@@ -1,0 +1,29 @@
+<main class="form-signin">
+  <form (submit)="doLogin()">
+    <h1 class="h3 mb-3 fw-normal">GeneXpert 10 Color</h1>
+
+    <div class="form-floating mb-3">
+      <input
+        type="text"
+        [(ngModel)]="user.login"
+        class="form-control"
+        name="login"
+        placeholder="Login ID"
+      />
+      <label for="login">Login ID</label>
+    </div>
+    <div class="form-floating">
+      <input
+        type="password"
+        [(ngModel)]="user.password"
+        class="form-control"
+        name="password"
+        placeholder="Login Password"
+      />
+      <label for="password">Password</label>
+    </div>
+
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+    <p class="mt-5 mb-3 text-muted">&copy; UDSM DHIS2</p>
+  </form>
+</main>

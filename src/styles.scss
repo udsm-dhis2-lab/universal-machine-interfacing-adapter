@@ -1,0 +1,51 @@
+@import "~bootstrap/dist/css/bootstrap.css";
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Margin bottom by footer height */
+  position: relative;
+  margin-bottom: 60px;
+}
+
+.footer {
+  position: fixed;
+  margin-top: 20px;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  line-height: 60px;
+  /* Vertically center the text there */
+  background-color: #f5f5f5;
+}
+
+.dashtable th {
+  text-align: center;
+}
+
+.dashtable .center {
+  text-align: center;
+}
+
+.dashtable th,
+td {
+  vertical-align: middle;
+}
+
+.livelog {
+  height: 150px !important;
+  max-height: 150px !important;
+  border-top: 1px solid #ccc;
+  overflow-y: scroll;
+  padding: 10px;
+  font-size: 0.9em;
+  display: flex;
+  flex-direction: column-reverse;
+}

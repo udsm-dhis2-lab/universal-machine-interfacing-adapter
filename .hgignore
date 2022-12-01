@@ -1,0 +1,22 @@
+# Project #
+.angular/
+
+# System #
+.DS_Store
+
+# Mercurial #
+.orig
+
+# Node #
+node_modules/
+
+# Grunt build #
+dist/
+release/
+# Bower #
+bower_components/
+public/system/lib
+.bower-cache/
+.bower-registry/
+.bower-tmp/
+.tmp/
