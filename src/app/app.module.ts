@@ -1,6 +1,6 @@
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { BrowserModule } from "@angular/platform-browser";
 import { CoreModule } from "./core/core.module";
 import { SharedModule } from "./shared/shared.module";
@@ -23,6 +23,7 @@ import { DatabaseService } from "./services/database.service";
 import { ElectronStoreService } from "./services/electron-store.service";
 import { InterfaceService } from "./services/interface.service";
 import { materialModules } from "./material.modules";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
@@ -41,6 +42,8 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
     FormsModule,
     HttpClientModule,
     CoreModule,
+    ReactiveFormsModule,
+    BrowserAnimationsModule,
     SharedModule,
     HomeModule,
     AppRoutingModule,

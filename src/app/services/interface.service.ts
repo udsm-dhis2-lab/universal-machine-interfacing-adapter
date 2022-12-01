@@ -143,7 +143,7 @@ export class InterfaceService {
         });
 
         // Add a 'close' event handler to this instance of socket
-        socket.on("close", function (data) {
+        socket.on("close", function () {
           const index = sockets.findIndex(function (o) {
             return (
               o.analyzerMachineHost === socket.analyzerMachineHost &&

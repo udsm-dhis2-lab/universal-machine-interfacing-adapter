@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { ElectronService } from "../core/services";
 import { ElectronStoreService } from "./electron-store.service";
 import { Pool } from "pg";
-import { FxRequest } from "../shared/interfaces/fx.interface";
+import { FxRequest, PageDetails } from "../shared/interfaces/fx.interface";
 
 @Injectable({
   providedIn: "root",
@@ -31,9 +31,6 @@ export class DatabaseService {
     ) {
       this.dbConfig = {
         connectionLimit: 1000,
-        // connectTimeout: 60 * 60 * 1000,
-        // acquireTimeout: 60 * 60 * 1000,
-        // timeout: 60 * 60 * 1000,
         host: that.appSettings.mysqlHost,
         user: that.appSettings.mysqlUser,
         password: that.appSettings.mysqlPassword,
@@ -98,14 +95,14 @@ export class DatabaseService {
     }
   }
 
-  private query(text: string, params: unknown[] = []): Promise<any[]> {
+  private query(text: string, params: unknown[] = []): Promise<any> {
     return new Promise((resolve, reject) => {
       new Pool({
         connectionString: "postgres://postgres:postgres@localhost:5432/test",
       })
         .query(text, params)
         .then((res: any) => {
-          resolve(res.rows);
+          resolve(res);
         })
         .catch((err: any) => {
           reject(err);
@@ -113,8 +110,15 @@ export class DatabaseService {
     });
   }
 
-  getProcesses = async (): Promise<any[]> => {
-    return await this.query(`SELECT * FROM PROCESS`);
+  getProcesses = async (pager: PageDetails): Promise<any> => {
+    const query = ` SELECT *, count(*) OVER() AS count FROM (SELECT * FROM PROCESS) AS PROCESS LIMIT ${
+      pager.pageSize
+    } OFFSET ${pager.page * pager.pageSize}`;
+    const results = await this.query(query);
+    return {
+      data: results.rows,
+      count: results.rows.length > 0 ? results.rows[0].count : 0,
+    };
   };
 
   execQuery(

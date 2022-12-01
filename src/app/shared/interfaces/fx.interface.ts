@@ -4,3 +4,7 @@ export interface FxRequest {
   description: string;
   frequency: string;
 }
+ export interface PageDetails{
+  page: number;
+  pageSize:number
+ }

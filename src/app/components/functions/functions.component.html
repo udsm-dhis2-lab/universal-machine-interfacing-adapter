@@ -5,24 +5,36 @@
     </button>
   </div>
   <h1 class="text-center">Welcome to custom functions setup</h1>
-  <div class="text-center d-flex justify-content-between row w-50">
-    <input
-      matInput
-      (change)="onInputChange($event, 'name')"
-      placeholder="name"
-      class="form-control"
-    />
-    <input
-      (change)="onInputChange($event, 'description')"
-      placeholder="description"
-      class="form-control"
-    />
-    <div class="text-center d-flex justify-content-between"></div>
-    <input
-      (change)="onInputChange($event, 'frequency')"
-      placeholder="Run frequency"
-      class="form-control"
-    />
+  <div>
+    <form [formGroup]="formGroup" class="text-center w-50">
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Function Name</mat-label>
+        <input
+          formControlName="name"
+          type="text"
+          matInput
+          placeholder="Function Name"
+        />
+      </mat-form-field>
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Function Description</mat-label>
+        <input
+          formControlName="description"
+          type="text"
+          matInput
+          placeholder="Function Description"
+        />
+      </mat-form-field>
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Function Run Interval</mat-label>
+        <input
+          formControlName="frequency"
+          type="text"
+          matInput
+          placeholder="Function Run Interval"
+        />
+      </mat-form-field>
+    </form>
   </div>
   <div class="text-center d-flex justify-content-between">
     <div>
@@ -30,45 +42,58 @@
     </div>
     <div>
       <button
+        mat-flat-button
         (click)="onUpload()"
-        [disabled]="!file || !name || !description || !frequency"
+        [disabled]="!file"
         class="btn btn-success"
       >
         Save
       </button>
     </div>
-    <h1 *ngIf="processes.length > 0">{{ processes.length }}</h1>
+    <h1>{{ totalRows }}</h1>
   </div>
 
   <table mat-table [dataSource]="processes" class="mat-elevation-z2 table">
-    <!--- Note that these columns can be defined in any order.
-          The actual rendered columns are set as a property on the row definition" -->
-
-    <!-- Position Column -->
-    <ng-container matColumnDef="position">
-      <th mat-header-cell *matHeaderCellDef>No.</th>
-      <td mat-cell *matCellDef="let element">{{ element.id }}</td>
-    </ng-container>
-
     <!-- Name Column -->
-    <ng-container matColumnDef="name">
+    <ng-container class="text-center" matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>Name</th>
       <td mat-cell *matCellDef="let element">{{ element.name }}</td>
     </ng-container>
 
-    <!-- Weight Column -->
-    <ng-container matColumnDef="weight">
-      <th mat-header-cell *matHeaderCellDef>Weight</th>
+    <!-- Description Column -->
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef>Description</th>
       <td mat-cell *matCellDef="let element">{{ element.description }}</td>
     </ng-container>
 
-    <!-- Symbol Column -->
-    <ng-container matColumnDef="symbol">
-      <th mat-header-cell *matHeaderCellDef>Symbol</th>
+    <!-- Frequency Column -->
+    <ng-container matColumnDef="frequency">
+      <th mat-header-cell *matHeaderCellDef>Frequency</th>
       <td mat-cell *matCellDef="let element">{{ element.frequency }}</td>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions" lastButton>
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let element" style="cursor: pointer">
+        <mat-icon>more_vert</mat-icon>
+      </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
+  <div class="sticky-paginator">
+    <mat-paginator
+      #paginator
+      [length]="totalRows"
+      [pageIndex]="currentPage"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="pageChanged($event)"
+      aria-label="Select page"
+      showFirstLastButtons
+    >
+    </mat-paginator>
+  </div>
 </div>
