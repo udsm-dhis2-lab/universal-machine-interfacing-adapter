@@ -1,0 +1,8 @@
+<div class="livelog">
+  <ng-container *ngIf="!(liveLogText?.length > 0)">
+    <span></span>
+  </ng-container>
+  <ng-container *ngFor="let x of liveLogText">
+    <span [innerHTML]="x"> </span>
+  </ng-container>
+</div>
