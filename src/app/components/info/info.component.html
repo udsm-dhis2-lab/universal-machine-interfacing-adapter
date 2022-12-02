@@ -1,0 +1,9 @@
+<mat-dialog-content>
+  <mat-label>You are about to delete this function. Are you sure?</mat-label>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="false">Cancel</button>
+  <button mat-button [mat-dialog-close]="true" cdkFocusInitial [color]="'warn'">
+    Yes
+  </button>
+</mat-dialog-actions>
