@@ -3,6 +3,9 @@ import { MatInputModule } from "@angular/material/input";
 import { MatTableModule } from "@angular/material/table";
 import { MatPaginatorModule } from "@angular/material/paginator";
 import { MatIconModule } from "@angular/material/icon";
+import { MatMenuModule } from "@angular/material/menu";
+import { MatSnackBarModule } from "@angular/material/snack-bar";
+import { MatDialogModule } from "@angular/material/dialog";
 
 export const materialModules = [
   MatButtonModule,
@@ -10,4 +13,7 @@ export const materialModules = [
   MatTableModule,
   MatPaginatorModule,
   MatIconModule,
+  MatMenuModule,
+  MatSnackBarModule,
+  MatDialogModule,
 ];

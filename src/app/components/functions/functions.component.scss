@@ -10,3 +10,74 @@ td.mat-cell:last-of-type,
 td.mat-footer-cell:last-of-type {
   padding-right: 0 !important;
 }
+
+.extended-menu-container {
+  padding: 16px 0px;
+  display: table-cell;
+  user-select: none;
+  width: 256px;
+
+  .menu-more-option {
+    padding: 5px;
+    outline: none;
+    transition: all 0.25s linear;
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+
+    .extended-menu-option {
+      border: 10px;
+      box-sizing: border-box;
+      display: block;
+      font-family: Roboto, sans-serif;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      cursor: pointer;
+      text-decoration: none;
+      margin: 0px;
+      padding: 0px;
+      outline: none;
+      font-size: 15px;
+      font-weight: inherit;
+      position: relative;
+      z-index: 1;
+      color: rgba(0, 0, 0, 0.87);
+      line-height: 32px;
+      transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+      min-height: 32px;
+      white-space: nowrap;
+      background: none;
+
+      .extended-menu-option-div {
+        margin-left: 0px;
+        padding: 0px 24px 0px 64px;
+        position: relative;
+
+        .menu-label {
+          color: rgb(117, 117, 117);
+          position: absolute;
+          font-size: 24px;
+          display: block;
+          user-select: none;
+          transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+          height: 24px;
+          width: 24px;
+          top: 4px;
+          margin: 0px;
+          left: 24px;
+        }
+        .menu-label-stop {
+          // color: #da1f05;
+          // da1f05
+          position: absolute;
+          font-size: 24px;
+          display: block;
+          user-select: none;
+          transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+          height: 24px;
+          width: 24px;
+          top: 4px;
+          margin: 0px;
+          left: 24px;
+        }
+      }
+    }
+  }
+}

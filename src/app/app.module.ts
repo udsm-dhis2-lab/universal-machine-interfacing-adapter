@@ -14,16 +14,18 @@ import { TranslateHttpLoader } from "@ngx-translate/http-loader";
 import { HomeModule } from "./home/home.module";
 
 import { CommonModule } from "@angular/common";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { AppComponent } from "./app.component";
 import { DashboardComponent } from "./components/dashboard/dashboard.component";
 import { FunctionsComponent } from "./components/functions/functions.component";
+import { InfoComponent } from "./components/info/info.component";
+import { LogsComponent } from "./components/logs/logs.component";
 import { SettingsComponent } from "./components/settings/settings.component";
 import { ElectronService } from "./core/services";
+import { materialModules } from "./material.modules";
 import { DatabaseService } from "./services/database.service";
 import { ElectronStoreService } from "./services/electron-store.service";
 import { InterfaceService } from "./services/interface.service";
-import { materialModules } from "./material.modules";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
@@ -35,6 +37,8 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
     SettingsComponent,
     DashboardComponent,
     FunctionsComponent,
+    LogsComponent,
+    InfoComponent,
   ],
   imports: [
     BrowserModule,

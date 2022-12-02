@@ -48,3 +48,18 @@ td {
   display: flex;
   flex-direction: column-reverse;
 }
+
+.success {
+  color: black !important;
+  background-color: green !important;
+}
+
+.info {
+  color: black !important;
+  background-color: yellow !important;
+}
+
+.error {
+  color: black !important;
+  background-color: red !important;
+}

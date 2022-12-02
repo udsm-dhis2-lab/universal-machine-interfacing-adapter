@@ -38,13 +38,26 @@
   </div>
   <div class="text-center d-flex justify-content-between">
     <div>
-      <input class="form-control" type="file" (change)="onChange($event)" />
+      <input
+        accept="text/javascript"
+        class="form-control"
+        type="file"
+        (change)="onChange($event)"
+      />
     </div>
     <div>
       <button
         mat-flat-button
-        (click)="onUpload()"
-        [disabled]="!file"
+        color="primary"
+        (click)="onSave()"
+        [disabled]="
+          !selectedFx &&
+          (!file ||
+            !getValue('name') ||
+            getValue('name') == '' ||
+            !getValue('description') ||
+            getValue('description') == '')
+        "
         class="btn btn-success"
       >
         Save
@@ -52,6 +65,8 @@
     </div>
     <h1>{{ totalRows }}</h1>
   </div>
+
+  <app-logs [liveLogText]="liveLogText"></app-logs>
 
   <table mat-table [dataSource]="processes" class="mat-elevation-z2 table">
     <!-- Name Column -->
@@ -75,8 +90,99 @@
     <!-- Actions Column -->
     <ng-container matColumnDef="actions" lastButton>
       <th mat-header-cell *matHeaderCellDef>Actions</th>
-      <td mat-cell *matCellDef="let element" style="cursor: pointer">
+      <td
+        mat-cell
+        *matCellDef="let element"
+        style="cursor: pointer"
+        matRipple
+        [matMenuTriggerFor]="appMenu"
+      >
         <mat-icon>more_vert</mat-icon>
+        <mat-menu #appMenu="matMenu">
+          <div role="menu" class="extended-menu-container">
+            <div
+              class="menu-more-option mat-typography"
+              (click)="onEdit(element)"
+            >
+              <span
+                matRipple
+                role="menuitem"
+                tabindex="0"
+                class="extended-menu-option"
+              >
+                <div>
+                  <div class="extended-menu-option-div">
+                    <span class="material-icons menu-label" color="#757575"
+                      >edit</span
+                    >
+                    <div class="edit">Edit</div>
+                  </div>
+                </div>
+              </span>
+            </div>
+            <div
+              class="menu-more-option mat-typography"
+              (click)="onDelete(element)"
+            >
+              <span
+                matRipple
+                role="menuitem"
+                tabindex="0"
+                class="extended-menu-option"
+              >
+                <div>
+                  <div class="extended-menu-option-div">
+                    <span
+                      class="material-icons menu-label text-danger"
+                      color="#da1f05"
+                      >delete</span
+                    >
+                    <div class="edit">Delete</div>
+                  </div>
+                </div>
+              </span>
+            </div>
+
+            <div
+              class="menu-more-option mat-typography"
+              (click)="onRun(element)"
+            >
+              <span
+                matRipple
+                role="menuitem"
+                tabindex="0"
+                class="extended-menu-option"
+              >
+                <div>
+                  <div class="extended-menu-option-div">
+                    <span class="material-icons menu-label-stop" color="#757575"
+                      >loop</span
+                    >
+                    <div class="edit">Run</div>
+                  </div>
+                </div>
+              </span>
+            </div>
+
+            <div class="menu-more-option mat-typography">
+              <span
+                matRipple
+                role="menuitem"
+                tabindex="0"
+                class="extended-menu-option"
+              >
+                <div>
+                  <div class="extended-menu-option-div">
+                    <span class="material-icons menu-label-stop" color="#757575"
+                      >cancel</span
+                    >
+                    <div class="edit">Cancel</div>
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </mat-menu>
       </td>
     </ng-container>
 
