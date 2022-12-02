@@ -2,7 +2,12 @@ import { Injectable } from "@angular/core";
 import { ElectronService } from "../core/services";
 import { ElectronStoreService } from "./electron-store.service";
 import { Pool } from "pg";
-import { FxRequest, PageDetails } from "../shared/interfaces/fx.interface";
+import {
+  FxPayload,
+  FxRequest,
+  PageDetails,
+} from "../shared/interfaces/fx.interface";
+import { DatabaseResponse } from "../shared/interfaces/db.interface";
 
 @Injectable({
   providedIn: "root",
@@ -95,7 +100,10 @@ export class DatabaseService {
     }
   }
 
-  private query(text: string, params: unknown[] = []): Promise<any> {
+  private query(
+    text: string,
+    params: unknown[] = []
+  ): Promise<DatabaseResponse> {
     return new Promise((resolve, reject) => {
       new Pool({
         connectionString: "postgres://postgres:postgres@localhost:5432/test",
@@ -110,6 +118,13 @@ export class DatabaseService {
     });
   }
 
+  run = async (id: number): Promise<string> => {
+    const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
+    const runFunc = Function("context", process.rows[0].code);
+    await runFunc({ name: "Bennett" });
+    return `Process started`;
+  };
+
   getProcesses = async (pager: PageDetails): Promise<any> => {
     const query = ` SELECT *, count(*) OVER() AS count FROM (SELECT * FROM PROCESS) AS PROCESS LIMIT ${
       pager.pageSize
@@ -119,6 +134,23 @@ export class DatabaseService {
       data: results.rows,
       count: results.rows.length > 0 ? results.rows[0].count : 0,
     };
+  };
+  deleteProcesses = async (
+    id: number
+  ): Promise<{ message: string; success: boolean }> => {
+    try {
+      const query = `DELETE FROM PROCESS WHERE ID= ${id};`;
+      const res = await this.query(query);
+      return {
+        success: res.rowCount === 1,
+        message:
+          res.rowCount === 1
+            ? "Function deleted successfully"
+            : "Function not found",
+      };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
   };
 
   execQuery(
@@ -228,20 +260,48 @@ export class DatabaseService {
     }
   }
 
-  saveFile = async (data: FxRequest): Promise<any> => {
+  createFunction = async (data: FxRequest): Promise<any> => {
     const bufferArray = await data.file.arrayBuffer();
     const fileData = Buffer.from(bufferArray).toString();
-    const runFunc = Function("context", fileData);
+    // const runFunc = Function("context", fileData);
     const query = `INSERT INTO PROCESS (CODE, NAME, DESCRIPTION, FREQUENCY) VALUES($1, $2, $3, $4);`;
     await this.query(query, [
       fileData,
-      `'${data.name}'`,
-      `'${data.description}'`,
-      `'${data.frequency}'`,
+      data.name,
+      data.description,
+      data.frequency,
     ]);
-    await runFunc({ name: "Bennett" });
+    // await runFunc({ name: "Bennett" });
 
     return data;
+  };
+  updateFunction = async (
+    data: FxPayload
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const updated = await this.updateFx(data);
+      return {
+        success: updated.rowCount === 1,
+        message: "Updated successfully",
+      };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  };
+
+  private updateFx = async (data: FxPayload) => {
+    const id = data.id;
+    if (data.file) {
+      const bufferArray = await data.file.arrayBuffer();
+      data.code = Buffer.from(bufferArray).toString();
+    }
+    delete data.file;
+    delete data.count;
+    delete data.id;
+    const query = `UPDATE PROCESS SET ${Object.keys(data)
+      .map((key) => key + "=" + `'${data[key]}'`)
+      .join(",")} WHERE ID=${id};`;
+    return await this.query(query, []);
   };
 
   addOrderTest(
@@ -331,11 +391,6 @@ export class DatabaseService {
     },
     errorf: { (err: any): void; (err: any): void; (err: any): void }
   ) {
-    // console.log("======Raw Data=======");
-    // console.log(data);
-    // console.log(Object.keys(data));
-    // console.log(Object.values(data));
-    // console.log("=============");
     const t =
       "INSERT INTO raw_data (" + Object.keys(data).join(",") + ") VALUES (?,?)";
 
