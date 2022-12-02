@@ -52,8 +52,10 @@ export class InterfaceService {
   lastOrders = this.lastOrdersSubject.asObservable();
 
   protected liveLogSubject = new BehaviorSubject([]);
+  protected processLogSubject = new BehaviorSubject([]);
   // eslint-disable-next-line @typescript-eslint/member-ordering
   liveLog = this.liveLogSubject.asObservable();
+  proccessLog = this.processLogSubject.asObservable();
 
   constructor(
     public electronService: ElectronService,
@@ -1009,8 +1011,8 @@ export class InterfaceService {
   fetchRecentLogs() {
     const that = this;
     that.dbService.fetchRecentLogs(
-      (res) => {
-        res.forEach(function (r) {
+      (res: { log: any }[]) => {
+        res.forEach((r: { log: any }) => {
           that.logtext.push(r.log);
           that.liveLogSubject.next(that.logtext);
         });
