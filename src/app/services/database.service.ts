@@ -121,7 +121,7 @@ export class DatabaseService {
   run = async (id: number): Promise<string> => {
     const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
     const runFunc = Function("context", process.rows[0].code);
-    await runFunc({ name: "Bennett" });
+    await runFunc({ name: "Bennett", color: "Indigo" });
     return `Process started`;
   };
 
@@ -266,7 +266,7 @@ export class DatabaseService {
     // const runFunc = Function("context", fileData);
     const query = `INSERT INTO PROCESS (CODE, NAME, DESCRIPTION, FREQUENCY) VALUES($1, $2, $3, $4);`;
     await this.query(query, [
-      fileData,
+      fileData.split("'").join('"'),
       data.name,
       data.description,
       data.frequency,
@@ -293,8 +293,9 @@ export class DatabaseService {
     const id = data.id;
     if (data.file) {
       const bufferArray = await data.file.arrayBuffer();
-      data.code = Buffer.from(bufferArray).toString();
+      data.code = Buffer.from(bufferArray).toString().split("'").join('"');
     }
+    // console.log(data.code);
     delete data.file;
     delete data.count;
     delete data.id;

@@ -1,73 +1,114 @@
 <div class="container center mt-50">
-  <div class="d-flex justify-content-end">
-    <button class="btn btn-primary" (click)="navigateToDashboard()">
-      Dashboard
-    </button>
-  </div>
-  <h1 class="text-center">Welcome to custom functions setup</h1>
-  <div>
-    <form [formGroup]="formGroup" class="text-center w-50">
-      <mat-form-field class="w-100" appearance="outline">
-        <mat-label>Function Name</mat-label>
-        <input
-          formControlName="name"
-          type="text"
-          matInput
-          placeholder="Function Name"
-        />
-      </mat-form-field>
-      <mat-form-field class="w-100" appearance="outline">
-        <mat-label>Function Description</mat-label>
-        <input
-          formControlName="description"
-          type="text"
-          matInput
-          placeholder="Function Description"
-        />
-      </mat-form-field>
-      <mat-form-field class="w-100" appearance="outline">
-        <mat-label>Function Run Interval</mat-label>
-        <input
-          formControlName="frequency"
-          type="text"
-          matInput
-          placeholder="Function Run Interval"
-        />
-      </mat-form-field>
-    </form>
-  </div>
-  <div class="text-center d-flex justify-content-between">
-    <div>
-      <input
-        accept="text/javascript"
-        class="form-control"
-        type="file"
-        (change)="onChange($event)"
-      />
-    </div>
-    <div>
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="onSave()"
-        [disabled]="
-          !selectedFx &&
-          (!file ||
-            !getValue('name') ||
-            getValue('name') == '' ||
-            !getValue('description') ||
-            getValue('description') == '')
-        "
-        class="btn btn-success"
-      >
-        Save
+  <div class="sticky-header">
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-primary" (click)="navigateToDashboard()">
+        Dashboard
       </button>
     </div>
-    <h1>{{ totalRows }}</h1>
+    <h1 class="text-center">Welcome to custom functions setup</h1>
+  </div>
+  <div *ngIf="createNewFunction" class="d-flex justify-content-between">
+    <div>
+      <h1>Secrets</h1>
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Secret Name</mat-label>
+        <input type="text" matInput placeholder="Secret Name" />
+      </mat-form-field>
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Secret Description</mat-label>
+        <input type="text" matInput placeholder="Secret Description" />
+      </mat-form-field>
+      <div>
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="onSave()"
+          [disabled]="
+            !selectedFx &&
+            (!file ||
+              !getValue('name') ||
+              getValue('name') == '' ||
+              !getValue('description') ||
+              getValue('description') == '')
+          "
+          class="btn btn-success"
+        >
+          Save Secret
+        </button>
+      </div>
+    </div>
+    <div class="column">
+      <form [formGroup]="formGroup" class="text-center w-100">
+        <h1>Functions</h1>
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Function Name</mat-label>
+          <input
+            formControlName="name"
+            type="text"
+            matInput
+            placeholder="Function Name"
+          />
+        </mat-form-field>
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Function Description</mat-label>
+          <input
+            formControlName="description"
+            type="text"
+            matInput
+            placeholder="Function Description"
+          />
+        </mat-form-field>
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Function Run Interval</mat-label>
+          <input
+            formControlName="frequency"
+            type="text"
+            matInput
+            placeholder="Function Run Interval"
+          />
+        </mat-form-field>
+      </form>
+
+      <div class="mb-5 text-center d-flex justify-content-between">
+        <div>
+          <input
+            accept="text/javascript"
+            class="form-control"
+            type="file"
+            (change)="onChange($event)"
+          />
+        </div>
+        <div>
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="onSave()"
+            [disabled]="
+              !selectedFx &&
+              (!file ||
+                !getValue('name') ||
+                getValue('name') == '' ||
+                !getValue('description') ||
+                getValue('description') == '')
+            "
+            class="btn btn-success"
+          >
+            Save Function
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <app-logs [liveLogText]="liveLogText"></app-logs>
-
+  <div *ngIf="!createNewFunction" class="d-flex justify-content-end mb-2">
+    <button class="btn btn-primary" (click)="newFunction()">
+      <span class="mt-5">
+        <mat-icon>add</mat-icon>
+      </span>
+      <span> New Function </span>
+    </button>
+  </div>
   <table mat-table [dataSource]="processes" class="mat-elevation-z2 table">
     <!-- Name Column -->
     <ng-container class="text-center" matColumnDef="name">

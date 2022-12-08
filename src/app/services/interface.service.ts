@@ -63,7 +63,6 @@ export class InterfaceService {
     public store: ElectronStoreService
   ) {
     this.log = this.electronService.log;
-    // console.log(this.log.findLogPath());
     this.net = this.electronService.net;
   }
 
@@ -191,12 +190,14 @@ export class InterfaceService {
       that.connectionTries++; // incrementing the connection tries
 
       that.socketClient.connect(that.connectopts, function () {
+        console.log(that.connectopts);
         that.connectionTries = 0; // resetting connection tries to 0
         that.connectionStatus(true);
         that.logger("success", "Connected as client successfully");
       });
 
       that.socketClient.on("data", function (data) {
+        console.log("DATA HERE", data);
         that.connectionStatus(true);
         that.handleTCPResponse(data);
       });
@@ -270,24 +271,15 @@ export class InterfaceService {
     const msgID = message.get("MSH.10").toString();
     that.socketClient.write(that.hl7ACK(msgID));
     // let result = null;
-    //console.log(message.get('OBX'));
 
     const obx = message.get("OBX").toArray();
 
-    //obx.forEach(function (singleObx) {
-    //  console.log(singleObx);
-    //});
-
     const spm = message.get("SPM");
     let sampleNumber = 0;
-
-    //console.log(obx[1]);
     spm.forEach(function (singleSpm) {
       //sampleNumber = (singleSpm.get(1).toInteger());
       //const singleObx = obx[(sampleNumber * 2) - 1]; // there are twice as many OBX .. so we take the even number - 1 OBX for each SPM
       const singleObx = obx[0]; // there are twice as many OBX .. so we take the even number - 1 OBX for each SPM
-
-      //console.log(singleObx.get('OBX.19').toString());
 
       const resultOutcome = singleObx.get("OBX.5.1").toString();
 
@@ -390,23 +382,14 @@ export class InterfaceService {
     const msgID = message.get("MSH.10").toString();
     that.socketClient.write(that.hl7ACK(msgID));
     // let result = null;
-    //console.log(message.get('OBX'));
-
     const obx = message.get("OBX").toArray();
-
-    //obx.forEach(function (singleObx) {
-    //  console.log(singleObx);
-    //});
 
     const spm = message.get("SPM");
     let sampleNumber = 0;
 
-    //console.log(obx[1]);
     spm.forEach(function (singleSpm) {
       sampleNumber = singleSpm.get(1).toInteger();
       let singleObx = obx[sampleNumber * 2 - 1]; // there are twice as many OBX .. so we take the even number - 1 OBX for each SPM
-
-      //console.log(singleObx.get('OBX.19').toString());
 
       let resultOutcome = singleObx.get("OBX.5.1").toString();
 
@@ -721,9 +704,9 @@ export class InterfaceService {
           }
         });
 
-        //that.logger('info', dataArray);
-        //that.logger('info',dataArray['R']);
-
+        that.logger("info", dataArray);
+        that.logger("info", dataArray["R"]);
+        console.log(JSON.stringify(dataArray));
         if (
           dataArray === null ||
           dataArray === undefined ||
@@ -883,10 +866,8 @@ export class InterfaceService {
           }
         });
 
-        //console.log("=== CHOTOA ===");
-        //that.logger('info', dataArray);
-        //that.logger('info',dataArray['R']);
-
+        console.log("=== CHOTOA ===");
+        that.logger("info", dataArray["R"]);
         if (
           dataArray === null ||
           dataArray === undefined ||

@@ -31,6 +31,7 @@ export class FunctionsComponent implements OnInit {
   currentPage: number = 0;
   liveLogText: any[] = [];
   selectedFx: FxPayload;
+  createNewFunction: boolean = false;
   displayedColumns: string[] = ["name", "description", "frequency", "actions"];
 
   constructor(
@@ -56,9 +57,13 @@ export class FunctionsComponent implements OnInit {
   navigateToDashboard() {
     this.router.navigate(["./dashboard"]);
   }
+  newFunction() {
+    this.createNewFunction = !this.createNewFunction;
+  }
 
   loadFunctions = () => {
     this.reset();
+    this.createNewFunction = false;
     this.service
       .getProcesses({ page: this.currentPage, pageSize: this.pageSize })
       .then((res) => {
@@ -81,6 +86,7 @@ export class FunctionsComponent implements OnInit {
   }
 
   onEdit(fx: FxPayload) {
+    this.createNewFunction = true;
     this.selectedFx = fx;
     Object.keys(fx).forEach((key) => {
       this.formGroup.patchValue({ [key]: fx[key] });
