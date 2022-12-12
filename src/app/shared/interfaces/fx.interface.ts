@@ -17,9 +17,16 @@ export interface FxPayload {
   frequency: string;
   count: string;
   file?: File;
+  secret_id?: number;
 }
 
 export interface FxResponse {
   success: boolean;
   message: string;
+}
+
+export interface SecretPayload {
+  name: string;
+  description?: string;
+  value: Record<string, unknown>;
 }

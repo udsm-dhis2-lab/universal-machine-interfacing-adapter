@@ -976,7 +976,7 @@ export class InterfaceService {
     });
   }
 
-  fetchLastOrders() {
+  fetchLastOrders(summary: boolean) {
     const that = this;
     that.dbService.fetchLastOrders(
       (res) => {
@@ -985,7 +985,8 @@ export class InterfaceService {
       },
       (err) => {
         that.logger("error", "Failed to fetch data " + JSON.stringify(err));
-      }
+      },
+      summary
     );
   }
 

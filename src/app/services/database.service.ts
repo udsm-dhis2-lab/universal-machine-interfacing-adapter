@@ -1,13 +1,18 @@
 import { Injectable } from "@angular/core";
 import { ElectronService } from "../core/services";
 import { ElectronStoreService } from "./electron-store.service";
-import { Pool } from "pg";
+// import { Pool } from "pg";
 import {
   FxPayload,
   FxRequest,
   PageDetails,
+  SecretPayload,
 } from "../shared/interfaces/fx.interface";
-import { DatabaseResponse } from "../shared/interfaces/db.interface";
+import {
+  DatabaseResponse,
+  ErrorOf,
+  Success,
+} from "../shared/interfaces/db.interface";
 
 @Injectable({
   providedIn: "root",
@@ -102,21 +107,41 @@ export class DatabaseService {
 
   private query(
     text: string,
-    params: unknown[] = []
+    params: unknown[] = [],
+    success?: Success,
+    errorf?: ErrorOf,
+    summary?: boolean
   ): Promise<DatabaseResponse> {
     return new Promise((resolve, reject) => {
-      new Pool({
+      new this.electronService.postgres({
         connectionString: "postgres://postgres:postgres@localhost:5432/test",
       })
         .query(text, params)
-        .then((res: any) => {
-          resolve(res);
+        .then((res: DatabaseResponse) => {
+          if (success) {
+            success(summary ? res : res.rows);
+          } else {
+            resolve(res);
+          }
         })
         .catch((err: any) => {
-          reject(err);
+          if (errorf) {
+            errorf(err);
+          } else {
+            reject(err);
+          }
         });
     });
   }
+
+  createNewSecret = async (secret: SecretPayload) => {
+    const query = `INSERT INTO SECRET(${Object.keys(secret).join(
+      ","
+    )}) VALUES(${Object.keys(secret)
+      .map((key, index) => "$" + (index + 1))
+      .join(",")}) RETURNING *`;
+    return await this.query(query, Object.values(secret));
+  };
 
   run = async (id: number): Promise<string> => {
     const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
@@ -338,11 +363,12 @@ export class DatabaseService {
 
   fetchLastOrders(
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorf: (err: any) => void,
+    summary: boolean
   ) {
-    const t = "SELECT * FROM orders ORDER BY added_on DESC LIMIT 1000";
+    const t = "SELECT * FROM orders ORDER BY added_on";
     if (this.mysqlPool != null) {
-      this.execQuery(t, null, success, errorf);
+      this.query(t, null, success, errorf, summary);
     } else {
       // Fetching from SQLITE
       this.electronService.execSqliteQuery(t, null).then((results: any) => {
@@ -356,10 +382,10 @@ export class DatabaseService {
     errorf: (err: any) => void
   ) {
     const t =
-      "SELECT MAX(lims_sync_date_time) as lastLimsSync, MAX(added_on) as lastResultReceived FROM `orders`";
+      "SELECT MAX(lims_sync_date_time) as lastLimsSync, MAX(added_on) as lastResultReceived FROM orders";
 
     if (this.mysqlPool != null) {
-      this.execQuery(t, null, success, errorf);
+      this.query(t, null, success, errorf);
     } else {
       // Fetching from SQLITE
       this.electronService.execSqliteQuery(t, null).then((results: any) => {
@@ -428,7 +454,7 @@ export class DatabaseService {
   ) {
     const t = "SELECT * FROM app_log ORDER BY added_on DESC, id DESC LIMIT 500";
     if (this.mysqlPool != null) {
-      this.execQuery(t, null, success, errorf);
+      this.query(t, null, success, errorf);
     } else {
       // Fetching from SQLITE
       this.electronService.execSqliteQuery(t, null).then((results: any) => {

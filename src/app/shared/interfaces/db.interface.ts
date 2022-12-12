@@ -99,3 +99,21 @@ export interface DatabaseResponse {
   RowCtor?: any;
   rowAsArray: boolean;
 }
+
+export interface Success {
+  (res: any): void;
+  (res: any): void;
+  (res: any): void;
+  (res: any): void;
+  (res: any): void;
+  (arg0: any): void;
+}
+
+export interface ErrorOf {
+  (err: any): void;
+  (err: any): void;
+  (err: any): void;
+  (err: any): void;
+  (err: any): void;
+  (arg0: { error: string }): void;
+}

@@ -59,8 +59,15 @@ export class Sqlite3Helper {
     database.run(
       `
       CREATE SEQUENCE process_id_seq; 
-     CREATE TABLE process ( id integer NOT NULL DEFAULT nextval('process_id_seq'), code text, name text, description text, frequency test ); 
+     CREATE TABLE process ( id integer NOT NULL DEFAULT nextval('process_id_seq'), code text, name text, description text, frequency text ); 
      ALTER SEQUENCE process_id_seq OWNED BY process.id;
+      `
+    );
+    database.run(
+      `
+     CREATE SEQUENCE secret_id_seq; 
+     CREATE TABLE secret ( id integer NOT NULL DEFAULT nextval('secret_id_seq'), name text  NOT NULL, description text, value json  NOT NULL ); 
+     ALTER SEQUENCE secret_id_seq OWNED BY secret.id;
       `
     );
 

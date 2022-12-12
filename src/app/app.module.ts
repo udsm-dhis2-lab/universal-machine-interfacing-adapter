@@ -26,6 +26,7 @@ import { materialModules } from "./material.modules";
 import { DatabaseService } from "./services/database.service";
 import { ElectronStoreService } from "./services/electron-store.service";
 import { InterfaceService } from "./services/interface.service";
+import { AddOrChangeSecretComponent } from "./components/add-or-change-secret/add-or-change-secret.component";
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
@@ -39,6 +40,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
     FunctionsComponent,
     LogsComponent,
     InfoComponent,
+    AddOrChangeSecretComponent,
   ],
   imports: [
     BrowserModule,

@@ -8,36 +8,86 @@
     <h1 class="text-center">Welcome to custom functions setup</h1>
   </div>
   <div *ngIf="createNewFunction" class="d-flex justify-content-between">
-    <div>
+    <div class="pr-5 w-45">
       <h1>Secrets</h1>
-      <mat-form-field class="w-100" appearance="outline">
-        <mat-label>Secret Name</mat-label>
-        <input type="text" matInput placeholder="Secret Name" />
-      </mat-form-field>
-      <mat-form-field class="w-100" appearance="outline">
-        <mat-label>Secret Description</mat-label>
-        <input type="text" matInput placeholder="Secret Description" />
-      </mat-form-field>
-      <div>
-        <button
-          mat-flat-button
-          color="primary"
-          (click)="onSave()"
-          [disabled]="
-            !selectedFx &&
-            (!file ||
-              !getValue('name') ||
-              getValue('name') == '' ||
-              !getValue('description') ||
-              getValue('description') == '')
-          "
-          class="btn btn-success"
+      <form class="example-form" [formGroup]="secretForm">
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Secret Name</mat-label>
+          <input
+            type="text"
+            matInput
+            placeholder="Secret Name"
+            formControlName="name"
+          />
+        </mat-form-field>
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Secret Description</mat-label>
+          <input
+            type="text"
+            matInput
+            placeholder="Secret Description"
+            formControlName="description"
+          />
+        </mat-form-field>
+        <div
+          *ngFor="let group of secrets.controls; let i = index"
+          formArrayName="secretValue"
         >
-          Save Secret
-        </button>
-      </div>
+          <div class="form-group jumbotron" [formGroupName]="i">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Secret Key</mat-label>
+              <input
+                type="text"
+                matInput
+                placeholder="Secret Key"
+                formControlName="key"
+              />
+            </mat-form-field>
+
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Secret Value</mat-label>
+              <input
+                type="text"
+                matInput
+                placeholder="Secret Value"
+                formControlName="value"
+              />
+            </mat-form-field>
+
+            <button
+              matTooltip="Delete Above Fields"
+              matTooltipHideDelay="1000"
+              mat-flat-button
+              *ngIf="i > 0"
+              class="float-end mb-3"
+              (click)="removeAddress(i)"
+            >
+              <mat-icon class="text-danger">delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div class="d-flex">
+          <div class="mr-5">
+            <button
+              [disabled]="!validateSecret"
+              mat-flat-button
+              color="primary"
+              (click)="onSaveSecrets()"
+              class="btn btn-success ml-5"
+            >
+              Save Secret
+            </button>
+          </div>
+
+          <div class="ml-5">
+            <button mat-flat-button (click)="addSecretFields()">
+              <mat-icon>add</mat-icon> Add Fields
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
-    <div class="column">
+    <div class="column w-45">
       <form [formGroup]="formGroup" class="text-center w-100">
         <h1>Functions</h1>
         <mat-form-field class="w-100" appearance="outline">
@@ -102,10 +152,12 @@
 
   <app-logs [liveLogText]="liveLogText"></app-logs>
   <div *ngIf="!createNewFunction" class="d-flex justify-content-end mb-2">
-    <button class="btn btn-primary" (click)="newFunction()">
-      <span class="mt-5">
-        <mat-icon>add</mat-icon>
-      </span>
+    <button
+      mat-raised-button
+      class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
+      (click)="newFunction()"
+    >
+      <mat-icon>add</mat-icon>
       <span> New Function </span>
     </button>
   </div>
@@ -218,6 +270,29 @@
                       >cancel</span
                     >
                     <div class="edit">Cancel</div>
+                  </div>
+                </div>
+              </span>
+            </div>
+
+            <div
+              class="menu-more-option mat-typography"
+              (click)="addOrChangeSecret(element)"
+            >
+              <span
+                matRipple
+                role="menuitem"
+                tabindex="0"
+                class="extended-menu-option"
+              >
+                <div>
+                  <div class="extended-menu-option-div">
+                    <span class="material-icons menu-label-stop" color="#757575"
+                      >add</span
+                    >
+                    <div class="edit">
+                      {{ element.secret_id ? "Change" : "Add" }} Secret
+                    </div>
                   </div>
                 </div>
               </span>

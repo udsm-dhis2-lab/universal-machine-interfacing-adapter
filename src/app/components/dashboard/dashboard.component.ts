@@ -1,7 +1,9 @@
 import { Component, OnInit, NgZone } from "@angular/core";
+import { PageEvent } from "@angular/material/paginator";
 import { Router } from "@angular/router";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import { InterfaceService } from "../../services/interface.service";
+import { DatabaseResponse } from "../../shared/interfaces/db.interface";
 //import { GeneXpertService } from '../../services/GeneXpert.service';
 
 @Component({
@@ -20,6 +22,21 @@ export class DashboardComponent implements OnInit {
   public interval: any;
   public lastOrders: any;
   public liveLogText = [];
+  pageSize: number = 10;
+  currentPage: number = 0;
+  pageSizeOptions: any[] = [5, 10, 50, 100];
+  totalRows: number;
+  displayedColumns: string[] = [
+    "order_id",
+    "results",
+    "test_unit",
+    "test_type",
+    "tested_by",
+    "tested_on",
+    "lims_sync_status",
+    "lims_sync_date_time",
+    "actions",
+  ];
 
   constructor(
     private store: ElectronStoreService,
@@ -94,18 +111,30 @@ export class DashboardComponent implements OnInit {
 
   fetchLastOrders() {
     const that = this;
-    that.interfaceService.fetchLastOrders();
+    that.interfaceService.fetchLastOrders(true);
 
-    that.interfaceService.fetchLastSyncTimes(function (data) {
+    that.interfaceService.fetchLastSyncTimes((data) => {
       that.lastLimsSync = data.lastLimsSync;
-      that.lastResultReceived = data.lastResultReceived;
+      that.lastResultReceived = (data.lastresultreceived || "")
+        .toString()
+        .split("GMT+0300")
+        .join("");
     });
 
-    that.interfaceService.lastOrders.subscribe((lastFewOrders) => {
-      that._ngZone.run(() => {
-        that.lastOrders = lastFewOrders[0];
-      });
-    });
+    that.interfaceService.lastOrders.subscribe(
+      (lastFewOrders: DatabaseResponse[]) => {
+        that._ngZone.run(() => {
+          this.totalRows = lastFewOrders[0]?.rowCount;
+          that.lastOrders = lastFewOrders[0]?.rows;
+        });
+      }
+    );
+  }
+
+  pageChanged(event: PageEvent) {
+    this.pageSize = event.pageSize;
+    this.currentPage = event.pageIndex;
+    this.fetchRecentLogs();
   }
 
   fetchRecentLogs() {

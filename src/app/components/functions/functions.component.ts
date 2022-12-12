@@ -1,5 +1,5 @@
 import { Component, NgZone, OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { PageEvent } from "@angular/material/paginator";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -11,6 +11,7 @@ import {
   FxRequest,
   FxResponse,
 } from "../../shared/interfaces/fx.interface";
+import { AddOrChangeSecretComponent } from "../add-or-change-secret/add-or-change-secret.component";
 import { InfoComponent } from "../info/info.component";
 
 @Component({
@@ -26,13 +27,14 @@ export class FunctionsComponent implements OnInit {
   loading: boolean = false; // Flag variable
   file: File = null; //
   response: any = null;
-  processes: any[] = [];
+  processes: FxPayload[] = [];
   pageSize: number = 10;
   currentPage: number = 0;
   liveLogText: any[] = [];
   selectedFx: FxPayload;
   createNewFunction: boolean = false;
   displayedColumns: string[] = ["name", "description", "frequency", "actions"];
+  secretForm: FormGroup;
 
   constructor(
     private service: DatabaseService,
@@ -42,7 +44,13 @@ export class FunctionsComponent implements OnInit {
     private _ngZone: NgZone,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
-  ) {}
+  ) {
+    this.secretForm = this.formBuilder.group({
+      secretValue: this.formBuilder.array([this.addSecretsGroup()]),
+      name: "",
+      description: "",
+    });
+  }
 
   ngOnInit() {
     this.interfaceService.liveLog.subscribe((mesg) => {
@@ -54,11 +62,79 @@ export class FunctionsComponent implements OnInit {
     this.loadFunctions();
   }
 
+  private addSecretsGroup(): FormGroup {
+    return this.formBuilder.group({
+      key: "",
+      value: "",
+    });
+  }
+
+  onSaveSecrets() {
+    const values = this.getSecretValue();
+    const value = {};
+    values.forEach((data) => {
+      value[data.key] = data.value;
+    });
+    const name = this.secretForm.get("name").value;
+    const description = this.secretForm.get("description").value;
+    this.service
+      .createNewSecret({ value, name, description })
+      .then((res) => console.log(res));
+  }
+
+  //Add Fields
+  addSecretFields(): void {
+    this.secrets.push(this.addSecretsGroup());
+  }
+
+  //Remove Fields
+  removeAddress(index: number): void {
+    this.secrets.removeAt(index);
+  }
+
+  get validateSecret() {
+    if (
+      !this.secretForm.get("name").value ||
+      !this.secretForm.get("description").value
+    )
+      return false;
+    if (this.getSecretValue().length === 0) return false;
+    return true;
+  }
+
+  getSecretValue = (): any[] => {
+    if (!this.secretForm.get("secretValue").value) return [];
+    return this.secretForm
+      .get("secretValue")
+      .value.filter(
+        (data: { key: string; value: string }) =>
+          data.key !== "" && data.value !== ""
+      );
+  };
+
+  //Fields Array
+  get secrets(): FormArray {
+    return <FormArray>this.secretForm.get("secretValue");
+  }
+
   navigateToDashboard() {
     this.router.navigate(["./dashboard"]);
   }
   newFunction() {
     this.createNewFunction = !this.createNewFunction;
+  }
+
+  addOrChangeSecret(fx: FxPayload) {
+    const confirmDialog = this.dialog.open(AddOrChangeSecretComponent, {
+      width: "300px",
+      height: "190px",
+      data: fx,
+    });
+    confirmDialog.afterClosed().subscribe((res) => {
+      if (res) {
+        this.deleteFx(fx);
+      }
+    });
   }
 
   loadFunctions = () => {
