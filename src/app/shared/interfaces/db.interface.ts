@@ -117,3 +117,11 @@ export interface ErrorOf {
   (err: any): void;
   (arg0: { error: string }): void;
 }
+
+export interface SettingsDB {
+  dbHost: string;
+  dbPort: string;
+  dbName: string;
+  dbUser: string;
+  dbPassword: string;
+}

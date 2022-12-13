@@ -154,12 +154,6 @@ export class InterfaceService {
           if (index !== -1) {
             sockets.splice(index, 1);
           }
-          console.log(
-            "CLOSED: " +
-              socket.analyzerMachineHost +
-              " " +
-              socket.analyzerMachineHost
-          );
         });
       });
 
@@ -190,14 +184,12 @@ export class InterfaceService {
       that.connectionTries++; // incrementing the connection tries
 
       that.socketClient.connect(that.connectopts, function () {
-        console.log(that.connectopts);
         that.connectionTries = 0; // resetting connection tries to 0
         that.connectionStatus(true);
         that.logger("success", "Connected as client successfully");
       });
 
       that.socketClient.on("data", function (data) {
-        console.log("DATA HERE", data);
         that.connectionStatus(true);
         that.handleTCPResponse(data);
       });
@@ -706,7 +698,6 @@ export class InterfaceService {
 
         that.logger("info", dataArray);
         that.logger("info", dataArray["R"]);
-        console.log(JSON.stringify(dataArray));
         if (
           dataArray === null ||
           dataArray === undefined ||
@@ -866,7 +857,6 @@ export class InterfaceService {
           }
         });
 
-        console.log("=== CHOTOA ===");
         that.logger("info", dataArray["R"]);
         if (
           dataArray === null ||
@@ -979,7 +969,7 @@ export class InterfaceService {
   fetchLastOrders(summary: boolean) {
     const that = this;
     that.dbService.fetchLastOrders(
-      (res) => {
+      (res: any[]) => {
         res = [res]; // converting it into an array
         that.lastOrdersSubject.next(res);
       },

@@ -21,88 +21,42 @@ export class DatabaseService {
   private mysqlPool = null;
   private dbConfig = null;
   public appSettings = null;
+  private dbConnected: boolean;
 
   constructor(
     private electronService: ElectronService,
     private store: ElectronStoreService
   ) {
-    const mysql = this.electronService.mysql;
     const that = this;
     that.appSettings = that.store.get("appSettings");
 
-    // Initialize mysql connection pool only if settings are available
+    // Initialize DB connection pool only if settings are available
     if (
-      that.appSettings.mysqlHost != null &&
-      that.appSettings.mysqlHost != "" &&
-      that.appSettings.mysqlUser != null &&
-      that.appSettings.mysqlUser != "" &&
-      that.appSettings.mysqlDb != null &&
-      that.appSettings.mysqlDb != ""
+      that.appSettings.dbHost != null &&
+      that.appSettings.dbHost != "" &&
+      that.appSettings.dbUser != null &&
+      that.appSettings.dbUser != "" &&
+      that.appSettings.dbName != null &&
+      that.appSettings.dbName != ""
     ) {
       this.dbConfig = {
         connectionLimit: 1000,
-        host: that.appSettings.mysqlHost,
-        user: that.appSettings.mysqlUser,
-        password: that.appSettings.mysqlPassword,
-        database: that.appSettings.mysqlDb,
-        port: that.appSettings.mysqlPort,
+        host: that.appSettings.dbHost,
+        user: that.appSettings.dbUser,
+        password: that.appSettings.dbPassword,
+        database: that.appSettings.dbName,
+        port: that.appSettings.dbPort,
         dateStrings: "date",
       };
-
-      that.mysqlPool = mysql.createPool(that.dbConfig);
-
-      that.execQuery(
-        'SET GLOBAL sql_mode = \
-                        (SELECT REPLACE(@@sql_mode, "ONLY_FULL_GROUP_BY", ""))',
-        [],
-        (res: any) => {
-          console.log(res);
-        },
-        (err: any) => {
-          console.error(err);
-        }
-      );
-      that.execQuery(
-        "SET GLOBAL CONNECT_TIMEOUT=28800",
-        [],
-        (res: any) => {
-          console.log(res);
-        },
-        (err: any) => {
-          console.error(err);
-        }
-      );
-      that.execQuery(
-        "SET SESSION INTERACTIVE_TIMEOUT = 28800",
-        [],
-        (res: any) => {
-          console.log(res);
-        },
-        (err: any) => {
-          console.error(err);
-        }
-      );
-      that.execQuery(
-        "SET SESSION WAIT_TIMEOUT = 28800",
-        [],
-        (res: any) => {
-          console.log(res);
-        },
-        (err: any) => {
-          console.error(err);
-        }
-      );
-      that.execQuery(
-        "SET SESSION MAX_EXECUTION_TIME = 28800",
-        [],
-        (res: any) => {
-          console.log(res);
-        },
-        (err: any) => {
-          console.error(err);
-        }
-      );
     }
+
+    this.query("SELECT * FROM current_catalog;")
+      .then(() => {
+        this.dbConnected = true;
+      })
+      .catch(() => {
+        this.dbConnected = false;
+      });
   }
 
   private query(
@@ -114,7 +68,7 @@ export class DatabaseService {
   ): Promise<DatabaseResponse> {
     return new Promise((resolve, reject) => {
       new this.electronService.postgres({
-        connectionString: "postgres://postgres:postgres@localhost:5432/test",
+        connectionString: `postgres://${this.dbConfig.user}:${this.dbConfig.password}@${this.dbConfig.host}:${this.dbConfig.port}/${this.dbConfig.database}`,
       })
         .query(text, params)
         .then((res: DatabaseResponse) => {
@@ -145,8 +99,15 @@ export class DatabaseService {
 
   run = async (id: number): Promise<string> => {
     const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
+    const secret = process.rows[0].secret_id
+      ? (
+          await this.query(
+            `SELECT * FROM SECRET WHERE ID=${process.rows[0].secret_id}`
+          )
+        ).rows[0].value
+      : null;
     const runFunc = Function("context", process.rows[0].code);
-    await runFunc({ name: "Bennett", color: "Indigo" });
+    await runFunc(secret);
     return `Process started`;
   };
 
@@ -159,6 +120,13 @@ export class DatabaseService {
       data: results.rows,
       count: results.rows.length > 0 ? results.rows[0].count : 0,
     };
+  };
+  getSecrets = async (search?: string): Promise<any> => {
+    const query = search
+      ? `SELECT * FROM SECRET WHERE NAME ILIKE %${search}% OR DESCRIPTION ILIKE %${search}%`
+      : "SELECT * FROM SECRET";
+    const results = await this.query(query);
+    return results.rows;
   };
   deleteProcesses = async (
     id: number
@@ -178,27 +146,8 @@ export class DatabaseService {
     }
   };
 
-  execQuery(
-    query: string,
-    data: unknown[],
-    success: {
-      (res: any): void;
-      (res: any): void;
-      (res: any): void;
-      (res: any): void;
-      (res: any): void;
-      (arg0: any): void;
-    },
-    errorf: {
-      (err: any): void;
-      (err: any): void;
-      (err: any): void;
-      (err: any): void;
-      (err: any): void;
-      (arg0: { error: string }): void;
-    }
-  ) {
-    if (this.mysqlPool != null) {
+  execQuery(query: string, data: unknown[], success: Success, errorf: ErrorOf) {
+    if (this.dbConnected) {
       this.mysqlPool.getConnection(
         (
           err: any,
@@ -245,7 +194,7 @@ export class DatabaseService {
     errorf: (arg0: { error: string }) => void,
     callback: () => void
   ) {
-    if (this.mysqlPool != null) {
+    if (this.dbConnected) {
       this.mysqlPool.getConnection(
         (
           err: any,
@@ -320,7 +269,6 @@ export class DatabaseService {
       const bufferArray = await data.file.arrayBuffer();
       data.code = Buffer.from(bufferArray).toString().split("'").join('"');
     }
-    // console.log(data.code);
     delete data.file;
     delete data.count;
     delete data.id;
@@ -346,12 +294,13 @@ export class DatabaseService {
       (err: any): void;
     }
   ) {
-    const t =
-      "INSERT INTO orders (" +
-      Object.keys(data).join(",") +
-      ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    if (this.mysqlPool != null) {
-      this.execQuery(t, Object.values(data), success, errorf);
+    const t = `INSERT INTO ORDERS(${Object.keys(data).join(
+      ","
+    )}) VALUES(${Object.keys(data)
+      .map((key, index) => "$" + (index + 1))
+      .join(",")}) RETURNING *`;
+    if (this.dbConnected) {
+      this.query(t, Object.values(data), success, errorf);
     }
 
     this.electronService
@@ -367,7 +316,7 @@ export class DatabaseService {
     summary: boolean
   ) {
     const t = "SELECT * FROM orders ORDER BY added_on";
-    if (this.mysqlPool != null) {
+    if (this.dbConnected) {
       this.query(t, null, success, errorf, summary);
     } else {
       // Fetching from SQLITE
@@ -384,7 +333,7 @@ export class DatabaseService {
     const t =
       "SELECT MAX(lims_sync_date_time) as lastLimsSync, MAX(added_on) as lastResultReceived FROM orders";
 
-    if (this.mysqlPool != null) {
+    if (this.dbConnected) {
       this.query(t, null, success, errorf);
     } else {
       // Fetching from SQLITE
@@ -399,7 +348,7 @@ export class DatabaseService {
       "UPDATE orders SET tested_by = ?,test_unit = ?,results = ?,analysed_date_time = ?,specimen_date_time = ? " +
       ",result_accepted_date_time = ?,machine_used = ?,test_location = ?,result_status = ? " +
       " WHERE test_id = ? AND result_status < 1";
-    if (this.mysqlPool != null) {
+    if (this.dbConnected) {
       this.execQuery(t, data, success, errorf);
     }
 
@@ -418,17 +367,21 @@ export class DatabaseService {
     },
     errorf: { (err: any): void; (err: any): void; (err: any): void }
   ) {
-    const t =
-      "INSERT INTO raw_data (" + Object.keys(data).join(",") + ") VALUES (?,?)";
+    const t = `INSERT INTO RAW_DATA(${Object.keys(data).join(
+      ","
+    )}) VALUES(${Object.keys(data)
+      .map((key, index) => "$" + (index + 1))
+      .join(",")}) RETURNING *`;
 
-    if (this.mysqlPool != null) {
+    if (this.dbConnected) {
       this.execQuery(t, Object.values(data), success, errorf);
+    } else {
+      this.electronService
+        .execSqliteQuery(t, Object.values(data))
+        .then((results: any) => {
+          success(results);
+        });
     }
-    this.electronService
-      .execSqliteQuery(t, Object.values(data))
-      .then((results: any) => {
-        success(results);
-      });
   }
 
   addApplicationLog(
@@ -436,11 +389,15 @@ export class DatabaseService {
     success: { (res: any): void; (arg0: any): void },
     errorf: (err: any) => void
   ) {
-    const t =
-      "INSERT INTO app_log (" + Object.keys(data).join(",") + ") VALUES (?)";
-    if (this.mysqlPool != null) {
+    const t = `INSERT INTO APP_LOG(${Object.keys(data).join(
+      ","
+    )}) VALUES(${Object.keys(data)
+      .map((key, index) => "$" + (index + 1))
+      .join(",")}) RETURNING *`;
+    if (this.dbConnected) {
       this.execQuery(t, Object.values(data), success, errorf);
     }
+
     this.electronService
       .execSqliteQuery(t, Object.values(data))
       .then((results: any) => {
@@ -453,13 +410,12 @@ export class DatabaseService {
     errorf: (err: any) => void
   ) {
     const t = "SELECT * FROM app_log ORDER BY added_on DESC, id DESC LIMIT 500";
-    if (this.mysqlPool != null) {
+    if (this.dbConnected) {
       this.query(t, null, success, errorf);
-    } else {
-      // Fetching from SQLITE
-      this.electronService.execSqliteQuery(t, null).then((results: any) => {
-        success(results);
-      });
     }
+    // Fetching from SQLITE
+    this.electronService.execSqliteQuery(t, null).then((results: any) => {
+      success(results);
+    });
   }
 }

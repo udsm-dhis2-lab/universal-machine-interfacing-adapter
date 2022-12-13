@@ -4,7 +4,6 @@ import { Router } from "@angular/router";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import { InterfaceService } from "../../services/interface.service";
 import { DatabaseResponse } from "../../shared/interfaces/db.interface";
-//import { GeneXpertService } from '../../services/GeneXpert.service';
 
 @Component({
   selector: "app-dashboard",
@@ -113,7 +112,7 @@ export class DashboardComponent implements OnInit {
     const that = this;
     that.interfaceService.fetchLastOrders(true);
 
-    that.interfaceService.fetchLastSyncTimes((data) => {
+    that.interfaceService.fetchLastSyncTimes((data: any) => {
       that.lastLimsSync = data.lastLimsSync;
       that.lastResultReceived = (data.lastresultreceived || "")
         .toString()
@@ -122,10 +121,11 @@ export class DashboardComponent implements OnInit {
     });
 
     that.interfaceService.lastOrders.subscribe(
-      (lastFewOrders: DatabaseResponse[]) => {
+      (lastFewOrders: DatabaseResponse[] | any[]) => {
         that._ngZone.run(() => {
-          this.totalRows = lastFewOrders[0]?.rowCount;
-          that.lastOrders = lastFewOrders[0]?.rows;
+          this.totalRows =
+            lastFewOrders[0]?.rowCount ?? lastFewOrders[0]?.length;
+          that.lastOrders = lastFewOrders[0]?.rows ?? lastFewOrders[0];
         });
       }
     );
