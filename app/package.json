@@ -1,11 +1,11 @@
 {
-  "name": "vlsm-interfacing",
-  "version": "2.0.8",
-  "description": "Interfacing Tool By VLSM",
-  "homepage": "https://github.com/deforay/vlsm-interfacing",
+  "name": "machine-interfacing",
+  "version": "0.0.1",
+  "description": "Machine Interfacing by UDSM DHIS2",
+  "homepage": "https://github.com/udsm-dhis2-lab/GeneXpert",
   "author": {
-    "name": "VLSM",
-    "email": "support@deforay.com"
+    "name": "Bennett Benedict",
+    "email": "bennybenester@gmail.com"
   },
   "keywords": [
     "HIV",
@@ -29,6 +29,8 @@
     "electron-store": "^8.1.0",
     "hl7parser": "^1.0.1",
     "mysql": "2.18.1",
+    "pg": "^8.8.0",
+    "pg-native": "^3.0.1",
     "sqlite3": "^5.1.2"
   }
 }
