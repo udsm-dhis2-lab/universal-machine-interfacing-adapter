@@ -169,13 +169,14 @@ export class FunctionsComponent implements OnInit {
 
   addOrChangeSecret(fx: FxPayload) {
     const confirmDialog = this.dialog.open(AddOrChangeSecretComponent, {
-      width: "300px",
-      height: "190px",
+      width: "45vw",
+      height: "auto",
+      disableClose: true,
       data: fx,
     });
     confirmDialog.afterClosed().subscribe((res) => {
       if (res) {
-        this.deleteFx(fx);
+        this.loadFunctions();
       }
     });
   }
