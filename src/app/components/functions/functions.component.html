@@ -117,6 +117,17 @@
             placeholder="Function Run Interval"
           />
         </mat-form-field>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Secret</mat-label>
+          <mat-select formControlName="secret_id">
+            <mat-option>None</mat-option>
+            <mat-option
+              *ngFor="let secret of loadedSecrets"
+              [value]="secret.id"
+              >{{ secret.display }}</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
       </form>
 
       <div class="mb-5 text-center d-flex justify-content-between">

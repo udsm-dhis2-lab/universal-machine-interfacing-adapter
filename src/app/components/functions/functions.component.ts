@@ -35,6 +35,7 @@ export class FunctionsComponent implements OnInit {
   createNewFunction: boolean = false;
   displayedColumns: string[] = ["name", "description", "frequency", "actions"];
   secretForm: FormGroup;
+  loadedSecrets: any[];
 
   constructor(
     private service: DatabaseService,
@@ -62,6 +63,24 @@ export class FunctionsComponent implements OnInit {
     this.loadFunctions();
   }
 
+  private getSecrets = () => {
+    this.service
+      .getSecrets()
+      .then((res) => {
+        this.loadedSecrets = (res || []).map((secret) => {
+          return {
+            ...secret,
+            display: secret.description
+              ? `${secret.name}   ${secret.description.substring(0, 10)}`
+              : secret.name,
+          };
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
   private addSecretsGroup(): FormGroup {
     return this.formBuilder.group({
       key: "",
@@ -79,8 +98,30 @@ export class FunctionsComponent implements OnInit {
     const description = this.secretForm.get("description").value;
     this.service
       .createNewSecret({ value, name, description })
-      .then((res) => console.log(res));
+      .then((res) => {
+        this.loadedSecrets = [
+          {
+            ...res.rows[0],
+            display: res.rows[0].description
+              ? `${res.rows[0].name}   ${res.rows[0].description.substring(
+                  0,
+                  10
+                )}`
+              : res.rows[0].name,
+          },
+          ...this.loadedSecrets,
+        ];
+        this.resetSecretFrom();
+        this.openSnackBar({ message: "Secret Saved", success: true });
+      })
+      .catch((error) => {
+        this.openSnackBar({ message: error.message, success: false });
+      });
   }
+
+  resetSecretFrom = () => {
+    this.secretForm.reset();
+  };
 
   //Add Fields
   addSecretFields(): void {
@@ -121,6 +162,7 @@ export class FunctionsComponent implements OnInit {
     this.router.navigate(["./dashboard"]);
   }
   newFunction() {
+    this.getSecrets();
     this.createNewFunction = !this.createNewFunction;
   }
 
@@ -151,8 +193,9 @@ export class FunctionsComponent implements OnInit {
   createForm() {
     this.formGroup = this.formBuilder.group({
       name: [null, Validators.required],
-      description: [null, [Validators.required]],
-      frequency: [null, [Validators.required]],
+      description: [null],
+      frequency: [null],
+      secret_id: [null],
       validate: "",
     });
   }
@@ -162,6 +205,7 @@ export class FunctionsComponent implements OnInit {
   }
 
   onEdit(fx: FxPayload) {
+    this.getSecrets();
     this.createNewFunction = true;
     this.selectedFx = fx;
     Object.keys(fx).forEach((key) => {
@@ -187,8 +231,10 @@ export class FunctionsComponent implements OnInit {
       name: this.getValue("name"),
       description: this.getValue("description"),
       frequency: this.getValue("frequency"),
+      secret_id: this.getValue("secret_id"),
       file: this.file,
     };
+
     if (this.selectedFx) {
       this.updateFunction({ ...this.selectedFx, ...data });
     } else {
@@ -197,6 +243,11 @@ export class FunctionsComponent implements OnInit {
   };
 
   updateFunction = (data: FxPayload) => {
+    Object.keys(data).forEach((key) => {
+      if (!data[key]) {
+        delete data[key];
+      }
+    });
     this.service.updateFunction(data).then((res) => {
       this.selectedFx = null;
       this.openSnackBar(res);
@@ -205,6 +256,11 @@ export class FunctionsComponent implements OnInit {
   };
 
   saveNewFunction = (data: FxRequest) => {
+    Object.keys(data).forEach((key) => {
+      if (!data[key]) {
+        delete data[key];
+      }
+    });
     this.loading = !this.loading;
     this.service.createFunction(data).then((res) => {
       this.response = res;
