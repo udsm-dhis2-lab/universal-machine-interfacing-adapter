@@ -15,8 +15,15 @@
         <button (click)="close()" class="btn btn-danger">
           <span>Disconnect {{ machineName }}</span>
         </button>
-        <button routerLink="/functions" class="btn btn-primary">
-          <span>Fx</span>
+        <button
+          mat-raised-button
+          color="primary"
+          [style.width]="'120px'"
+          class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
+          routerLink="/functions"
+        >
+          <mat-icon>dashboard</mat-icon>
+          <span> Functions </span>
         </button>
       </div>
 
@@ -29,31 +36,60 @@
         </p>
         <button
           (click)="reconnect()"
-          class="btn btn-success"
+          mat-raised-button
+          [style.height]="'38px'"
+          [style.width]="reconnectButtonText === 'Connect' ? '100px' : 'auto'"
+          [style.background-color]="'#188754'"
+          [style.color]="'#FFFFFF'"
+          class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
           [disabled]="connectionInProcess"
         >
+          <ng-container *ngIf="reconnectButtonText === 'Connect'">
+            <mat-icon>link</mat-icon>
+          </ng-container>
           <span>{{ reconnectButtonText }}</span>
         </button>
         &nbsp;&nbsp;
+
         <button
-          *ngIf="connectionInProcess"
           (click)="close()"
-          class="btn btn-danger"
+          *ngIf="connectionInProcess"
+          mat-raised-button
+          [style.width]="'100px'"
+          [style.height]="'38px'"
+          [style.background-color]="'#DC3545'"
+          [style.color]="'#FFFFFF'"
+          class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
         >
-          <span>Cancel</span>
+          <mat-icon>cancel</mat-icon>
+          <span> Cancel </span>
         </button>
         &nbsp;&nbsp;
         <button
           *ngIf="!connectionInProcess"
+          mat-raised-button
+          [style.width]="'100px'"
+          [style.height]="'38px'"
+          [style.background-color]="'#0C6EFD'"
+          [style.color]="'#FFFFFF'"
+          class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
           routerLink="/settings"
-          class="btn btn-primary"
         >
-          <span>Settings</span>
+          <mat-icon>settings</mat-icon>
+          <span> Settings </span>
         </button>
 
         &nbsp;&nbsp;
-        <button routerLink="/functions" class="btn btn-primary">
-          <span>Fx</span>
+        <button
+          mat-raised-button
+          color="primary"
+          [style.width]="'100px'"
+          [style.height]="'38px'"
+          class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
+          routerLink="/functions"
+        >
+          <mat-icon>functions</mat-icon>
+          <span> Functions </span>
         </button>
       </ng-template>
     </div>

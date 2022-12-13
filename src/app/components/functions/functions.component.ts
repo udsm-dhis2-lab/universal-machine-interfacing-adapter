@@ -27,6 +27,7 @@ export class FunctionsComponent implements OnInit {
   loading: boolean = false; // Flag variable
   file: File = null; //
   response: any = null;
+  fxRunning: boolean;
   processes: FxPayload[] = [];
   pageSize: number = 10;
   currentPage: number = 0;
