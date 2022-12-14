@@ -1,29 +1,50 @@
 <main class="form-signin">
   <form (submit)="doLogin()">
     <h1 class="h3 mb-3 fw-normal">GeneXpert 10 Color</h1>
-
+    <div class="text-center">
+      <img src="assets/icons/logo.png" />
+    </div>
     <div class="form-floating mb-3">
-      <input
-        type="text"
-        [(ngModel)]="user.login"
-        class="form-control"
-        name="login"
-        placeholder="Login ID"
-      />
-      <label for="login">Login ID</label>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Username</mat-label>
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="user.login"
+          name="login"
+          placeholder="Enter Your Username"
+        />
+      </mat-form-field>
     </div>
     <div class="form-floating">
-      <input
-        type="password"
-        [(ngModel)]="user.password"
-        class="form-control"
-        name="password"
-        placeholder="Login Password"
-      />
-      <label for="password">Password</label>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [(ngModel)]="user.password"
+          name="password"
+          placeholder="Enter Your Password"
+          [type]="hide ? 'password' : 'text'"
+        />
+        <mat-icon style="cursor: pointer" matSuffix (click)="hide = !hide"
+          >{{ hide ? "visibility_off" : "visibility" }}
+        </mat-icon>
+      </mat-form-field>
     </div>
 
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-    <p class="mt-5 mb-3 text-muted">&copy; UDSM DHIS2</p>
+    <button
+      [disabled]="user.password === '' || user.login === ''"
+      mat-flat-button
+      class="w-100"
+      [style.height]="'50px'"
+      [style.background-color]="
+        user.password === '' || user.login === '' ? '' : '#0C6EFD'
+      "
+      [style.color]="'#FFFFFF'"
+      type="submit"
+    >
+      Login
+    </button>
+    <p class="mt-5 mb-3 text-muted">&copy; UDSM DHIS2 Lab</p>
   </form>
 </main>

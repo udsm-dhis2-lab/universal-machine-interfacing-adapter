@@ -1,5 +1,7 @@
 import { Component, OnInit } from "@angular/core";
+import { async } from "@angular/core/testing";
 import { Router } from "@angular/router";
+import { readFileSync } from "fs";
 import { ElectronService } from "../../core/services";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import {
@@ -47,7 +49,13 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  updateSettings() {
+  get isNew() {
+    const appSettings = this.store.get("appSettings");
+    if (appSettings && Object.values(this.settings).length > 0) return false;
+    return true;
+  }
+
+  updateSettings = async () => {
     const that = this;
 
     const appSettings = {
@@ -68,12 +76,44 @@ export class SettingsComponent implements OnInit {
     };
 
     that.store.set("appSettings", appSettings);
-    new Notification("Success", {
+    new Notification("✅", {
       body: "Updated interfacing settings",
+      icon: "assets/icons/favicon.png",
+      timestamp: new Date().valueOf(),
     });
-
     this.router.navigate(["/dashboard"]);
-  }
+    that.checkDbConnectionAndMigrate;
+  };
+
+  private checkDbConnectionAndMigrate = async () => {
+    try {
+      const settings: SettingsDB = {
+        dbHost: this.settings.dbHost,
+        dbPort: this.settings.dbPort,
+        dbName: this.settings.dbName,
+        dbUser: this.settings.dbUser,
+        dbPassword: this.settings.dbPassword,
+      };
+      await this.query("SELECT * FROM current_catalog;", settings);
+      await this.migrate(settings);
+    } catch (e) {
+      new Notification("🚫", {
+        body: e.message,
+      });
+    }
+  };
+
+  private migrate = async (settings: SettingsDB) => {
+    console.log("HERE NOW");
+    try {
+      const sql = readFileSync("./assets/tables.sql", "utf-8");
+      console.log(sql);
+      await this.query(sql, settings);
+      return;
+    } catch (e) {
+      return;
+    }
+  };
 
   async checDBConnection() {
     const settings: SettingsDB = {
