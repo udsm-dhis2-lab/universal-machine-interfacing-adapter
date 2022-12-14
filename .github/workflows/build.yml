@@ -17,6 +17,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+
+      - run: npm install -g npm@latest
       - run: npm install --global --production windows-build-tools
       - run: npm i --legacy-peer-deps
       - run: npm run electron:build
