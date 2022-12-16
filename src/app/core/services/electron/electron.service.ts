@@ -8,6 +8,8 @@ import * as fs from "fs";
 import * as mysql from "mysql";
 import { Pool } from "pg";
 import log from "electron-log";
+import * as cron from "node-cron";
+import axios from "axios";
 
 @Injectable({
   providedIn: "root",
@@ -22,6 +24,8 @@ export class ElectronService {
   log: typeof log;
   sqlite: any;
   postgres: typeof Pool;
+  scheduler: typeof cron;
+  axios: typeof axios;
 
   constructor() {
     // Conditional imports
@@ -32,8 +36,10 @@ export class ElectronService {
       this.childProcess = window.require("child_process");
       this.fs = window.require("fs");
       this.postgres = window.require("pg").Pool;
+      this.scheduler = window.require("node-cron");
       this.mysql = window.require("mysql");
       this.net = window.require("net");
+      this.axios = window.require("axios");
       this.log = window.require("electron-log");
 
       this.log.transports.file.level = "info";

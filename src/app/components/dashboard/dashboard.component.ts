@@ -4,6 +4,7 @@ import { Router } from "@angular/router";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import { InterfaceService } from "../../services/interface.service";
 import { DatabaseResponse } from "../../shared/interfaces/db.interface";
+import cron from "node-cron";
 
 @Component({
   selector: "app-dashboard",
@@ -37,6 +38,13 @@ export class DashboardComponent implements OnInit {
     "actions",
   ];
 
+  statuses = {
+    0: { icon: "🔵", color: "", spin: false },
+    1: { icon: "✅", color: "", spin: false },
+    2: { icon: "♻️", color: "", spin: true },
+    3: { icon: "🚫", color: "", spin: false },
+  };
+
   constructor(
     private store: ElectronStoreService,
     private _ngZone: NgZone,
@@ -46,6 +54,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     const that = this;
+    // that.runCron();
 
     that.appSettings = that.store.get("appSettings");
 

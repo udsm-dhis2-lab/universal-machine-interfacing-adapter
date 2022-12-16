@@ -289,7 +289,7 @@
               >
                 <div>
                   <div class="extended-menu-option-div">
-                    <span class="material-icons menu-label-stop" color="#757575"
+                    <span class="material-icons menu-label-stop" color="#da1f05"
                       >cancel</span
                     >
                     <div class="edit">Cancel</div>
@@ -315,6 +315,29 @@
                     >
                     <div class="edit">
                       {{ element.secret_id ? "Change" : "Add" }} Secret
+                    </div>
+                  </div>
+                </div>
+              </span>
+            </div>
+
+            <div
+              class="menu-more-option mat-typography"
+              (click)="addOrChangeSecret(element)"
+            >
+              <span
+                matRipple
+                role="menuitem"
+                tabindex="0"
+                class="extended-menu-option"
+              >
+                <div>
+                  <div class="extended-menu-option-div">
+                    <span class="material-icons menu-label-stop" color="#757575"
+                      >schedule</span
+                    >
+                    <div class="edit">
+                      {{ element.frequency ? "Reschedule" : "Schedule" }}
                     </div>
                   </div>
                 </div>

@@ -57,20 +57,6 @@ function createWindow(): BrowserWindow {
       // Path when running electron in local folder
       pathIndex = "../dist/index.html";
     }
-    ipcMain.handle("dark-mode:toggle", () => {
-      if (nativeTheme.shouldUseDarkColors) {
-        nativeTheme.themeSource = "light";
-      } else {
-        nativeTheme.themeSource = "dark";
-      }
-      console.log("HERE");
-
-      return nativeTheme.shouldUseDarkColors;
-    });
-
-    ipcMain.handle("dark-mode:system", () => {
-      nativeTheme.themeSource = "system";
-    });
     const url = new URL(path.join("file:", __dirname, pathIndex));
     win.loadURL(url.href);
   }

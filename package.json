@@ -14,7 +14,7 @@
     "electron:serve-tsc": "tsc -p tsconfig.serve.json",
     "electron:serve": "wait-on tcp:4200 && npm run electron:serve-tsc && electron . --serve",
     "electron:local": "npm run build:prod && electron .",
-    "electron:build": "npm run build:prod && electron-builder build --win --publish=never",
+    "electron:build": "npm run build:prod && electron-builder build --publish=never",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
     "e2e": "npm run build:prod && playwright test -c e2e/playwright.config.ts e2e/",
@@ -23,10 +23,12 @@
     "lint": "ng lint"
   },
   "dependencies": {
+    "axios": "^1.2.1",
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
     "hl7parser": "^1.0.1",
     "mysql": "^2.18.1",
+    "node-cron": "^3.0.2",
     "pg": "^8.8.0",
     "pg-native": "^3.0.1",
     "sqlite3": "^5.1.2"

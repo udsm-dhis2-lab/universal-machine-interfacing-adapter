@@ -1,18 +1,19 @@
 import { Injectable } from "@angular/core";
+import axios from "axios";
+import { Pool } from "pg";
 import { ElectronService } from "../core/services";
-import { ElectronStoreService } from "./electron-store.service";
-// import { Pool } from "pg";
+import {
+  DatabaseResponse,
+  ErrorOf,
+  Success,
+} from "../shared/interfaces/db.interface";
 import {
   FxPayload,
   FxRequest,
   PageDetails,
   SecretPayload,
 } from "../shared/interfaces/fx.interface";
-import {
-  DatabaseResponse,
-  ErrorOf,
-  Success,
-} from "../shared/interfaces/db.interface";
+import { ElectronStoreService } from "./electron-store.service";
 
 @Injectable({
   providedIn: "root",
@@ -88,6 +89,21 @@ export class DatabaseService {
     });
   }
 
+  private functionsQuery({ query, params = [], settings }): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      new Pool({
+        connectionString: `postgres://${settings.user}:${settings.password}@${settings.host}:${settings.port}/${settings.database}`,
+      })
+        .query(query, params)
+        .then((res: DatabaseResponse) => {
+          resolve(res.rows);
+        })
+        .catch((err: any) => {
+          reject(err);
+        });
+    });
+  }
+
   createNewSecret = async (secret: SecretPayload) => {
     const query = `INSERT INTO SECRET(${Object.keys(secret).join(
       ","
@@ -107,7 +123,16 @@ export class DatabaseService {
         ).rows[0].value
       : null;
     const runFunc = Function("context", process.rows[0].code);
-    await runFunc(secret);
+    await runFunc(
+      secret
+        ? {
+            ...secret,
+            db: this.functionsQuery,
+            settings: this.dbConfig,
+            http: axios,
+          }
+        : null
+    );
     return `Process started`;
   };
 
@@ -144,6 +169,13 @@ export class DatabaseService {
     } catch (e) {
       return { success: false, message: e.message };
     }
+  };
+
+  runCron = () => {
+    console.log("HERE CRON");
+    this.electronService.scheduler.schedule("* * * * *", () => {
+      console.log("running a task every minute");
+    });
   };
 
   execQuery(query: string, data: unknown[], success: Success, errorf: ErrorOf) {
@@ -237,7 +269,6 @@ export class DatabaseService {
   createFunction = async (data: FxRequest): Promise<any> => {
     const bufferArray = await data.file.arrayBuffer();
     const fileData = Buffer.from(bufferArray).toString();
-    // const runFunc = Function("context", fileData);
     const query = `INSERT INTO PROCESS (CODE, NAME, DESCRIPTION, FREQUENCY) VALUES($1, $2, $3, $4);`;
     await this.query(query, [
       fileData.split("'").join('"'),
@@ -245,8 +276,6 @@ export class DatabaseService {
       data.description,
       data.frequency,
     ]);
-    // await runFunc({ name: "Bennett" });
-
     return data;
   };
   updateFunction = async (

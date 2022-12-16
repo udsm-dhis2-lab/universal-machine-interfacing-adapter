@@ -62,6 +62,7 @@ export class FunctionsComponent implements OnInit {
     });
     this.createForm();
     this.loadFunctions();
+    this.runCron();
   }
 
   private getSecrets = () => {
@@ -227,6 +228,10 @@ export class FunctionsComponent implements OnInit {
   getValue(input: string) {
     return this.formGroup.get(input).value;
   }
+
+  runCron = () => {
+    this.service.runCron();
+  };
 
   onSave = () => {
     const data = {
