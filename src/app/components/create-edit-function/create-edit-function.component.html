@@ -1,0 +1,146 @@
+<div class="d-flex justify-content-end">
+  <button mat-flat-button (click)="isFunction = !isFunction">
+    {{ isFunction ? "Create Secrets" : "Create Function" }}
+  </button>
+</div>
+
+<div class="d-flex justify-content-between">
+  <div *ngIf="!isFunction" class="pr-5 w-100">
+    <h1>Secrets</h1>
+    <form class="example-form" [formGroup]="secretForm">
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Secret Name</mat-label>
+        <input
+          type="text"
+          matInput
+          placeholder="Secret Name"
+          formControlName="name"
+        />
+      </mat-form-field>
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Secret Description</mat-label>
+        <input
+          type="text"
+          matInput
+          placeholder="Secret Description"
+          formControlName="description"
+        />
+      </mat-form-field>
+      <div
+        *ngFor="let group of secrets.controls; let i = index"
+        formArrayName="secretValue"
+      >
+        <div class="form-group jumbotron" [formGroupName]="i">
+          <mat-form-field class="w-100" appearance="outline">
+            <mat-label>Secret Key</mat-label>
+            <input
+              type="text"
+              matInput
+              placeholder="Secret Key"
+              formControlName="key"
+            />
+          </mat-form-field>
+
+          <mat-form-field class="w-100" appearance="outline">
+            <mat-label>Secret Value</mat-label>
+            <input
+              type="text"
+              matInput
+              placeholder="Secret Value"
+              formControlName="value"
+            />
+          </mat-form-field>
+
+          <button
+            matTooltip="Delete Above Fields"
+            matTooltipHideDelay="1000"
+            mat-flat-button
+            *ngIf="i > 0"
+            class="float-end mb-3"
+            (click)="removeAddress(i)"
+          >
+            <mat-icon class="text-danger">delete</mat-icon>
+          </button>
+        </div>
+      </div>
+      <div class="d-flex">
+        <div class="ml-5">
+          <button mat-flat-button (click)="addSecretFields()">
+            <mat-icon>add</mat-icon> Add Fields
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div *ngIf="isFunction" class="column w-100">
+    <form [formGroup]="formGroup" class="text-center w-100">
+      <h1>Functions</h1>
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Function Name</mat-label>
+        <input
+          formControlName="name"
+          type="text"
+          matInput
+          placeholder="Function Name"
+        />
+      </mat-form-field>
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Function Description</mat-label>
+        <input
+          formControlName="description"
+          type="text"
+          matInput
+          placeholder="Function Description"
+        />
+      </mat-form-field>
+      <mat-form-field
+        (click)="scheduleCron(false)"
+        class="w-100"
+        appearance="outline"
+      >
+        <mat-label>Function Run Interval</mat-label>
+        <input
+          formControlName="frequency"
+          type="text"
+          [readonly]="true"
+          matInput
+          placeholder="Function Run Interval"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Secret</mat-label>
+        <mat-select formControlName="secret_id">
+          <mat-option>None</mat-option>
+          <mat-option
+            *ngFor="let secret of loadedSecrets"
+            [value]="secret.id"
+            >{{ secret.display }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+    </form>
+
+    <div class="mb-5 text-center d-flex justify-content-between">
+      <div>
+        <input
+          accept="text/javascript"
+          class="form-control"
+          type="file"
+          (change)="onChange($event)"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div mat-dialog-actions [align]="'end'">
+  <button mat-flat-button mat-dialog-close cdkFocusInitial>Cancel</button>
+  <button
+    [disabled]="!validate"
+    color="primary"
+    mat-flat-button
+    (click)="isFunction ? onSave() : onSaveSecrets()"
+  >
+    Save {{ isFunction ? "Function" : "Secret" }}
+  </button>
+</div>
