@@ -61,7 +61,7 @@ export class DatabaseService {
   }
 
   private query(
-    text: string,
+    query: string,
     params: unknown[] = [],
     success?: Success,
     errorf?: ErrorOf,
@@ -71,7 +71,7 @@ export class DatabaseService {
       new this.electronService.postgres({
         connectionString: `postgres://${this.dbConfig.user}:${this.dbConfig.password}@${this.dbConfig.host}:${this.dbConfig.port}/${this.dbConfig.database}`,
       })
-        .query(text, params)
+        .query(query, params)
         .then((res: DatabaseResponse) => {
           if (success) {
             success(summary ? res : res.rows);
@@ -174,47 +174,14 @@ export class DatabaseService {
   runCron = () => {
     console.log("HERE CRON");
     this.electronService.scheduler.schedule("* * * * *", () => {
-      console.log("running a task every minute");
+      console.log(new Date().valueOf(), " running a task");
     });
   };
 
   execQuery(query: string, data: unknown[], success: Success, errorf: ErrorOf) {
     if (this.dbConnected) {
-      this.mysqlPool.getConnection(
-        (
-          err: any,
-          connection: {
-            release: () => void;
-            query: (
-              arg0: { sql: any },
-              arg1: any,
-              arg2: (errors: any, results: any, fields: any) => void
-            ) => void;
-          }
-        ) => {
-          if (err) {
-            try {
-              connection.release();
-            } catch (ex) {}
-            errorf(err);
-            return;
-          }
-
-          connection.query(
-            { sql: query },
-            data,
-            (errors: any, results: any, fields: any) => {
-              if (!errors) {
-                success(results);
-                connection.release();
-              } else {
-                errorf(errors);
-                connection.release();
-              }
-            }
-          );
-        }
-      );
+      console.log(query, data);
+      this.query(query, data, success, errorf);
     } else {
       errorf({ error: "Please check your database connection" });
     }
@@ -372,7 +339,7 @@ export class DatabaseService {
     }
   }
 
-  addResults(data: any, success: (arg0: any) => void, errorf: any) {
+  private addResults(data: any, success: Success, errorf: ErrorOf) {
     const t =
       "UPDATE orders SET tested_by = ?,test_unit = ?,results = ?,analysed_date_time = ?,specimen_date_time = ? " +
       ",result_accepted_date_time = ?,machine_used = ?,test_location = ?,result_status = ? " +

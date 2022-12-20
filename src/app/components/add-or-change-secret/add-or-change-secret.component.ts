@@ -1,13 +1,15 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, Inject, OnInit, ViewChild } from "@angular/core";
+import { FormControl } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { CronOptions, CronGenComponent } from "ngx-cron-editor";
 import { DatabaseService } from "../../services/database.service";
 import { FxPayload, FxResponse } from "../../shared/interfaces/fx.interface";
 
 @Component({
   selector: "app-add-or-change-secret",
   templateUrl: "./add-or-change-secret.component.html",
-  styleUrls: ["./add-or-change-secret.component.css"],
+  styleUrls: ["./add-or-change-secret.component.scss"],
 })
 export class AddOrChangeSecretComponent implements OnInit {
   dialogData: FxPayload;
