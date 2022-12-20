@@ -204,12 +204,15 @@
         </div>
         <hr />
 
-        <button class="btn btn-primary" type="submit">Save Settings</button>
+        <button mat-flat-button color="primary" type="submit">
+          Save Settings
+        </button>
         &nbsp;
         <button
+          color="warn"
+          mat-flat-button
           [disabled]="isNew"
           routerLink="/dashboard"
-          class="btn btn-danger"
           type="button"
         >
           <span>Back without saving</span>
