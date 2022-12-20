@@ -28,6 +28,7 @@
     "electron-store": "^8.1.0",
     "hl7parser": "^1.0.1",
     "mysql": "^2.18.1",
+    "ngx-cron-editor": "^0.7.4",
     "node-cron": "^3.0.2",
     "pg": "^8.8.0",
     "pg-native": "^3.0.1",
