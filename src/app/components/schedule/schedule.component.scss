@@ -1,0 +1,25 @@
+@use "~@angular/material" as mat;
+
+.schedule-container {
+  margin: 30px;
+}
+
+.schedule-card {
+  @include mat.elevation(2);
+  // position: absolute;
+}
+
+.schedule-card-header .mat-card-header {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  align-items: center;
+}
+
+.mat-card-header {
+  display: inline;
+}
+
+.schedule-card-footer {
+  margin: 0px;
+  padding: 16px;
+}

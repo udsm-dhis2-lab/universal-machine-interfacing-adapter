@@ -1,0 +1,57 @@
+<section class="mat-typography schedule-container">
+  <h1 class="text-center">{{ dialogData?.name }}</h1>
+
+  <mat-card class="schedule-card">
+    <mat-card-header class="card-header">
+      <mat-form-field>
+        <mat-label>Flavor</mat-label>
+        <mat-select
+          (change)="cronFlavorChange()"
+          [(ngModel)]="cronOptions.cronFlavor"
+        >
+          <mat-option [value]="'quartz'"> Quartz </mat-option>
+
+          <mat-option [value]="'standard'"> Standard </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-card-header>
+
+    <mat-card-content class="schedule-card-content">
+      <form>
+        <cron-editor
+          #cronEditorDemo
+          [formControl]="cronForm"
+          [options]="cronOptions"
+          >Cron here...</cron-editor
+        >
+      </form>
+    </mat-card-content>
+
+    <mat-card-footer
+      class="schedule-card-footer d-flex justify-content-between"
+    >
+      <div>
+        <h3>
+          <b>Expression: {{ cronForm?.value }}</b>
+        </h3>
+      </div>
+      <div class="d-flex justify-content-between">
+        <button
+          mat-dialog-close
+          mat-raised-button
+          style="padding-right: 10px !important"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="onSave()"
+          color="primary"
+          mat-raised-button
+          [disabled]="cronForm.value === '' || !cronForm.value"
+        >
+          Save
+        </button>
+      </div>
+    </mat-card-footer>
+  </mat-card>
+</section>
