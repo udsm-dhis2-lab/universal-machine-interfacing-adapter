@@ -50,7 +50,7 @@ export class FunctionsComponent implements OnInit {
     this.newFunction(fx);
   }
 
-  scheduleCron = (fx: FxPayload, edit) => {
+  scheduleCron = (fx: FxPayload, edit: boolean) => {
     const confirmDialog = this.dialog.open(ScheduleComponent, {
       width: "auto",
       height: "auto",

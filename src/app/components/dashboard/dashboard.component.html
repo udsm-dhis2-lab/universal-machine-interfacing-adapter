@@ -138,7 +138,7 @@
           <th style="width: 15% !important" mat-header-cell *matHeaderCellDef>
             Sample/Order ID
           </th>
-          <td mat-cell *matCellDef="let element">{{ element.order_id }}</td>
+          <td mat-cell *matCellDef="let element">{{ element?.order_id }}</td>
         </ng-container>
 
         <!-- Description Column -->
@@ -146,7 +146,7 @@
           <th style="width: 15%" mat-header-cell *matHeaderCellDef>
             Test Result
           </th>
-          <td mat-cell *matCellDef="let element">{{ element.results }}</td>
+          <td mat-cell *matCellDef="let element">{{ element?.results }}</td>
         </ng-container>
 
         <!-- Frequency Column -->
@@ -154,7 +154,7 @@
           <th style="width: 10%" mat-header-cell *matHeaderCellDef>
             Result Unit
           </th>
-          <td mat-cell *matCellDef="let element">{{ element.test_unit }}</td>
+          <td mat-cell *matCellDef="let element">{{ element?.test_unit }}</td>
         </ng-container>
 
         <!-- Frequency Column -->
@@ -162,7 +162,7 @@
           <th style="width: 15%" mat-header-cell *matHeaderCellDef>
             Test Type
           </th>
-          <td mat-cell *matCellDef="let element">{{ element.test_type }}</td>
+          <td mat-cell *matCellDef="let element">{{ element?.test_type }}</td>
         </ng-container>
 
         <!-- Frequency Column -->
@@ -170,7 +170,7 @@
           <th style="width: 15%" mat-header-cell *matHeaderCellDef>
             Tested By
           </th>
-          <td mat-cell *matCellDef="let element">{{ element.tested_by }}</td>
+          <td mat-cell *matCellDef="let element">{{ element?.tested_by }}</td>
         </ng-container>
 
         <!-- Frequency Column -->
@@ -180,11 +180,32 @@
           </th>
           <td mat-cell *matCellDef="let element">
             {{
-              (element.analysed_date_time || "")
+              (element?.analysed_date_time || "")
                 .toString()
                 .split("GMT+0300 (East Africa Time)")
                 .join(" ")
             }}
+          </td>
+        </ng-container>
+
+        <!-- Frequency Column -->
+        <ng-container matColumnDef="can_sync">
+          <th
+            class="text-center"
+            style="width: 5%"
+            mat-header-cell
+            *matHeaderCellDef
+          >
+            Can Sync
+          </th>
+          <td class="text-center" mat-cell *matCellDef="let element">
+            <mat-checkbox
+              class="example-margin"
+              [checked]="element?.can_sync"
+              color="accent"
+              (change)="changeSyncStatus($event.checked, element)"
+            >
+            </mat-checkbox>
           </td>
         </ng-container>
 
@@ -203,10 +224,10 @@
             mat-cell
             *matCellDef="let element"
             [ngClass]="{
-              'fa-spin': statuses[element.lims_sync_status].spin
+              'fa-spin': statuses[element?.lims_sync_status]?.spin
             }"
           >
-            <mat-icon>{{ statuses[element.lims_sync_status].icon }}</mat-icon>
+            <mat-icon>{{ statuses[element?.lims_sync_status]?.icon }}</mat-icon>
           </td>
         </ng-container>
 
@@ -216,7 +237,7 @@
             Sync Datetime
           </th>
           <td mat-cell *matCellDef="let element">
-            {{ element.lims_sync_date_time }}
+            {{ element?.lims_sync_date_time }}
           </td>
         </ng-container>
 

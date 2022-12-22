@@ -135,7 +135,20 @@
           </div>
         </div>
         <hr />
-        <div class="row">
+        <div>
+          <mat-checkbox
+            [(ngModel)]="settings.hasExternalDB"
+            [ngModelOptions]="{ standalone: true }"
+            color="accent"
+            (change)="addDatabase($event.checked)"
+          >
+            {{
+              settings.hasExternalDB ? "External DB Added" : "Add External DB?"
+            }}
+          </mat-checkbox>
+        </div>
+        <hr />
+        <div *ngIf="settings.hasExternalDB" class="row">
           <div class="form-group col col-sm-6">
             <label for="dbHost" class="col-form-label-sm">Host</label>
             <input

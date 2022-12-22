@@ -3,8 +3,15 @@ import { PageEvent } from "@angular/material/paginator";
 import { Router } from "@angular/router";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import { InterfaceService } from "../../services/interface.service";
-import { DatabaseResponse } from "../../shared/interfaces/db.interface";
-import cron from "node-cron";
+import {
+  DatabaseResponse,
+  SettingsDB,
+} from "../../shared/interfaces/db.interface";
+import { readFileSync } from "fs";
+import { ElectronService } from "../../core/services";
+import { DatabaseService } from "../../services/database.service";
+import { FxResponse } from "../../shared/interfaces/fx.interface";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
   selector: "app-dashboard",
@@ -33,6 +40,7 @@ export class DashboardComponent implements OnInit {
     "test_type",
     "tested_by",
     "tested_on",
+    "can_sync",
     "lims_sync_status",
     "lims_sync_date_time",
     "actions",
@@ -49,15 +57,16 @@ export class DashboardComponent implements OnInit {
     private store: ElectronStoreService,
     private _ngZone: NgZone,
     public interfaceService: InterfaceService,
-    private router: Router
+    public electronService: ElectronService,
+    private router: Router,
+    private database: DatabaseService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
     const that = this;
-    // that.runCron();
-
     that.appSettings = that.store.get("appSettings");
-
+    that.checkDbConnectionAndMigrate(that.appSettings);
     if (
       null === that.appSettings ||
       undefined === that.appSettings ||
@@ -99,6 +108,7 @@ export class DashboardComponent implements OnInit {
     });
 
     that.interfaceService.liveLog.subscribe((mesg) => {
+      console.log("LIVE LOG", mesg);
       that._ngZone.run(() => {
         that.liveLogText = mesg;
       });
@@ -122,8 +132,8 @@ export class DashboardComponent implements OnInit {
     that.interfaceService.fetchLastOrders(true);
 
     that.interfaceService.fetchLastSyncTimes((data: any) => {
-      that.lastLimsSync = data.lastLimsSync;
-      that.lastResultReceived = (data.lastresultreceived || "")
+      that.lastLimsSync = data?.lastLimsSync;
+      that.lastResultReceived = (data?.lastresultreceived || "")
         .toString()
         .split("GMT+0300")
         .join("");
@@ -166,4 +176,70 @@ export class DashboardComponent implements OnInit {
   ngOnDestroy() {
     clearInterval(this.interval);
   }
+
+  private checkDbConnectionAndMigrate = async (appSettings) => {
+    try {
+      const settings: SettingsDB = {
+        dbHost: appSettings.dbHost,
+        dbPort: appSettings.dbPort,
+        dbName: appSettings.dbName,
+        dbUser: appSettings.dbUser,
+        dbPassword: appSettings.dbPassword,
+      };
+      if (appSettings.hasExternalDB) {
+        await this.query("SELECT * FROM current_catalog;", settings);
+        await this.migrate(settings);
+      }
+    } catch (e) {
+      new Notification("🚫", {
+        body: e.message,
+      });
+    }
+  };
+
+  private migrate = async (settings: SettingsDB) => {
+    try {
+      const sql = readFileSync("./assets/tables.sql", "utf-8");
+      await this.query(sql, settings);
+      return;
+    } catch (e) {
+      return;
+    }
+  };
+
+  private query(text: string, settings: SettingsDB): Promise<DatabaseResponse> {
+    return new Promise((resolve, reject) => {
+      new this.electronService.postgres({
+        connectionString: `postgres://${settings.dbUser}:${settings.dbPassword}@${settings.dbHost}:${settings.dbPort}/${settings.dbName}`,
+      })
+        .query(text, [])
+        .then((res: DatabaseResponse) => {
+          resolve(res);
+        })
+        .catch((err: any) => {
+          reject(err);
+        });
+    });
+  }
+
+  changeSyncStatus(checked: boolean, result: any) {
+    this.database
+      .updateOrder({ id: result.id, can_sync: checked })
+      .then((res) => {
+        console.log(res);
+        this.openSnackBar({ message: "Status Updated", success: true });
+      })
+      .catch((e) => {
+        this.openSnackBar({ message: e.message, success: false });
+      });
+  }
+
+  openSnackBar = (data: FxResponse) => {
+    this.snackBar.open(data.message, "", {
+      duration: 2500,
+      panelClass: data.success ? ["success"] : ["error"],
+      horizontalPosition: "center",
+      verticalPosition: "bottom",
+    });
+  };
 }

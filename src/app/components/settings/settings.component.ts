@@ -1,7 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { async } from "@angular/core/testing";
 import { Router } from "@angular/router";
-import { readFileSync } from "fs";
 import { ElectronService } from "../../core/services";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import {
@@ -44,6 +42,7 @@ export class SettingsComponent implements OnInit {
       this.settings.dbName = appSettings.dbName;
       this.settings.dbUser = appSettings.dbUser;
       this.settings.dbPassword = appSettings.dbPassword;
+      this.settings.hasExternalDB = appSettings.hasExternalDB;
     }
   }
 
@@ -73,6 +72,7 @@ export class SettingsComponent implements OnInit {
       dbName: that.settings.dbName,
       dbUser: that.settings.dbUser,
       dbPassword: that.settings.dbPassword,
+      hasExternalDB: that.settings.hasExternalDB,
     };
 
     that.store.set("appSettings", appSettings);
@@ -82,37 +82,10 @@ export class SettingsComponent implements OnInit {
       timestamp: new Date().valueOf(),
     });
     this.router.navigate(["/dashboard"]);
-    that.checkDbConnectionAndMigrate;
   };
 
-  private checkDbConnectionAndMigrate = async () => {
-    try {
-      const settings: SettingsDB = {
-        dbHost: this.settings.dbHost,
-        dbPort: this.settings.dbPort,
-        dbName: this.settings.dbName,
-        dbUser: this.settings.dbUser,
-        dbPassword: this.settings.dbPassword,
-      };
-      await this.query("SELECT * FROM current_catalog;", settings);
-      await this.migrate(settings);
-    } catch (e) {
-      new Notification("🚫", {
-        body: e.message,
-      });
-    }
-  };
-
-  private migrate = async (settings: SettingsDB) => {
-    console.log("HERE NOW");
-    try {
-      const sql = readFileSync("./assets/tables.sql", "utf-8");
-      console.log(sql);
-      await this.query(sql, settings);
-      return;
-    } catch (e) {
-      return;
-    }
+  addDatabase = (checked: boolean) => {
+    this.settings.hasExternalDB = checked;
   };
 
   async checDBConnection() {
@@ -151,7 +124,9 @@ export class SettingsComponent implements OnInit {
   private query(text: string, settings: SettingsDB): Promise<DatabaseResponse> {
     return new Promise((resolve, reject) => {
       new this.electronService.postgres({
-        connectionString: `postgres://${settings.dbUser}:${settings.dbPassword}@${settings.dbHost}:${settings.dbPort}/${settings.dbName}`,
+        connectionString: `postgres://${settings.dbUser}:${
+          settings.dbPassword
+        }@${settings.dbHost}:${settings.dbPort || 5432}/${settings.dbName}`,
       })
         .query(text, [])
         .then((res: DatabaseResponse) => {
