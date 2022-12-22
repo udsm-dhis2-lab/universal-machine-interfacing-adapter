@@ -69,7 +69,7 @@ export class ElectronService {
     this.ipcRenderer.invoke("dialog", method, config);
   }
 
-  execSqliteQuery(sql: any, args: any): any {
+  execSqliteQuery(sql: any, args: any[] = []): any {
     return new Promise((resolve) => {
       this.ipcRenderer.once("sqlite3-reply", (_, arg) => {
         resolve(arg);
