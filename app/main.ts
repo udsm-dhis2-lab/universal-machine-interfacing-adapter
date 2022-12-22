@@ -1,11 +1,4 @@
-import {
-  app,
-  BrowserWindow,
-  screen,
-  ipcMain,
-  dialog,
-  nativeTheme,
-} from "electron";
+import { app, BrowserWindow, screen, ipcMain, dialog } from "electron";
 import * as path from "path";
 import * as fs from "fs";
 import * as Store from "electron-store";
@@ -14,7 +7,7 @@ import * as Store from "electron-store";
 let win: BrowserWindow = null;
 let store: Store = null;
 let sqlitePath: string = null;
-let sqliteDbName: string = "interface.db";
+let sqliteDbName: string = "database.db";
 const args = process.argv.slice(1),
   serve = args.some((val) => val === "--serve");
 
@@ -25,8 +18,10 @@ function createWindow(): BrowserWindow {
   //const Store = require('electron-store');
   Store.initRenderer();
   store = new Store();
-
-  sqlitePath = path.join(app.getPath("userData"), "/", sqliteDbName);
+  try {
+    fs.mkdirSync(app.getPath("userData") + "/data");
+  } catch (e) {}
+  sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
   store.set("appPath", sqlitePath);
 
   // Create the browser window.
@@ -117,7 +112,7 @@ try {
     //new Sqlite3Helper(appUserDataPath);
     const sqlite3 = require("sqlite3");
 
-    sqlitePath = path.join(app.getPath("userData"), "/", sqliteDbName);
+    sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
     const database = new sqlite3.Database(sqlitePath, (err) => {
       if (err) {
         store.set("appPath", JSON.stringify(err));
@@ -142,6 +137,7 @@ try {
       `machine_used` TEXT DEFAULT NULL, \
       `test_location` TEXT DEFAULT NULL, \
       `created_at` INTEGER NOT NULL DEFAULT "0", \
+      `can_sync` BOOLEAN NOT NULL DEFAULT "FALSE", \
       `result_status` INTEGER NOT NULL DEFAULT "0", \
       `lims_sync_status` INTEGER DEFAULT "0", \
       `lims_sync_date_time` datetime DEFAULT NULL, \
@@ -172,6 +168,17 @@ try {
       `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
       PRIMARY KEY("id" AUTOINCREMENT) \
       );'
+    );
+
+    database.run(
+      `
+     CREATE TABLE IF NOT EXISTS process ( id integer, code text, name text, description text, frequency text, secret_id integer, PRIMARY KEY("id" AUTOINCREMENT) ); 
+      `
+    );
+    database.run(
+      `
+     CREATE TABLE IF NOT EXISTS secret (id integer NOT NULL, name text  NOT NULL, description text, value mediumtext  NOT NULL, PRIMARY KEY("id" AUTOINCREMENT) ); 
+      `
     );
 
     database.run("PRAGMA journal_mode = WAL;");
