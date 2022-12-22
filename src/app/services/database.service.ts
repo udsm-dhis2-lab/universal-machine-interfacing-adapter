@@ -48,31 +48,92 @@ export class DatabaseService {
         database: that.appSettings.dbName,
         port: that.appSettings.dbPort,
         dateStrings: "date",
+        hasExternalDB: that.appSettings.hasExternalDB,
       };
     }
 
-    this.query("SELECT * FROM current_catalog;")
-      .then(() => {
-        this.dbConnected = true;
-      })
-      .catch(() => {
-        this.dbConnected = false;
-      });
+    if (that.appSettings.hasExternalDB) {
+      this.query("SELECT * FROM current_catalog;")
+        .then(() => {
+          this.dbConnected = true;
+        })
+        .catch(() => {
+          this.dbConnected = false;
+        });
+    }
   }
 
-  private query(
+  private async query(
     query: string,
     params: unknown[] = [],
     success?: Success,
     errorf?: ErrorOf,
     summary?: boolean
   ): Promise<DatabaseResponse> {
+    if (this.dbConfig.hasExternalDB) {
+      return await this.fetchFromPostgres(
+        query,
+        params,
+        success,
+        errorf,
+        summary
+      );
+    }
+    let newParams = [];
+    params?.forEach((param) => {
+      if (typeof param === "object") {
+        newParams = [...newParams, JSON.stringify(param)];
+      } else {
+        newParams = [...newParams, param];
+      }
+    });
+    return await this.electronService.execSqliteQuery(query, newParams);
+  }
+
+  fetchFromSqlite = (
+    query: string,
+    params: any[],
+    success?: Success,
+    errorOf?: ErrorOf
+  ) => {
+    return new Promise((resolve, reject) => {
+      this.electronService
+        .execSqliteQuery(query, params)
+        .then((res) => {
+          if (success) {
+            success(res);
+          } else {
+            resolve(res);
+          }
+        })
+        .catch((err: any) => {
+          console.log(err);
+          if (errorOf) {
+            errorOf(err);
+          } else {
+            reject(err);
+          }
+        });
+    });
+  };
+
+  private fetchFromPostgres = (
+    query: string,
+    params: unknown[] = [],
+    success?: Success,
+    errorf?: ErrorOf,
+    summary?: boolean
+  ): Promise<DatabaseResponse> => {
     return new Promise((resolve, reject) => {
       new this.electronService.postgres({
-        connectionString: `postgres://${this.dbConfig.user}:${this.dbConfig.password}@${this.dbConfig.host}:${this.dbConfig.port}/${this.dbConfig.database}`,
+        connectionString: `postgres://${this.dbConfig.user}:${
+          this.dbConfig.password
+        }@${this.dbConfig.host}:${this.dbConfig.port || 5432}/${
+          this.dbConfig.database
+        }`,
       })
         .query(query, params)
-        .then((res: DatabaseResponse) => {
+        .then((res: any) => {
           if (success) {
             success(summary ? res : res.rows);
           } else {
@@ -87,15 +148,17 @@ export class DatabaseService {
           }
         });
     });
-  }
+  };
 
   private functionsQuery({ query, params = [], settings }): Promise<any[]> {
     return new Promise((resolve, reject) => {
       new Pool({
-        connectionString: `postgres://${settings.user}:${settings.password}@${settings.host}:${settings.port}/${settings.database}`,
+        connectionString: `postgres://${settings.user}:${settings.password}@${
+          settings.host
+        }:${settings.port || 5432}/${settings.database}`,
       })
         .query(query, params)
-        .then((res: DatabaseResponse) => {
+        .then((res: any) => {
           resolve(res.rows);
         })
         .catch((err: any) => {
@@ -115,35 +178,54 @@ export class DatabaseService {
 
   run = async (id: number): Promise<string> => {
     const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
-    const secret = process.rows[0].secret_id
-      ? (
-          await this.query(
-            `SELECT * FROM SECRET WHERE ID=${process.rows[0].secret_id}`
-          )
-        ).rows[0].value
-      : null;
-    const runFunc = Function("context", process.rows[0].code);
-    await runFunc(
-      secret
-        ? {
-            ...secret,
-            db: this.functionsQuery,
-            settings: this.dbConfig,
-            http: axios,
-          }
-        : null
+    const secret = await this.getSecret(process);
+    const runFunc = Function(
+      "context",
+      this.appSettings.hasExternalDB ? process?.rows[0]?.code : process[0].code
     );
+    await runFunc({
+      secret,
+      db: this.functionsQuery,
+      settings: this.dbConfig,
+      http: axios,
+    });
     return `Process started`;
   };
 
+  private getSecret = async (process: any) => {
+    const secret = this.appSettings.hasExternalDB
+      ? process.rows[0]?.secret_id
+      : process[0]?.secret_id;
+    if (secret) {
+      const secretData = await this.query(
+        `SELECT * FROM SECRET WHERE ID=${secret}`
+      );
+      return this.appSettings.hasExternalDB
+        ? secretData.rows[0].value
+        : this.parseSecret(secretData[0].value);
+    }
+    return null;
+  };
+
+  private parseSecret = (value: string) => {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      return {};
+    }
+  };
   getProcesses = async (pager: PageDetails): Promise<any> => {
     const query = ` SELECT *, count(*) OVER() AS count FROM (SELECT * FROM PROCESS) AS PROCESS LIMIT ${
       pager.pageSize
     } OFFSET ${pager.page * pager.pageSize}`;
     const results = await this.query(query);
     return {
-      data: results.rows,
-      count: results.rows.length > 0 ? results.rows[0].count : 0,
+      data: Array.isArray(results) ? results : results.rows,
+      count: Array.isArray(results)
+        ? results.length
+        : results.rows.length > 0
+        ? results.rows[0].count
+        : 0,
     };
   };
   getSecrets = async (search?: string): Promise<any> => {
@@ -151,7 +233,7 @@ export class DatabaseService {
       ? `SELECT * FROM SECRET WHERE NAME ILIKE %${search}% OR DESCRIPTION ILIKE %${search}%`
       : "SELECT * FROM SECRET";
     const results = await this.query(query);
-    return results.rows;
+    return Array.isArray(results) ? results : results.rows;
   };
   deleteProcesses = async (
     id: number
@@ -160,11 +242,10 @@ export class DatabaseService {
       const query = `DELETE FROM PROCESS WHERE ID= ${id};`;
       const res = await this.query(query);
       return {
-        success: res.rowCount === 1,
-        message:
-          res.rowCount === 1
-            ? "Function deleted successfully"
-            : "Function not found",
+        success: Array.isArray(res) ? res.length === 0 : res.rowCount === 1,
+        message: (Array.isArray(res) ? res.length === 0 : res.rowCount === 1)
+          ? "Function deleted successfully"
+          : "Function not found",
       };
     } catch (e) {
       return { success: false, message: e.message };
@@ -172,7 +253,6 @@ export class DatabaseService {
   };
 
   runCron = () => {
-    console.log("HERE CRON");
     this.electronService.scheduler.schedule("* * * * *", () => {
       console.log(new Date().valueOf(), " running a task");
     });
@@ -236,13 +316,15 @@ export class DatabaseService {
   createFunction = async (data: FxRequest): Promise<any> => {
     const bufferArray = await data.file.arrayBuffer();
     const fileData = Buffer.from(bufferArray).toString();
-    const query = `INSERT INTO PROCESS (CODE, NAME, DESCRIPTION, FREQUENCY) VALUES($1, $2, $3, $4);`;
-    await this.query(query, [
-      fileData.split("'").join('"'),
-      data.name,
-      data.description,
-      data.frequency,
-    ]);
+    delete data.file;
+    const payload = { ...data, code: fileData.split("'").join('"') };
+    const query = `INSERT INTO PROCESS(${Object.keys(payload).join(
+      ","
+    )}) VALUES(${Object.keys(payload)
+      .map((key, index) => "$" + (index + 1))
+      .join(",")}) RETURNING *`;
+
+    await this.query(query, Object.values(payload));
     return data;
   };
   updateFunction = async (
@@ -251,7 +333,9 @@ export class DatabaseService {
     try {
       const updated = await this.updateFx(data);
       return {
-        success: updated.rowCount === 1,
+        success: Array.isArray(updated)
+          ? updated.length === 0
+          : updated.rowCount === 1,
         message: "Updated successfully",
       };
     } catch (e) {
@@ -269,6 +353,13 @@ export class DatabaseService {
     delete data.count;
     delete data.id;
     const query = `UPDATE PROCESS SET ${Object.keys(data)
+      .map((key) => key + "=" + `'${data[key]}'`)
+      .join(",")} WHERE ID=${id};`;
+    return await this.query(query, []);
+  };
+  updateOrder = async (data: any) => {
+    const id = data.id;
+    const query = `UPDATE ORDERS SET ${Object.keys(data)
       .map((key) => key + "=" + `'${data[key]}'`)
       .join(",")} WHERE ID=${id};`;
     return await this.query(query, []);
@@ -337,20 +428,6 @@ export class DatabaseService {
         success(results);
       });
     }
-  }
-
-  private addResults(data: any, success: Success, errorf: ErrorOf) {
-    const t =
-      "UPDATE orders SET tested_by = ?,test_unit = ?,results = ?,analysed_date_time = ?,specimen_date_time = ? " +
-      ",result_accepted_date_time = ?,machine_used = ?,test_location = ?,result_status = ? " +
-      " WHERE test_id = ? AND result_status < 1";
-    if (this.dbConnected) {
-      this.execQuery(t, data, success, errorf);
-    }
-
-    this.electronService.execSqliteQuery(t, data).then((results: any) => {
-      success(results);
-    });
   }
 
   addRawData(
