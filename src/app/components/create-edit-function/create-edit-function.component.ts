@@ -119,7 +119,6 @@ export class CreateEditFunctionComponent implements OnInit {
       secret_id: this.getValue("secret_id"),
       file: this.file,
     };
-
     if (this.dialogData) {
       this.updateFunction({ ...this.dialogData, ...data });
     } else {
@@ -133,14 +132,20 @@ export class CreateEditFunctionComponent implements OnInit {
         delete data[key];
       }
     });
-    this.service.updateFunction(data).then((res) => {
-      this.openSnackBar(res);
-    });
+    this.service
+      .updateFunction(data)
+      .then((res) => {
+        this.openSnackBar(res);
+        this.dialogRef.close(true);
+      })
+      .catch((e) => {
+        this.openSnackBar({ message: e.message, success: false });
+      });
   };
 
   saveNewFunction = (data: FxRequest) => {
     Object.keys(data).forEach((key) => {
-      if (!data[key]) {
+      if (data[key] === undefined || data[key] === null) {
         delete data[key];
       }
     });
@@ -222,18 +227,7 @@ export class CreateEditFunctionComponent implements OnInit {
     this.service
       .createNewSecret({ value, name, description })
       .then((res) => {
-        this.loadedSecrets = [
-          {
-            ...res.rows[0],
-            display: res.rows[0].description
-              ? `${res.rows[0].name}   ${res.rows[0].description.substring(
-                  0,
-                  10
-                )}`
-              : res.rows[0].name,
-          },
-          ...this.loadedSecrets,
-        ];
+        this.updateSecrets(res);
         this.resetSecretFrom();
         this.openSnackBar({ message: "Secret Saved", success: true });
         this.getSecrets();
@@ -242,6 +236,26 @@ export class CreateEditFunctionComponent implements OnInit {
         this.openSnackBar({ message: error.message, success: false });
       });
   }
+
+  private updateSecrets = (res) => {
+    this.loadedSecrets = [
+      {
+        ...(Array.isArray(res) ? res : res.rows[0]),
+        display: Array.isArray(res)
+          ? res[0].description
+          : res.rows[0].description
+          ? `${Array.isArray(res) ? res[0].name : res.rows[0].name}   ${
+              Array.isArray(res)
+                ? res[0].description
+                : res.rows[0].description.substring(0, 10)
+            }`
+          : Array.isArray(res)
+          ? res[0].name
+          : res.rows[0].name,
+      },
+      ...this.loadedSecrets,
+    ];
+  };
 
   openSnackBar = (data: FxResponse) => {
     this.snackBar.open(data.message, "", {
