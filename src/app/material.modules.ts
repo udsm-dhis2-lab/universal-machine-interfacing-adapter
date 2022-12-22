@@ -12,6 +12,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatCardModule } from "@angular/material/card";
 import { MatGridListModule } from "@angular/material/grid-list";
 import { MatSliderModule } from "@angular/material/slider";
+import { MatCheckboxModule } from "@angular/material/checkbox";
 
 export const materialModules = [
   MatButtonModule,
@@ -24,7 +25,6 @@ export const materialModules = [
   MatDialogModule,
   MatTooltipModule,
   MatSelectModule,
-
   MatCardModule,
   MatSelectModule,
   MatSliderModule,
@@ -33,4 +33,5 @@ export const materialModules = [
   MatIconModule,
   MatButtonModule,
   LayoutModule,
+  MatCheckboxModule,
 ];
