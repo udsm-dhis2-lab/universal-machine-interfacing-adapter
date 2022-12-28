@@ -108,7 +108,6 @@ export class DashboardComponent implements OnInit {
     });
 
     that.interfaceService.liveLog.subscribe((mesg) => {
-      console.log("LIVE LOG", mesg);
       that._ngZone.run(() => {
         that.liveLogText = mesg;
       });
@@ -221,6 +220,10 @@ export class DashboardComponent implements OnInit {
         });
     });
   }
+
+  checkedCanSync = (canSync: string) => {
+    return canSync.toLocaleLowerCase() === "false" ? false : true;
+  };
 
   changeSyncStatus(checked: boolean, result: any) {
     this.database

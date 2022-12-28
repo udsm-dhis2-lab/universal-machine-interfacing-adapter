@@ -201,7 +201,7 @@
           <td class="text-center" mat-cell *matCellDef="let element">
             <mat-checkbox
               class="example-margin"
-              [checked]="element?.can_sync"
+              [checked]="checkedCanSync(element?.can_sync)"
               color="accent"
               (change)="changeSyncStatus($event.checked, element)"
             >
