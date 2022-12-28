@@ -74,8 +74,9 @@ export class SettingsComponent implements OnInit {
       dbPassword: that.settings.dbPassword,
       hasExternalDB: that.settings.hasExternalDB,
     };
-
-    that.store.set("appSettings", appSettings);
+    try {
+      that.store.set("appSettings", appSettings);
+    } catch (e) {}
     new Notification("✅", {
       body: "Updated interfacing settings",
       icon: "assets/icons/favicon.png",

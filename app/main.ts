@@ -14,15 +14,16 @@ const args = process.argv.slice(1),
 function createWindow(): BrowserWindow {
   const electronScreen = screen;
   const size = electronScreen.getPrimaryDisplay().workAreaSize;
-
-  //const Store = require('electron-store');
-  Store.initRenderer();
-  store = new Store();
-  try {
+  if (!fs.existsSync(app.getPath("userData") + "/data")) {
     fs.mkdirSync(app.getPath("userData") + "/data");
+  }
+
+  try {
+    Store.initRenderer();
+    store = new Store();
+    sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
+    store.set("appPath", sqlitePath);
   } catch (e) {}
-  sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
-  store.set("appPath", sqlitePath);
 
   // Create the browser window.
   win = new BrowserWindow({
@@ -115,7 +116,10 @@ try {
     sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
     const database = new sqlite3.Database(sqlitePath, (err) => {
       if (err) {
-        store.set("appPath", JSON.stringify(err));
+        store.set(
+          "appPath",
+          path.join(app.getPath("userData"), "/data/", sqliteDbName)
+        );
         console.error("Database opening error: ", err);
       }
     });
