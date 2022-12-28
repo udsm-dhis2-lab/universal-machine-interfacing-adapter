@@ -113,10 +113,6 @@ export class FunctionsComponent implements OnInit {
     });
   };
 
-  runCron = () => {
-    this.service.runCron();
-  };
-
   pageChanged(event: PageEvent) {
     this.pageSize = event.pageSize;
     this.currentPage = event.pageIndex;
