@@ -21,8 +21,8 @@ const run = async () => {
 
         const sql = `SELECT * FROM orders WHERE CAN_SYNC='true';`
         db.all(sql, [], async (err, rows) => {
-            if (err) {
-                console.error(err);
+            if (err || rows.length === 0) {
+                console.error(err ? err : 'No data to sync');
             } else {
                 await syncData(rows)
             }
