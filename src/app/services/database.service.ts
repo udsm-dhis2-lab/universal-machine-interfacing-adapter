@@ -41,6 +41,7 @@ export class DatabaseService {
       that.appSettings.dbName != ""
     ) {
       this.dbConfig = {
+        ...that.appSettings,
         connectionLimit: 1000,
         host: that.appSettings.dbHost,
         user: that.appSettings.dbUser,
@@ -107,7 +108,6 @@ export class DatabaseService {
           }
         })
         .catch((err: any) => {
-          console.log(err);
           if (errorOf) {
             errorOf(err);
           } else {
@@ -188,6 +188,8 @@ export class DatabaseService {
       db: this.functionsQuery,
       settings: this.dbConfig,
       http: axios,
+      sqlite: this.electronService.sqlite,
+      dbPath: this.store.get("appPath"),
     });
     return `Process started`;
   };
@@ -239,28 +241,43 @@ export class DatabaseService {
     id: number
   ): Promise<{ message: string; success: boolean }> => {
     try {
+      await this.getCron(id);
       const query = `DELETE FROM PROCESS WHERE ID= ${id};`;
       const res = await this.query(query);
       return {
         success: Array.isArray(res) ? res.length === 0 : res.rowCount === 1,
-        message: (Array.isArray(res) ? res.length === 0 : res.rowCount === 1)
-          ? "Function deleted successfully"
-          : "Function not found",
+        message: "Function deleted successfully",
       };
     } catch (e) {
       return { success: false, message: e.message };
     }
   };
 
-  runCron = () => {
-    this.electronService.scheduler.schedule("* * * * *", () => {
-      console.log(new Date().valueOf(), " running a task");
-    });
+  private getCron = async (id: number) => {
+    try {
+      const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
+      (Array.isArray(process) ? process.length === 0 : process.rowCount === 1)
+        ? this.throwError("Function not found")
+        : this.getAndStopCron(process);
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  };
+
+  private throwError = (error: string) => {
+    throw new Error(error);
+  };
+
+  private getAndStopCron = (process: any) => {
+    try {
+      const schedule = this.electronService.scheduler.schedule(
+        `${process.name}_${process.id}`
+      );
+    } catch (e) {}
   };
 
   execQuery(query: string, data: unknown[], success: Success, errorf: ErrorOf) {
     if (this.dbConnected) {
-      console.log(query, data);
       this.query(query, data, success, errorf);
     } else {
       errorf({ error: "Please check your database connection" });
@@ -334,7 +351,7 @@ export class DatabaseService {
       const updated = await this.updateFx(data);
       return {
         success: Array.isArray(updated)
-          ? updated.length === 0
+          ? updated.length === 1
           : updated.rowCount === 1,
         message: "Updated successfully",
       };
@@ -354,8 +371,54 @@ export class DatabaseService {
     delete data.id;
     const query = `UPDATE PROCESS SET ${Object.keys(data)
       .map((key) => key + "=" + `'${data[key]}'`)
-      .join(",")} WHERE ID=${id};`;
-    return await this.query(query, []);
+      .join(",")} WHERE ID=${id} RETURNING *;`;
+    const process = await this.query(query, []);
+    if (data.frequency) {
+      await this.scheduleFunction(process, data);
+    }
+    return process;
+  };
+
+  scheduleFunction = async (data: any, orgData: FxPayload) => {
+    try {
+      const process: FxPayload =
+        Array.isArray(data) && data.length === 1 ? data[0] : data.rows[0];
+      const tasks = this.electronService.scheduler.getTasks();
+      const task = tasks.get(`${orgData.name}_${process.id}`);
+      await this.updateCron(process, task);
+    } catch (e) {}
+  };
+
+  updateCron = async (process: FxPayload, schedule) => {
+    const secret = await this.getSecret([process]);
+    try {
+      if (schedule) {
+        schedule.stop();
+        this.scheduleFx(process, secret);
+      } else {
+        this.scheduleFx(process, secret);
+      }
+    } catch (e) {}
+  };
+
+  private scheduleFx = (process: FxPayload, secret: SecretPayload) => {
+    this.electronService.scheduler.schedule(
+      process.frequency,
+      async () => {
+        const runFunc = Function("context", process.code);
+        await runFunc({
+          secret,
+          db: this.functionsQuery,
+          settings: this.dbConfig,
+          http: axios,
+          dbPath: this.store.get("appPath"),
+          sqlite: this.electronService.sqlite,
+        });
+      },
+      {
+        name: `${process.name}_${process.id}`,
+      }
+    );
   };
   updateOrder = async (data: any) => {
     const id = data.id;

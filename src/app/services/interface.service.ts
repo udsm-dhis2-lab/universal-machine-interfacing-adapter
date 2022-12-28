@@ -621,14 +621,7 @@ export class InterfaceService {
     }
   }
 
-  arrayKeyExists(key, search) {
-    // eslint-disable-line camelcase
-    //  discuss at: http://locutus.io/php/arrayKeyExists/
-    // original by: Kevin van Zonneveld (http://kvz.io)
-    // improved by: Felix Geisendoerfer (http://www.debuggable.com/felix)
-    //   example 1: arrayKeyExists('kevin', {'kevin': 'van Zonneveld'})
-    //   returns 1: true
-
+  arrayKeyExists(key: string, search: any[]) {
     if (
       !search ||
       (search.constructor !== Array && search.constructor !== Object)
