@@ -1,8 +1,27 @@
-import { app, BrowserWindow, screen, ipcMain, dialog } from "electron";
+import { app, BrowserWindow, screen, ipcMain, dialog, Menu } from "electron";
 import * as path from "path";
 import * as fs from "fs";
 import * as Store from "electron-store";
 //import { Sqlite3Helper } from '../src/app/core/sqlite3helper.main';
+
+// const isMac = process.platform === "darwin";
+const items = [
+  {
+    label: "Help",
+    submenu: [
+      {
+        label: "Learn More",
+        click: async () => {
+          const { shell } = require("electron");
+          await shell.openExternal("https://electronjs.org");
+        },
+      },
+    ],
+  },
+];
+
+const menu = Menu.buildFromTemplate(items);
+Menu.setApplicationMenu(menu);
 
 let win: BrowserWindow = null;
 let store: Store = null;
@@ -26,6 +45,9 @@ function createWindow(): BrowserWindow {
 
   // Create the browser window.
   win = new BrowserWindow({
+    disableAutoHideCursor: true,
+    autoHideMenuBar: true,
+    title: "Machine Interfacing Module",
     x: 0,
     y: 0,
     fullscreenable: true,
