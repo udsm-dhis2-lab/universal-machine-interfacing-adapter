@@ -43,7 +43,7 @@ export class FunctionsComponent implements OnInit {
       });
     });
     this.loadFunctions();
-    this.runCron();
+    // this.runCron();
   }
 
   onEdit(fx: FxPayload) {
@@ -111,10 +111,6 @@ export class FunctionsComponent implements OnInit {
       horizontalPosition: "center",
       verticalPosition: "bottom",
     });
-  };
-
-  runCron = () => {
-    this.service.runCron();
   };
 
   pageChanged(event: PageEvent) {

@@ -5,6 +5,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { CronOptions, CronGenComponent } from "ngx-cron-editor";
 import { DatabaseService } from "../../services/database.service";
 import { FxPayload, FxResponse } from "../../shared/interfaces/fx.interface";
+import cron from "node-cron";
 
 @Component({
   selector: "app-schedule",
@@ -61,6 +62,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   onSave = () => {
+    this.validateCron();
     if (this.data.edit) {
       delete this.dialogData.code;
       this.service
@@ -77,6 +79,16 @@ export class ScheduleComponent implements OnInit {
         });
     } else {
       this.dialogRef.close(this.cronForm.value);
+    }
+  };
+
+  validateCron = () => {
+    const valid = cron.validate(this.cronForm.value);
+    if (!valid) {
+      this.openSnackBar({
+        message: "This clone might not run",
+        success: valid,
+      });
     }
   };
 

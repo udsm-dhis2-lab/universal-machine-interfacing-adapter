@@ -10,7 +10,7 @@ export class Sqlite3Helper {
     const sqlite3 = require("sqlite3");
 
     const database = new sqlite3.Database(
-      appUserDataPath + "/interfacing.db",
+      appUserDataPath + "/data/database.db",
       (err) => {
         if (err) console.error("Database opening error: ", err);
       }
