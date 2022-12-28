@@ -43,7 +43,7 @@ export class FunctionsComponent implements OnInit {
       });
     });
     this.loadFunctions();
-    this.runCron();
+    // this.runCron();
   }
 
   onEdit(fx: FxPayload) {
