@@ -69,6 +69,7 @@ export class DashboardComponent implements OnInit {
 
   keyedCurrentPrivileges: any = {};
   currentOrderApprovalStatuses: any[] = [];
+  currentUserHasAlreadyApproved: boolean = false;
 
   constructor(
     private store: ElectronStoreService,
@@ -283,7 +284,10 @@ export class DashboardComponent implements OnInit {
       status,
       (status: any) => {
         this.fetchLastOrders();
-        if (this.currentOrderApprovalStatuses?.length > 0) {
+        if (
+          this.currentOrderApprovalStatuses?.length ==
+          this.appSettings.authorizationCount - 1
+        ) {
           this.changeSyncStatus(true, order);
         }
       },
@@ -300,6 +304,12 @@ export class DashboardComponent implements OnInit {
       order?.id,
       (statuses: any) => {
         this.currentOrderApprovalStatuses = statuses;
+        this.currentUserHasAlreadyApproved =
+          (
+            statuses?.filter(
+              (status) => status?.user_id == this.store.get("userid")
+            ) || []
+          )?.length > 0;
       },
       (err) => {
         console.error(err);

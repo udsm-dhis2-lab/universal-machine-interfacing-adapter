@@ -313,16 +313,22 @@
                   currentOrderApprovalStatuses?.length >=
                     appSettings.authorizationCount ||
                   (!keyedCurrentPrivileges['DO_FINAL_AUTHORIZATION'] &&
-                    !keyedCurrentPrivileges['DO_AUTHORIZE'])
+                    !keyedCurrentPrivileges['DO_AUTHORIZE']) ||
+                  !currentUserHasAlreadyApproved
                 "
                 (click)="onApproval($event, element)"
               >
+                <!-- TODO: Improve to support preve -->
                 <!-- <mat-icon></mat-icon> -->
                 <span>{{
-                  currentOrderApprovalStatuses?.length == 0
+                  !appSettings.authorizationCount ||
+                  (appSettings.authorizationCount &&
+                    appSettings.authorizationCount == 0)
                     ? "Approve"
-                    : currentOrderApprovalStatuses?.length == 1
-                    ? "Second Approval"
+                    : appSettings.authorizationCount > 0 &&
+                      currentOrderApprovalStatuses?.length <=
+                        appSettings.authorizationCount - 1
+                    ? "Approve"
                     : "FULL AUTHORIZED"
                 }}</span>
               </button>
