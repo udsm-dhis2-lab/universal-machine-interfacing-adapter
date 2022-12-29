@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { async } from "@angular/core/testing";
 import axios from "axios";
 import { Pool } from "pg";
 import { ElectronService } from "../core/services";
@@ -12,6 +13,7 @@ import {
   FxRequest,
   PageDetails,
   SecretPayload,
+  SyncReference,
 } from "../shared/interfaces/fx.interface";
 import { ElectronStoreService } from "./electron-store.service";
 
@@ -174,6 +176,15 @@ export class DatabaseService {
       .map((key, index) => "$" + (index + 1))
       .join(",")}) RETURNING *`;
     return await this.query(query, Object.values(secret));
+  };
+
+  updateSecret = async (secret: SecretPayload) => {
+    const secretId = secret?.id;
+    const query = `UPDATE SECRET SET ${Object.keys(secret)
+      .map((key) => key + "=" + `'${secret[key]}'`)
+      .join(",")} WHERE ID=${secretId} RETURNING *;`;
+
+    return await this.query(query, []);
   };
 
   run = async (id: number): Promise<string> => {

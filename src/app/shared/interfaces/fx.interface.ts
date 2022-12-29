@@ -26,7 +26,15 @@ export interface FxResponse {
 }
 
 export interface SecretPayload {
+  id?: number;
   name: string;
   description?: string;
   value: Record<string, unknown>;
+}
+
+export interface SyncReference {
+  id?: number;
+  order_id: number;
+  sync_reference?: any;
+  added_on: number;
 }

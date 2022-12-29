@@ -12,6 +12,7 @@ import { ElectronService } from "../../core/services";
 import { DatabaseService } from "../../services/database.service";
 import { FxResponse } from "../../shared/interfaces/fx.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { uniqBy } from "lodash";
 
 @Component({
   selector: "app-dashboard",
@@ -47,11 +48,24 @@ export class DashboardComponent implements OnInit {
   ];
 
   statuses = {
-    0: { icon: "🔵", color: "", spin: false },
-    1: { icon: "✅", color: "", spin: false },
-    2: { icon: "♻️", color: "", spin: true },
-    3: { icon: "🚫", color: "", spin: false },
+    0: { icon: "🔵", color: "", spin: false, label: "Not synced" },
+    1: { icon: "✅", color: "", spin: false, label: "Successfully synced" },
+    SUCCESS: {
+      icon: "✅",
+      color: "",
+      spin: false,
+      label: "Successfully synced",
+    },
+    2: { icon: "♻️", color: "", spin: true, label: "Synching" },
+    3: { icon: "🚫", color: "", spin: false, label: "Failed" },
   };
+
+  statusesForKey = uniqBy(
+    Object.keys(this.statuses).map((key) => {
+      return this.statuses[key];
+    }),
+    "label"
+  );
 
   constructor(
     private store: ElectronStoreService,

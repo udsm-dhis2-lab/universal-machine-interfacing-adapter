@@ -26,3 +26,13 @@
     transform: rotate(359deg);
   }
 }
+
+.key-info {
+  margin-top: 8px !important;
+  font-size: small;
+  margin-right: 16px;
+}
+
+::ng-deep .key-info .mat-icon {
+  font-size: 0.7rem !important;
+}

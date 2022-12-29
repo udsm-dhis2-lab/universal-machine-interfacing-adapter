@@ -121,17 +121,30 @@
 
   <div class="card">
     <div class="card-body">
-      <h4>
-        Recent Results
-
-        <button
-          (click)="fetchLastOrders()"
-          class="btn btn-sm btn-primary"
-          style="float: right"
-        >
-          <span>Fetch Recent Records</span>
-        </button>
-      </h4>
+      <div class="w-100 d-flex justify-content-between">
+        <div class="w-25">
+          <h4>Recent Results</h4>
+        </div>
+        <div class="w-75 d-flex justify-content-end">
+          <span class="key-info" *ngFor="let status of statusesForKey">
+            <span
+              ><mat-icon>
+                {{ status?.icon }}
+              </mat-icon></span
+            >
+            <span>
+              {{ status?.label }}
+            </span>
+          </span>
+          <button
+            (click)="fetchLastOrders()"
+            class="btn btn-sm btn-primary"
+            style="float: right"
+          >
+            <span>Fetch Recent Records</span>
+          </button>
+        </div>
+      </div>
       <table mat-table [dataSource]="lastOrders" class="mat-elevation-z2 table">
         <!-- Name Column -->
         <ng-container class="text-center" matColumnDef="order_id">
@@ -227,7 +240,13 @@
               'fa-spin': statuses[element?.lims_sync_status]?.spin
             }"
           >
-            <mat-icon>{{ statuses[element?.lims_sync_status]?.icon }}</mat-icon>
+            <mat-icon>{{
+              statuses[
+                !element?.sync_status
+                  ? element?.lims_sync_status
+                  : element?.sync_status
+              ]?.icon
+            }}</mat-icon>
           </td>
         </ng-container>
 

@@ -28,6 +28,8 @@ export class CreateEditFunctionComponent implements OnInit {
   file: File = null;
   dialogData: any;
   isFunction: boolean = true;
+
+  selectedSecret: any;
   constructor(
     private service: DatabaseService,
     private formBuilder: FormBuilder,
@@ -256,6 +258,11 @@ export class CreateEditFunctionComponent implements OnInit {
       ...this.loadedSecrets,
     ];
   };
+
+  onEditSecret(event: Event, secret: any): void {
+    event.stopPropagation();
+    this.selectedSecret = secret;
+  }
 
   openSnackBar = (data: FxResponse) => {
     this.snackBar.open(data.message, "", {
