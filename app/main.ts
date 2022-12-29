@@ -176,12 +176,8 @@ try {
       PRIMARY KEY("id" AUTOINCREMENT) \
       );'
     );
-
-    database.run("ALTER TABLE `orders` ADD COLUMN sync_status TEXT;");
-
-    database.run("ALTER TABLE `orders` ADD COLUMN reference_uuid TEXT;");
-
-    database.run("DROP TABLE IF EXISTS `sync_reference`;");
+    // database.run("ALTER TABLE `orders` ADD COLUMN reference_uuid TEXT;");
+    // database.run("ALTER TABLE `orders` ADD COLUMN sync_status TEXT;");
 
     database.run(
       'CREATE TABLE IF NOT EXISTS `raw_data` ( \

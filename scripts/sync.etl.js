@@ -12,7 +12,7 @@ const syncData = async (rows) => {
   for (const row of rows) {
     // Stage: yzu183PkJCH
     console.log(row);
-    const url = `${context.secret.url}/api/trackedEntityInstances.json?filter=${context.secret.tbAttribute}:EQ:020301109601-5/KK/2022/567&ou=${context.secret.ou}&ouMode=DESCENDANTS&program=${context.secret.program}&fields=attributes[attribute,code,value],enrollments[*],orgUnit,trackedEntityInstance&paging=false`;
+    const url = `${context.secret.url}/api/trackedEntityInstances.json?filter=${context.secret.tbAttribute}:EQ:${row?.order_id}&ou=${context.secret.ou}&ouMode=DESCENDANTS&program=${context.secret.program}&fields=attributes[attribute,code,value],enrollments[*],orgUnit,trackedEntityInstance&paging=false`;
     const res = await context.http.get(url, {
       auth,
       headers,
