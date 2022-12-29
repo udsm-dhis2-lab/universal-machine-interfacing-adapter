@@ -259,4 +259,10 @@ export class DashboardComponent implements OnInit {
       verticalPosition: "bottom",
     });
   };
+
+  logOut(event: Event): void {
+    event.stopPropagation();
+    this.store.set("loggedin", false);
+    this.router.navigate(["/home"]);
+  }
 }

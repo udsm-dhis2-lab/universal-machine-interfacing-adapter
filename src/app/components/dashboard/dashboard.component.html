@@ -1,5 +1,16 @@
 <!-- Begin page content -->
 <main role="main" class="container-lg">
+  <div class="w-100 d-flex justify-content-end">
+    <button mat-button [matMenuTriggerFor]="settingsMenu">Settings</button>
+    <mat-menu #settingsMenu="matMenu">
+      <button mat-menu-item routerLink="/settings">General settings</button>
+      <button mat-menu-item routerLink="/functions">Functions & Secrets</button>
+    </mat-menu>
+
+    <button mat-button (click)="logOut($event)" title="Log out">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
   <br />
   <br />
   <br />

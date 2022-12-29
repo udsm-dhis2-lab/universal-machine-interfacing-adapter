@@ -16,16 +16,18 @@ export class HomeComponent implements OnInit {
   hide: boolean = true;
   constructor(private router: Router, private store: ElectronStoreService) {
     this.settings = this.store.get("appSettings");
-
     if (
       undefined !== this.settings &&
       null !== this.settings &&
       undefined !== this.settings.interfaceAutoConnect &&
       null !== this.settings.interfaceAutoConnect &&
-      "yes" === this.settings.interfaceAutoConnect
+      "yes" === this.settings.interfaceAutoConnect &&
+      this.store.get("loggedin") === true
     ) {
       this.store.set("loggedin", true);
       this.router.navigate(["/dashboard"]);
+    } else {
+      this.router.navigate(["/home"]);
     }
   }
 
