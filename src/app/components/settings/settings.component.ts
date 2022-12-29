@@ -43,6 +43,7 @@ export class SettingsComponent implements OnInit {
       this.settings.dbUser = appSettings.dbUser;
       this.settings.dbPassword = appSettings.dbPassword;
       this.settings.hasExternalDB = appSettings.hasExternalDB;
+      this.settings.authorizationCount = appSettings.authorizationCount;
     }
   }
 
@@ -73,6 +74,7 @@ export class SettingsComponent implements OnInit {
       dbUser: that.settings.dbUser,
       dbPassword: that.settings.dbPassword,
       hasExternalDB: that.settings.hasExternalDB,
+      authorizationCount: that.settings.authorizationCount,
     };
     try {
       that.store.set("appSettings", appSettings);

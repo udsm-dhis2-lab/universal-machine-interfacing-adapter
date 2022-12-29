@@ -1,6 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { DatabaseService } from "../services/database.service";
 import { ElectronStoreService } from "../services/electron-store.service";
+import { keyBy } from "lodash";
 
 @Component({
   selector: "app-home",
@@ -14,7 +16,12 @@ export class HomeComponent implements OnInit {
     password: "",
   };
   hide: boolean = true;
-  constructor(private router: Router, private store: ElectronStoreService) {
+  constructor(
+    private router: Router,
+    private store: ElectronStoreService,
+    private databaseService: DatabaseService
+  ) {
+    this.databaseService.setDefaultDatabaseData();
     this.settings = this.store.get("appSettings");
     if (
       undefined !== this.settings &&
@@ -34,19 +41,46 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {}
 
   public doLogin() {
-    if (this.user.login === "admin" && this.user.password === "admin") {
-      this.store.set("loggedin", true);
+    this.databaseService.getUserDetails(
+      this.user.login,
+      this.user.password,
+      (res: any) => {
+        if (res?.length > 0) {
+          const roleIds = res.map((user) => {
+            return user?.role_id;
+          });
+          this.store.set("loggedin", true);
+          this.store.set("userid", res[0]?.id);
+          this.store.set("roleids", roleIds);
+          this.databaseService.getPrivilegesByRolesDetails(
+            roleIds,
+            (privilegeRes: any) => {
+              this.store.set("priveleges", privilegeRes);
+              this.store.set(
+                "keyedUserPrivileges",
+                keyBy(privilegeRes, "name")
+              );
+            },
+            (err) => {
+              console.error(err);
+            }
+          );
 
-      if (undefined === this.settings) {
-        this.router.navigate(["/settings"]);
-      } else {
-        this.router.navigate(["/dashboard"]);
+          if (undefined === this.settings) {
+            this.router.navigate(["/settings"]);
+          } else {
+            this.router.navigate(["/dashboard"]);
+          }
+        } else {
+          const myNotification = new Notification("Error", {
+            body: "Oops! Wrong username or password.",
+          });
+          this.router.navigate([""]);
+        }
+      },
+      (err) => {
+        console.log(err);
       }
-    } else {
-      const myNotification = new Notification("Error", {
-        body: "Oops! Wrong username or password.",
-      });
-      this.router.navigate([""]);
-    }
+    );
   }
 }

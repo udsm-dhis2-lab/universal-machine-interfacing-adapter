@@ -565,4 +565,277 @@ export class DatabaseService {
       success(results);
     });
   }
+
+  setDefaultDatabaseData(): void {
+    const privileges = [
+      {
+        id: 1,
+        name: "DO_AUTHORIZE",
+        description: "For authorization access",
+      },
+      {
+        id: 2,
+        name: "DO_FINAL_AUTHORIZATION",
+        description: "For one who does final authorization",
+      },
+      {
+        id: 3,
+        name: "ADD_FUNCTION",
+        description: "For add function access",
+      },
+      {
+        id: 4,
+        name: "ADD_SECRET",
+        description: "For add secret access",
+      },
+      {
+        id: 5,
+        name: "ADD_SETTINGS",
+        description: "For add settings access",
+      },
+    ];
+
+    const roles = [
+      {
+        id: 1,
+        name: "Initial Authorization",
+        description: "Authorize",
+      },
+      {
+        id: 2,
+        name: "Final Authorization",
+        description: "Authorize",
+      },
+      {
+        id: 3,
+        name: "Settings",
+        description: "Settings",
+      },
+    ];
+
+    const rolesAndPriveleges = [
+      {
+        id: 1,
+        role_id: 1,
+        privilege_id: 1,
+      },
+      {
+        id: 2,
+        role_id: 3,
+        privilege_id: 1,
+      },
+      {
+        id: 3,
+        role_id: 3,
+        privilege_id: 2,
+      },
+      {
+        id: 4,
+        role_id: 3,
+        privilege_id: 3,
+      },
+      {
+        id: 5,
+        role_id: 3,
+        privilege_id: 4,
+      },
+      {
+        id: 6,
+        role_id: 3,
+        privilege_id: 5,
+      },
+      {
+        id: 7,
+        role_id: 2,
+        privilege_id: 2,
+      },
+    ];
+
+    const users = [
+      {
+        id: 1,
+        username: "admin",
+        password: "admin",
+        firstname: "Admin",
+        middlename: "",
+        lastname: "Admin",
+        title: "Admin",
+      },
+    ];
+
+    const userAndRoles = [
+      {
+        id: 1,
+        user_id: 1,
+        role_id: 1,
+      },
+      {
+        id: 2,
+        user_id: 1,
+        role_id: 2,
+      },
+      {
+        id: 3,
+        user_id: 1,
+        role_id: 3,
+      },
+    ];
+    for (const privilege of privileges) {
+      const t = `INSERT INTO privilege(${Object.keys(privilege).join(
+        ","
+      )}) VALUES(${Object.keys(privilege)
+        .map((key, index) => "$" + (index + 1))
+        .join(",")}) RETURNING *`;
+      if (this.dbConnected) {
+        this.execQuery(t, Object.values(privilege), null, null);
+      }
+
+      this.electronService
+        .execSqliteQuery(t, Object.values(privilege))
+        .then((results: any) => {
+          console.log(results);
+        });
+    }
+
+    for (const role of roles) {
+      const t = `INSERT INTO role(${Object.keys(role).join(
+        ","
+      )}) VALUES(${Object.keys(role)
+        .map((key, index) => "$" + (index + 1))
+        .join(",")}) RETURNING *`;
+      if (this.dbConnected) {
+        this.execQuery(t, Object.values(role), null, null);
+      }
+
+      this.electronService
+        .execSqliteQuery(t, Object.values(role))
+        .then((results: any) => {
+          console.log(results);
+        });
+    }
+
+    for (const user of users) {
+      const t = `INSERT INTO user(${Object.keys(user).join(
+        ","
+      )}) VALUES(${Object.keys(user)
+        .map((key, index) => "$" + (index + 1))
+        .join(",")}) RETURNING *`;
+      if (this.dbConnected) {
+        this.execQuery(t, Object.values(user), null, null);
+      }
+
+      this.electronService
+        .execSqliteQuery(t, Object.values(user))
+        .then((results: any) => {
+          console.log(results);
+        });
+    }
+
+    for (const roleAndPrivilege of rolesAndPriveleges) {
+      const t = `INSERT INTO role_privilege(${Object.keys(
+        roleAndPrivilege
+      ).join(",")}) VALUES(${Object.keys(roleAndPrivilege)
+        .map((key, index) => "$" + (index + 1))
+        .join(",")}) RETURNING *`;
+      if (this.dbConnected) {
+        this.execQuery(t, Object.values(roleAndPrivilege), null, null);
+      }
+
+      this.electronService
+        .execSqliteQuery(t, Object.values(roleAndPrivilege))
+        .then((results: any) => {
+          console.log(results);
+        });
+    }
+
+    for (const userAndRole of userAndRoles) {
+      const t = `INSERT INTO user_role(${Object.keys(userAndRole).join(
+        ","
+      )}) VALUES(${Object.keys(userAndRole)
+        .map((key, index) => "$" + (index + 1))
+        .join(",")}) RETURNING *`;
+      if (this.dbConnected) {
+        this.execQuery(t, Object.values(userAndRole), null, null);
+      }
+
+      this.electronService
+        .execSqliteQuery(t, Object.values(userAndRole))
+        .then((results: any) => {
+          console.log(results);
+        });
+    }
+  }
+
+  getUserDetails(
+    username: string,
+    password: string,
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const userQuery = `SELECT * FROM user LEFT JOIN user_role ON user.id =user_role.user_id LEFT JOIN role ON role.id = user_role.role_id WHERE username="${username}" AND password="${password}"`;
+    if (this.dbConnected) {
+      this.query(userQuery, null, success, errorf);
+    }
+    // Fetching from SQLITE
+    this.electronService
+      .execSqliteQuery(userQuery, null)
+      .then((results: any) => {
+        success(results);
+      });
+  }
+
+  getPrivilegesByRolesDetails(
+    roleIds: number[],
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const privilegeQuery = `SELECT DISTINCT * FROM privilege LEFT JOIN role_privilege ON role_privilege.privilege_id =privilege.id WHERE role_privilege.role_id IN (${roleIds.join(
+      ","
+    )})`;
+    if (this.dbConnected) {
+      this.query(privilegeQuery, null, success, errorf);
+    }
+    // Fetching from SQLITE
+    this.electronService
+      .execSqliteQuery(privilegeQuery, null)
+      .then((results: any) => {
+        success(results);
+      });
+  }
+
+  setApprovalStatus(
+    status: any,
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const t = `INSERT INTO order_status(${Object.keys(status).join(
+      ","
+    )}) VALUES(${Object.keys(status)
+      .map((key, index) => "$" + (index + 1))
+      .join(",")}) RETURNING *`;
+    if (this.dbConnected) {
+      this.execQuery(t, Object.values(status), null, null);
+    }
+
+    this.electronService
+      .execSqliteQuery(t, Object.values(status))
+      .then((results: any) => {
+        success(results);
+      });
+  }
+
+  getApprovalStatuses(
+    order_id: number,
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const query = `SELECT * FROM order_status WHERE order_id = ${order_id}`;
+    if (this.dbConnected) {
+      this.execQuery(query, null, success, errorf);
+    }
+
+    this.electronService.execSqliteQuery(query, []).then((results: any) => {
+      success(results);
+    });
+  }
 }

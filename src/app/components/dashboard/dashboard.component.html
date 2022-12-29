@@ -1,10 +1,22 @@
 <!-- Begin page content -->
 <main role="main" class="container-lg">
   <div class="w-100 d-flex justify-content-end">
-    <button mat-button [matMenuTriggerFor]="settingsMenu">Settings</button>
+    <button
+      mat-button
+      [matMenuTriggerFor]="settingsMenu"
+      *ngIf="keyedCurrentPrivileges['ADD_SETTINGS']"
+    >
+      Settings
+    </button>
     <mat-menu #settingsMenu="matMenu">
       <button mat-menu-item routerLink="/settings">General settings</button>
-      <button mat-menu-item routerLink="/functions">Functions & Secrets</button>
+      <button
+        mat-menu-item
+        routerLink="/functions"
+        *ngIf="keyedCurrentPrivileges['ADD_FUNCTION']"
+      >
+        Functions & Secrets
+      </button>
     </mat-menu>
 
     <button mat-button (click)="logOut($event)" title="Log out">
@@ -64,7 +76,7 @@
 
         <button
           (click)="close()"
-          *ngIf="connectionInProcess"
+          *ngIf="connectionInProcess && keyedCurrentPrivileges['ADD_SETTINGS']"
           mat-raised-button
           [style.width]="'100px'"
           [style.height]="'38px'"
@@ -77,7 +89,7 @@
         </button>
         &nbsp;&nbsp;
         <button
-          *ngIf="!connectionInProcess"
+          *ngIf="!connectionInProcess && keyedCurrentPrivileges['ADD_SETTINGS']"
           mat-raised-button
           [style.width]="'100px'"
           [style.height]="'38px'"
@@ -92,6 +104,7 @@
 
         &nbsp;&nbsp;
         <button
+          *ngIf="keyedCurrentPrivileges['ADD_FUNCTION']"
           mat-raised-button
           color="primary"
           [style.width]="'100px'"
@@ -225,8 +238,9 @@
           <td class="text-center" mat-cell *matCellDef="let element">
             <mat-checkbox
               class="example-margin"
+              [disabled]="true"
               [checked]="checkedCanSync(element?.can_sync)"
-              color="accent"
+              color="primary"
               (change)="changeSyncStatus($event.checked, element)"
             >
             </mat-checkbox>
@@ -280,7 +294,39 @@
             style="cursor: pointer"
             matRipple
           >
-            <mat-icon>more_vert</mat-icon>
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="menu"
+              [disabled]="
+                !keyedCurrentPrivileges['DO_FINAL_AUTHORIZATION'] &&
+                !keyedCurrentPrivileges['DO_AUTHORIZE']
+              "
+              aria-label="More actions"
+              (click)="getApprovalInfos($event, element)"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button
+                mat-menu-item
+                [disabled]="
+                  currentOrderApprovalStatuses?.length >=
+                    appSettings.authorizationCount ||
+                  (!keyedCurrentPrivileges['DO_FINAL_AUTHORIZATION'] &&
+                    !keyedCurrentPrivileges['DO_AUTHORIZE'])
+                "
+                (click)="onApproval($event, element)"
+              >
+                <!-- <mat-icon></mat-icon> -->
+                <span>{{
+                  currentOrderApprovalStatuses?.length == 0
+                    ? "Approve"
+                    : currentOrderApprovalStatuses?.length == 1
+                    ? "Second Approval"
+                    : "FULL AUTHORIZED"
+                }}</span>
+              </button>
+            </mat-menu>
           </td>
         </ng-container>
 

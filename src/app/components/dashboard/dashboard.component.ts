@@ -67,6 +67,9 @@ export class DashboardComponent implements OnInit {
     "label"
   );
 
+  keyedCurrentPrivileges: any = {};
+  currentOrderApprovalStatuses: any[] = [];
+
   constructor(
     private store: ElectronStoreService,
     private _ngZone: NgZone,
@@ -79,6 +82,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     const that = this;
+    this.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
     that.appSettings = that.store.get("appSettings");
     that.checkDbConnectionAndMigrate(that.appSettings);
     if (
@@ -264,5 +268,42 @@ export class DashboardComponent implements OnInit {
     event.stopPropagation();
     this.store.set("loggedin", false);
     this.router.navigate(["/home"]);
+  }
+
+  onApproval(event: Event, order: any): void {
+    event.stopPropagation();
+    const status = {
+      category: "AUTHORIZATION",
+      status: "APPROVED",
+      remarks: "APPROVED",
+      order_id: order?.id,
+      user_id: this.store.get("userid"),
+    };
+    this.database.setApprovalStatus(
+      status,
+      (status: any) => {
+        this.fetchLastOrders();
+        if (this.currentOrderApprovalStatuses?.length > 0) {
+          this.changeSyncStatus(true, order);
+        }
+      },
+      (err) => {
+        console.error(err);
+      }
+    );
+  }
+
+  getApprovalInfos(event: Event, order: any): void {
+    event.stopPropagation();
+    this.currentOrderApprovalStatuses = [];
+    this.database.getApprovalStatuses(
+      order?.id,
+      (statuses: any) => {
+        this.currentOrderApprovalStatuses = statuses;
+      },
+      (err) => {
+        console.error(err);
+      }
+    );
   }
 }

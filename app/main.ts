@@ -178,6 +178,7 @@ try {
     );
     // database.run("ALTER TABLE `orders` ADD COLUMN reference_uuid TEXT;");
     // database.run("ALTER TABLE `orders` ADD COLUMN sync_status TEXT;");
+    // database.run("ALTER TABLE `orders` ADD COLUMN approval_status TEXT;");
 
     database.run(
       'CREATE TABLE IF NOT EXISTS `raw_data` ( \
@@ -190,12 +191,57 @@ try {
     );
 
     database.run(
+      'CREATE TABLE IF NOT EXISTS `order_status` ( \
+      `id` INTEGER NOT NULL, \
+      `order_id` INTEGER NOT NULL, \
+      `category` text NOT NULL, \
+      `status` text NOT NULL, \
+      `remarks` text NOT NULL, \
+      `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+      `user_id` INTEGER,\
+      PRIMARY KEY("id" AUTOINCREMENT), \
+      FOREIGN KEY(order_id) REFERENCES orders(id),\
+      FOREIGN KEY(user_id) REFERENCES user(id)\
+      );'
+    );
+
+    database.run(
       'CREATE TABLE IF NOT EXISTS `app_log` ( \
       `id` INTEGER NOT NULL, \
       `log` TEXT NOT NULL, \
       `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
       PRIMARY KEY("id" AUTOINCREMENT) \
       );'
+    );
+
+    database.run(
+      `
+     CREATE TABLE IF NOT EXISTS user ( id integer, username text, password text, firstname text, middlename text, lastname text, title, added_on datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY("id" AUTOINCREMENT) );
+      `
+    );
+
+    database.run(
+      `
+     CREATE TABLE IF NOT EXISTS role ( id integer, name text, description text, added_on datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY("id" AUTOINCREMENT) );
+      `
+    );
+
+    database.run(
+      `
+     CREATE TABLE IF NOT EXISTS privilege ( id integer, name text, description text,added_on datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY("id" AUTOINCREMENT) );
+      `
+    );
+
+    database.run(
+      `
+     CREATE TABLE IF NOT EXISTS role_privilege ( id integer, role_id integer, privilege_id integer,added_on datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY("id" AUTOINCREMENT),FOREIGN KEY(role_id) REFERENCES role(id),FOREIGN KEY(privilege_id) REFERENCES privilege(id) );
+      `
+    );
+
+    database.run(
+      `
+     CREATE TABLE IF NOT EXISTS user_role ( id integer, user_id integer, role_id integer,added_on datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY("id" AUTOINCREMENT),FOREIGN KEY(user_id) REFERENCES user(id),FOREIGN KEY(role_id) REFERENCES role(id) );
+      `
     );
 
     database.run(
