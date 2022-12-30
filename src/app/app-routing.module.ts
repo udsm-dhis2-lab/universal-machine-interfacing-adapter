@@ -6,6 +6,9 @@ import { HomeRoutingModule } from "./home/home-routing.module";
 import { DashboardComponent } from "./components/dashboard/dashboard.component";
 import { SettingsComponent } from "./components/settings/settings.component";
 import { FunctionsComponent } from "./components/functions/functions.component";
+import { ManageUserPrivilegesComponent } from "./components/manage-user-privileges/manage-user-privileges.component";
+import { ManageUserRolesComponent } from "./components/manage-user-roles/manage-user-roles.component";
+import { ManageUsersComponent } from "./components/manage-users/manage-users.component";
 
 const routes: Routes = [
   {
@@ -24,6 +27,18 @@ const routes: Routes = [
   {
     path: "functions",
     component: FunctionsComponent,
+  },
+  {
+    path: "privileges",
+    component: ManageUserPrivilegesComponent,
+  },
+  {
+    path: "roles",
+    component: ManageUserRolesComponent,
+  },
+  {
+    path: "users",
+    component: ManageUsersComponent,
   },
   {
     path: "**",

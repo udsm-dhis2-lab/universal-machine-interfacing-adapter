@@ -1,0 +1,82 @@
+<div class="container center mt-50">
+  <div class="sticky-header">
+    <div class="d-flex justify-content-end">
+      <button
+        mat-raised-button
+        color="primary"
+        [style.width]="'120px'"
+        class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
+        routerLink="/dashboard"
+      >
+        <mat-icon>dashboard</mat-icon>
+        <span> Dashbaord </span>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-7">
+      <div class="h3">Users</div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>SN</th>
+            <th>Firstname</th>
+            <th>Middlename</th>
+            <th>Lastname</th>
+            <th>Title</th>
+            <th>Username</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users; let count = index">
+            <td>
+              {{ count + 1 }}
+            </td>
+            <td>
+              {{ user?.firstname }}
+            </td>
+            <td>
+              {{ user?.middlename }}
+            </td>
+            <td>
+              {{ user?.lastname }}
+            </td>
+            <td>
+              {{ user?.title }}
+            </td>
+            <td>
+              {{ user?.username }}
+            </td>
+            <th></th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-5">
+      <div class="h3 mt-2">New User</div>
+      <app-form
+        [fields]="userFields"
+        (formUpdate)="onFormUpdate($event)"
+      ></app-form>
+      <div class="h5">Roles</div>
+      <div class="w-100 p-3" style="max-height: 100px; overflow: auto">
+        <app-shared-checkbox-form
+          *ngIf="userRoles && userRoles?.length > 0"
+          [list]="userRoles"
+          (optionValues)="getRolesSelected($event)"
+        ></app-shared-checkbox-form>
+      </div>
+      <div class="d-flex justify-content-end">
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="onSave($event)"
+          [disabled]="!isFormValid"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

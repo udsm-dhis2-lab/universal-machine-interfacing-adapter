@@ -593,6 +593,11 @@ export class DatabaseService {
         name: "ADD_SETTINGS",
         description: "For add settings access",
       },
+      {
+        id: 6,
+        name: "ALL",
+        description: "Full Access",
+      },
     ];
 
     const roles = [
@@ -610,6 +615,11 @@ export class DatabaseService {
         id: 3,
         name: "Settings",
         description: "Settings",
+      },
+      {
+        id: 4,
+        name: "Superuser",
+        description: "Has all accesses",
       },
     ];
 
@@ -649,6 +659,11 @@ export class DatabaseService {
         role_id: 2,
         privilege_id: 2,
       },
+      {
+        id: 8,
+        role_id: 4,
+        privilege_id: 6,
+      },
     ];
 
     const users = [
@@ -678,6 +693,11 @@ export class DatabaseService {
         id: 3,
         user_id: 1,
         role_id: 3,
+      },
+      {
+        id: 4,
+        user_id: 1,
+        role_id: 4,
       },
     ];
     for (const privilege of privileges) {
@@ -837,5 +857,92 @@ export class DatabaseService {
     this.electronService.execSqliteQuery(query, []).then((results: any) => {
       success(results);
     });
+  }
+
+  getPrivileges(
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const query = `SELECT * FROM privilege`;
+    if (this.dbConnected) {
+      this.execQuery(query, null, success, errorf);
+    }
+
+    this.electronService.execSqliteQuery(query, []).then((results: any) => {
+      success(results);
+    });
+  }
+
+  getRoles(
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const query = `SELECT * FROM role`;
+    if (this.dbConnected) {
+      this.execQuery(query, null, success, errorf);
+    }
+
+    this.electronService.execSqliteQuery(query, []).then((results: any) => {
+      success(results);
+    });
+  }
+
+  getUsers(
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const query = `SELECT * FROM user`;
+    if (this.dbConnected) {
+      this.execQuery(query, null, success, errorf);
+    }
+
+    this.electronService.execSqliteQuery(query, []).then((results: any) => {
+      success(results);
+    });
+  }
+
+  addUser(
+    user: any,
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const t = `INSERT INTO user(${Object.keys(user).join(
+      ","
+    )}) VALUES(${Object.keys(user)
+      .map((key, index) => "$" + (index + 1))
+      .join(",")}) RETURNING *`;
+    if (this.dbConnected) {
+      this.execQuery(t, Object.values(user), null, null);
+    }
+
+    this.electronService
+      .execSqliteQuery(t, Object.values(user))
+      .then((results: any) => {
+        success(results);
+      });
+  }
+
+  addUserRolesRelationship(
+    roles: any[],
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    for (const role of roles) {
+      const t = `INSERT INTO user_role(${Object.keys(role).join(
+        ","
+      )}) VALUES(${Object.keys(role)
+        .map((key, index) => "$" + (index + 1))
+        .join(",")}) RETURNING *`;
+      console.log("TETTE", t);
+      if (this.dbConnected) {
+        this.execQuery(t, Object.values(role), null, null);
+      }
+
+      this.electronService
+        .execSqliteQuery(t, Object.values(role))
+        .then((results: any) => {
+          success(results);
+        });
+    }
   }
 }

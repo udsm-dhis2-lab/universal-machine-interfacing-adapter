@@ -66,6 +66,7 @@ export class DashboardComponent implements OnInit {
     }),
     "label"
   );
+  currentUserId: number;
 
   keyedCurrentPrivileges: any = {};
   currentOrderApprovalStatuses: any[] = [];
@@ -83,7 +84,9 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     const that = this;
-    this.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
+    that.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
+    console.log("keyedCurrentPrivileges", that.keyedCurrentPrivileges);
+    that.currentUserId = this.store.get("userid");
     that.appSettings = that.store.get("appSettings");
     that.checkDbConnectionAndMigrate(that.appSettings);
     if (
@@ -268,6 +271,10 @@ export class DashboardComponent implements OnInit {
   logOut(event: Event): void {
     event.stopPropagation();
     this.store.set("loggedin", false);
+    this.store.set("keyedUserPrivileges", {});
+    this.store.set("privileges", {});
+    this.store.set("userid", null);
+    this.store.set("roleids", null);
     this.router.navigate(["/home"]);
   }
 

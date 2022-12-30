@@ -60,17 +60,17 @@ export class HomeComponent implements OnInit {
                 "keyedUserPrivileges",
                 keyBy(privilegeRes, "name")
               );
+
+              if (undefined === this.settings) {
+                this.router.navigate(["/settings"]);
+              } else {
+                this.router.navigate(["/dashboard"]);
+              }
             },
             (err) => {
               console.error(err);
             }
           );
-
-          if (undefined === this.settings) {
-            this.router.navigate(["/settings"]);
-          } else {
-            this.router.navigate(["/dashboard"]);
-          }
         } else {
           const myNotification = new Notification("Error", {
             body: "Oops! Wrong username or password.",

@@ -1,0 +1,47 @@
+<div class="container center mt-50">
+  <div class="sticky-header">
+    <div class="d-flex justify-content-end">
+      <button
+        mat-raised-button
+        color="primary"
+        [style.width]="'120px'"
+        class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
+        routerLink="/dashboard"
+      >
+        <mat-icon>dashboard</mat-icon>
+        <span> Dashbaord </span>
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-7">
+      <div class="h3">Roles</div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>SN</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let role of roles; let count = index">
+            <td>
+              {{ count + 1 }}
+            </td>
+            <td>
+              {{ role?.name }}
+            </td>
+            <td>
+              {{ role?.description }}
+            </td>
+            <th></th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-5"></div>
+  </div>
+</div>

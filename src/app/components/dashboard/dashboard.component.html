@@ -4,18 +4,57 @@
     <button
       mat-button
       [matMenuTriggerFor]="settingsMenu"
-      *ngIf="keyedCurrentPrivileges['ADD_SETTINGS']"
+      *ngIf="
+        keyedCurrentPrivileges['ADD_SETTINGS'] || keyedCurrentPrivileges['ALL']
+      "
     >
       Settings
     </button>
     <mat-menu #settingsMenu="matMenu">
-      <button mat-menu-item routerLink="/settings">General settings</button>
+      <button
+        mat-menu-item
+        routerLink="/settings"
+        *ngIf="keyedCurrentPrivileges['ALL']"
+      >
+        General settings
+      </button>
       <button
         mat-menu-item
         routerLink="/functions"
-        *ngIf="keyedCurrentPrivileges['ADD_FUNCTION']"
+        *ngIf="
+          keyedCurrentPrivileges['ADD_FUNCTION'] ||
+          keyedCurrentPrivileges['ALL']
+        "
       >
         Functions & Secrets
+      </button>
+      <button
+        mat-menu-item
+        routerLink="/users"
+        *ngIf="
+          keyedCurrentPrivileges['ADD_USER'] || keyedCurrentPrivileges['ALL']
+        "
+      >
+        Users
+      </button>
+      <button
+        mat-menu-item
+        routerLink="/roles"
+        *ngIf="
+          keyedCurrentPrivileges['ADD_ROLE'] || keyedCurrentPrivileges['ALL']
+        "
+      >
+        Roles
+      </button>
+      <button
+        mat-menu-item
+        routerLink="/privileges"
+        *ngIf="
+          keyedCurrentPrivileges['ADD_PRIVILEGE'] ||
+          keyedCurrentPrivileges['ALL']
+        "
+      >
+        Privileges
       </button>
     </mat-menu>
 
@@ -298,7 +337,8 @@
               [matMenuTriggerFor]="menu"
               [disabled]="
                 !keyedCurrentPrivileges['DO_FINAL_AUTHORIZATION'] &&
-                !keyedCurrentPrivileges['DO_AUTHORIZE']
+                !keyedCurrentPrivileges['DO_AUTHORIZE'] &&
+                !keyedCurrentPrivileges['ALL']
               "
               aria-label="More actions"
               (click)="getApprovalInfos($event, element)"
@@ -312,7 +352,8 @@
                   currentOrderApprovalStatuses?.length >=
                     appSettings.authorizationCount ||
                   (!keyedCurrentPrivileges['DO_FINAL_AUTHORIZATION'] &&
-                    !keyedCurrentPrivileges['DO_AUTHORIZE']) ||
+                    !keyedCurrentPrivileges['DO_AUTHORIZE'] &&
+                    !keyedCurrentPrivileges['ALL']) ||
                   !currentUserHasAlreadyApproved
                 "
                 (click)="onApproval($event, element)"

@@ -24,13 +24,16 @@ import { InfoComponent } from "./components/info/info.component";
 import { LogsComponent } from "./components/logs/logs.component";
 import { SettingsComponent } from "./components/settings/settings.component";
 import { ElectronService } from "./core/services";
-import { materialModules } from "./material.modules";
 import { DatabaseService } from "./services/database.service";
 import { ElectronStoreService } from "./services/electron-store.service";
 import { InterfaceService } from "./services/interface.service";
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
 import { ScheduleComponent } from "./components/schedule/schedule.component";
 import { CreateEditFunctionComponent } from "./components/create-edit-function/create-edit-function.component";
+import { ManageUserPrivilegesComponent } from './components/manage-user-privileges/manage-user-privileges.component';
+import { ManageUserRolesComponent } from './components/manage-user-roles/manage-user-roles.component';
+import { ManageUsersComponent } from './components/manage-users/manage-users.component';
+import { SharedCheckboxFormComponent } from './components/shared-checkbox-form/shared-checkbox-form.component';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
@@ -47,6 +50,10 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
     AddOrChangeSecretComponent,
     ScheduleComponent,
     CreateEditFunctionComponent,
+    ManageUserPrivilegesComponent,
+    ManageUserRolesComponent,
+    ManageUsersComponent,
+    SharedCheckboxFormComponent,
   ],
   imports: [
     BrowserModule,
@@ -59,7 +66,6 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
     SharedModule,
     HomeModule,
     AppRoutingModule,
-    ...materialModules,
     CronEditorModule,
     TranslateModule.forRoot({
       loader: {
