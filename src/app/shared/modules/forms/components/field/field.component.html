@@ -75,7 +75,6 @@
         type="text"
         *ngSwitchCase="'dropdown'"
         placeholder="Search {{ field?.label }}"
-        aria-label="{{ field?.label }}"
         [required]="field?.required"
         [formControlName]="field?.key"
         matInput
@@ -121,7 +120,6 @@
       <!-- <input
         type="text"
         placeholder="Search {{ field?.label }}"
-        aria-label="{{ field?.label }}"
         [required]="field?.required"
         [formControlName]="field?.key"
         matInput
@@ -217,7 +215,6 @@
     <input
       type="text"
       placeholder="Search {{ field?.label }}"
-      aria-label="{{ field?.label }}"
       [required]="field?.required"
       matInput
       [value]="
@@ -292,59 +289,6 @@
         option?.display
       }}</mat-option>
     </mat-select>
-  </mat-form-field>
-</div>
-
-<div
-  [formGroup]="form"
-  *ngIf="
-    (isBoolean || field?.controlType === 'checkbox' || isCheckBoxButton) &&
-    !isReport
-  "
->
-  <section>
-    <mat-checkbox
-      [hidden]="field?.hidden"
-      [id]="field?.id"
-      [required]="field?.required"
-      [formControlName]="field?.key"
-      [checked]="field?.value"
-      (change)="onFieldUpdate()"
-      color="primary"
-    >
-      <span [ngClass]="{ 'disabled-form-selection-option': field?.disabled }">
-        {{ field.label }}
-      </span>
-      <span class="ml-2" *ngIf="field?.disabled"> ({{ field?.message }}) </span>
-    </mat-checkbox>
-  </section>
-</div>
-
-<div [formGroup]="form" *ngIf="isDateTime && !isReport">
-  <mat-form-field
-    [hidden]="field?.hidden"
-    [ngSwitch]="field?.controlType"
-    appearance="outline"
-    class="w-100"
-  >
-    <mat-label [attr.for]="field?.key">{{ field?.label }}</mat-label>
-    <input
-      matInput
-      autocomplete="off"
-      [id]="field?.key"
-      [required]="field?.required"
-      [value]="field?.value"
-      [disabled]="field?.disabled"
-      [ngxMatDatetimePicker]="fieldId"
-      [placeholder]="field?.placeholder"
-      [max]="field?.max"
-      [min]="field?.min"
-      [formControlName]="field?.key"
-      (dateChange)="onFieldUpdate()"
-    />
-    <mat-datepicker-toggle matSuffix [for]="fieldId"></mat-datepicker-toggle>
-    <ngx-mat-datetime-picker #fieldId> </ngx-mat-datetime-picker>
-    <mat-error *ngIf="!isValid">{{ field?.label }} is required</mat-error>
   </mat-form-field>
 </div>
 

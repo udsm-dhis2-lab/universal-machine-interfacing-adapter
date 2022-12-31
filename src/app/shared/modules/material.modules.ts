@@ -14,6 +14,14 @@ import { MatGridListModule } from "@angular/material/grid-list";
 import { MatSliderModule } from "@angular/material/slider";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatTabsModule } from "@angular/material/tabs";
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatNativeDateModule } from "@angular/material/core";
+import {
+  NgxMatDatetimePickerModule,
+  NgxMatNativeDateModule,
+} from "@angular-material-components/datetime-picker";
+import { MatAutocompleteModule } from "@angular/material/autocomplete";
+import { MatToolbarModule } from "@angular/material/toolbar";
 
 export const materialModules = [
   MatButtonModule,
@@ -36,4 +44,10 @@ export const materialModules = [
   LayoutModule,
   MatCheckboxModule,
   MatTabsModule,
+  MatDatepickerModule,
+  MatNativeDateModule,
+  NgxMatDatetimePickerModule,
+  NgxMatNativeDateModule,
+  MatAutocompleteModule,
+  MatToolbarModule,
 ];

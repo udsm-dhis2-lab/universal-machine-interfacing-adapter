@@ -23,6 +23,8 @@
     "lint": "ng lint"
   },
   "dependencies": {
+    "@angular-material-components/datetime-picker": "^6.0.3",
+    "@angular/material-moment-adapter": "^13.3.9",
     "axios": "^1.2.1",
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
