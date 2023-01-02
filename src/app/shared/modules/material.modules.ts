@@ -22,6 +22,7 @@ import {
 } from "@angular-material-components/datetime-picker";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { MatToolbarModule } from "@angular/material/toolbar";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 export const materialModules = [
   MatButtonModule,
@@ -50,4 +51,5 @@ export const materialModules = [
   NgxMatNativeDateModule,
   MatAutocompleteModule,
   MatToolbarModule,
+  MatProgressSpinnerModule,
 ];

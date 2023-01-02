@@ -85,7 +85,6 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     const that = this;
     that.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
-    console.log("keyedCurrentPrivileges", that.keyedCurrentPrivileges);
     that.currentUserId = this.store.get("userid");
     that.appSettings = that.store.get("appSettings");
     that.checkDbConnectionAndMigrate(that.appSettings);
@@ -267,16 +266,6 @@ export class DashboardComponent implements OnInit {
       verticalPosition: "bottom",
     });
   };
-
-  logOut(event: Event): void {
-    event.stopPropagation();
-    this.store.set("loggedin", false);
-    this.store.set("keyedUserPrivileges", {});
-    this.store.set("privileges", {});
-    this.store.set("userid", null);
-    this.store.set("roleids", null);
-    this.router.navigate(["/home"]);
-  }
 
   onApproval(event: Event, order: any): void {
     event.stopPropagation();

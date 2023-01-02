@@ -63,3 +63,16 @@ td {
   color: black !important;
   background-color: red !important;
 }
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 100;
+  background: rgba($color: #ffffff, $alpha: 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,69 @@
+<div class="sticky-header">
+  <div class="w-100 d-flex justify-content-end">
+    <button mat-button (click)="onRouteTo($event, 'dashboard')">
+      <mat-icon>dashboard</mat-icon>
+      <span> Dashbaord </span>
+    </button>
+    <button
+      mat-button
+      [matMenuTriggerFor]="settingsMenu"
+      *ngIf="
+        keyedCurrentPrivileges['ADD_SETTINGS'] || keyedCurrentPrivileges['ALL']
+      "
+    >
+      <mat-icon>settings</mat-icon>
+      Settings
+    </button>
+    <mat-menu #settingsMenu="matMenu">
+      <button
+        mat-menu-item
+        (click)="onRouteTo($event, 'settings')"
+        *ngIf="keyedCurrentPrivileges['ALL']"
+      >
+        General settings
+      </button>
+      <button
+        mat-menu-item
+        (click)="onRouteTo($event, 'functions')"
+        *ngIf="
+          keyedCurrentPrivileges['ADD_FUNCTION'] ||
+          keyedCurrentPrivileges['ALL']
+        "
+      >
+        Functions & Secrets
+      </button>
+      <button
+        mat-menu-item
+        (click)="onRouteTo($event, 'users')"
+        *ngIf="
+          keyedCurrentPrivileges['ADD_USER'] || keyedCurrentPrivileges['ALL']
+        "
+      >
+        Users
+      </button>
+      <button
+        mat-menu-item
+        (click)="onRouteTo($event, 'roles')"
+        *ngIf="
+          keyedCurrentPrivileges['ADD_ROLE'] || keyedCurrentPrivileges['ALL']
+        "
+      >
+        Roles
+      </button>
+      <button
+        mat-menu-item
+        (click)="onRouteTo($event, 'privileges')"
+        *ngIf="
+          keyedCurrentPrivileges['ADD_PRIVILEGE'] ||
+          keyedCurrentPrivileges['ALL']
+        "
+      >
+        Privileges
+      </button>
+    </mat-menu>
+
+    <button mat-button (click)="logOut($event)" title="Log out">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
+</div>

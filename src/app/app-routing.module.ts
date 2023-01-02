@@ -1,6 +1,5 @@
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
-import { PageNotFoundComponent } from "./shared/components";
 
 import { HomeRoutingModule } from "./home/home-routing.module";
 import { DashboardComponent } from "./components/dashboard/dashboard.component";
@@ -9,6 +8,7 @@ import { FunctionsComponent } from "./components/functions/functions.component";
 import { ManageUserPrivilegesComponent } from "./components/manage-user-privileges/manage-user-privileges.component";
 import { ManageUserRolesComponent } from "./components/manage-user-roles/manage-user-roles.component";
 import { ManageUsersComponent } from "./components/manage-users/manage-users.component";
+import { PageNotFoundComponent } from "./shared/components/page-not-found/page-not-found.component";
 
 const routes: Routes = [
   {

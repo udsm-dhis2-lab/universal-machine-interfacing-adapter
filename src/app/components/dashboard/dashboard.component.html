@@ -1,67 +1,6 @@
 <!-- Begin page content -->
 <main role="main" class="container-lg">
-  <div class="w-100 d-flex justify-content-end">
-    <button
-      mat-button
-      [matMenuTriggerFor]="settingsMenu"
-      *ngIf="
-        keyedCurrentPrivileges['ADD_SETTINGS'] || keyedCurrentPrivileges['ALL']
-      "
-    >
-      Settings
-    </button>
-    <mat-menu #settingsMenu="matMenu">
-      <button
-        mat-menu-item
-        routerLink="/settings"
-        *ngIf="keyedCurrentPrivileges['ALL']"
-      >
-        General settings
-      </button>
-      <button
-        mat-menu-item
-        routerLink="/functions"
-        *ngIf="
-          keyedCurrentPrivileges['ADD_FUNCTION'] ||
-          keyedCurrentPrivileges['ALL']
-        "
-      >
-        Functions & Secrets
-      </button>
-      <button
-        mat-menu-item
-        routerLink="/users"
-        *ngIf="
-          keyedCurrentPrivileges['ADD_USER'] || keyedCurrentPrivileges['ALL']
-        "
-      >
-        Users
-      </button>
-      <button
-        mat-menu-item
-        routerLink="/roles"
-        *ngIf="
-          keyedCurrentPrivileges['ADD_ROLE'] || keyedCurrentPrivileges['ALL']
-        "
-      >
-        Roles
-      </button>
-      <button
-        mat-menu-item
-        routerLink="/privileges"
-        *ngIf="
-          keyedCurrentPrivileges['ADD_PRIVILEGE'] ||
-          keyedCurrentPrivileges['ALL']
-        "
-      >
-        Privileges
-      </button>
-    </mat-menu>
-
-    <button mat-button (click)="logOut($event)" title="Log out">
-      <mat-icon>logout</mat-icon>
-    </button>
-  </div>
+  <app-top-menu-bar></app-top-menu-bar>
   <br />
   <br />
   <br />

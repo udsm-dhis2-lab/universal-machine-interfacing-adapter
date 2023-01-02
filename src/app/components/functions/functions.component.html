@@ -1,23 +1,10 @@
 <div class="container center mt-50">
-  <div class="sticky-header">
-    <div class="d-flex justify-content-end">
-      <button
-        mat-raised-button
-        color="primary"
-        [style.width]="'120px'"
-        class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
-        (click)="navigateToDashboard()"
-      >
-        <mat-icon>dashboard</mat-icon>
-        <span> Dashbaord </span>
-      </button>
-    </div>
-    <h1 class="text-center">
-      <mat-icon style="font-size: xx-large; font-weight: bolder">
-        functions</mat-icon
-      >
-    </h1>
-  </div>
+  <app-top-menu-bar></app-top-menu-bar>
+  <h1 class="text-center">
+    <mat-icon style="font-size: xx-large; font-weight: bolder">
+      functions</mat-icon
+    >
+  </h1>
   <div *ngIf="fxRunning">
     <app-logs [liveLogText]="liveLogText"></app-logs>
   </div>

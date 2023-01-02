@@ -172,13 +172,12 @@ try {
       `is_printed` INTEGER DEFAULT NULL, \
       `printed_at` INTEGER DEFAULT NULL, \
       `raw_text` mediumtext, \
+      `sync_status` TEXT\
+      `reference_uuid` TEXT\
       `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
       PRIMARY KEY("id" AUTOINCREMENT) \
       );'
     );
-    // database.run("ALTER TABLE `orders` ADD COLUMN reference_uuid TEXT;");
-    // database.run("ALTER TABLE `orders` ADD COLUMN sync_status TEXT;");
-    // database.run("ALTER TABLE `orders` ADD COLUMN approval_status TEXT;");
 
     database.run(
       'CREATE TABLE IF NOT EXISTS `raw_data` ( \

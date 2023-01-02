@@ -922,6 +922,27 @@ export class DatabaseService {
       });
   }
 
+  addRole(
+    role: any,
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const t = `INSERT INTO role(${Object.keys(role).join(
+      ","
+    )}) VALUES(${Object.keys(role)
+      .map((key, index) => "$" + (index + 1))
+      .join(",")}) RETURNING *`;
+    if (this.dbConnected) {
+      this.execQuery(t, Object.values(role), null, null);
+    }
+
+    this.electronService
+      .execSqliteQuery(t, Object.values(role))
+      .then((results: any) => {
+        success(results);
+      });
+  }
+
   addUserRolesRelationship(
     roles: any[],
     success: { (res: any): void; (arg0: any): void },
@@ -933,13 +954,36 @@ export class DatabaseService {
       )}) VALUES(${Object.keys(role)
         .map((key, index) => "$" + (index + 1))
         .join(",")}) RETURNING *`;
-      console.log("TETTE", t);
+      console.log("TESTING", t);
       if (this.dbConnected) {
         this.execQuery(t, Object.values(role), null, null);
       }
 
       this.electronService
         .execSqliteQuery(t, Object.values(role))
+        .then((results: any) => {
+          success(results);
+        });
+    }
+  }
+
+  addRolesPrivilegeRelationship(
+    rolePrivileges: any[],
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    for (const roleAndPrivilege of rolePrivileges) {
+      const t = `INSERT INTO role_privilege(${Object.keys(
+        roleAndPrivilege
+      ).join(",")}) VALUES(${Object.keys(roleAndPrivilege)
+        .map((key, index) => "$" + (index + 1))
+        .join(",")}) RETURNING *`;
+      if (this.dbConnected) {
+        this.execQuery(t, Object.values(roleAndPrivilege), null, null);
+      }
+
+      this.electronService
+        .execSqliteQuery(t, Object.values(roleAndPrivilege))
         .then((results: any) => {
           success(results);
         });

@@ -15,6 +15,7 @@ export class ManageUsersComponent implements OnInit, AfterViewInit {
   isFormValid: boolean = false;
   formData: any;
   selectedRoles: any;
+  saving: boolean = false;
   constructor(private databaseService: DatabaseService) {}
 
   ngOnInit(): void {}
@@ -104,6 +105,7 @@ export class ManageUsersComponent implements OnInit, AfterViewInit {
       username: this.formData?.username?.value,
       password: this.formData?.password?.value,
     };
+    this.saving = true;
     this.databaseService.addUser(
       user,
       (response) => {
@@ -116,8 +118,11 @@ export class ManageUsersComponent implements OnInit, AfterViewInit {
         this.databaseService.addUserRolesRelationship(
           roles,
           (rolesResponse) => {
-            this.getList();
-            this.createUserFields();
+            setTimeout(() => {
+              this.getList();
+              this.createUserFields();
+              this.saving = false;
+            }, 200);
           },
           (error) => {}
         );
