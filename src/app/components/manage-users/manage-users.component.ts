@@ -48,36 +48,41 @@ export class ManageUsersComponent implements OnInit, AfterViewInit {
     );
   }
 
-  createUserFields(): void {
+  createUserFields(user?: any): void {
     this.userFields = [
       new Textbox({
         id: "username",
         key: "username",
         label: "Username",
+        value: user?.username,
         required: true,
       }),
       new Textbox({
         id: "firstname",
         key: "firstname",
         label: "Firstname",
+        value: user?.firstname,
         required: true,
       }),
       new Textbox({
         id: "middlename",
         key: "middlename",
         label: "Middlename",
+        value: user?.middlename,
         required: false,
       }),
       new Textbox({
         id: "lastname",
         key: "lastname",
         label: "Lastname",
+        value: user?.lastname,
         required: true,
       }),
       new Textbox({
         id: "title",
         key: "title",
         label: "Title",
+        value: user?.title,
         required: false,
       }),
       new Textbox({
@@ -85,6 +90,7 @@ export class ManageUsersComponent implements OnInit, AfterViewInit {
         key: "password",
         label: "Password",
         type: "password",
+        value: user?.password,
         required: true,
       }),
     ];
@@ -135,5 +141,9 @@ export class ManageUsersComponent implements OnInit, AfterViewInit {
 
   getRolesSelected(roles: any): void {
     this.selectedRoles = roles;
+  }
+
+  onEdit(user: any): void {
+    this.createUserFields(user);
   }
 }
