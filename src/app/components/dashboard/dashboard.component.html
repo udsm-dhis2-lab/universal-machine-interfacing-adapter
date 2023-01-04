@@ -293,7 +293,7 @@
                   (!keyedCurrentPrivileges['DO_FINAL_AUTHORIZATION'] &&
                     !keyedCurrentPrivileges['DO_AUTHORIZE'] &&
                     !keyedCurrentPrivileges['ALL']) ||
-                  !currentUserHasAlreadyApproved
+                  currentUserHasAlreadyApproved
                 "
                 (click)="onApproval($event, element)"
               >

@@ -189,6 +189,8 @@ try {
       );'
     );
 
+    database.run("DROP TABLE IF EXISTS `order_status`;");
+
     database.run(
       'CREATE TABLE IF NOT EXISTS `order_status` ( \
       `id` INTEGER NOT NULL, \
