@@ -4,6 +4,7 @@
     *ngFor="let item of list"
     (change)="onFieldUpdate($event, item)"
     color="primary"
+    [checked]="defaultSelectedItems && defaultSelectedItems[item?.id]"
   >
     {{ item?.name }}
   </mat-checkbox>

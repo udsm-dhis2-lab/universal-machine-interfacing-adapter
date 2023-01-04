@@ -922,6 +922,14 @@ export class DatabaseService {
       });
   }
 
+  updateUser = async (user: any) => {
+    const userId = user?.id;
+    const query = `UPDATE user SET ${Object.keys(user)
+      .map((key) => key + "=" + `'${user[key]}'`)
+      .join(",")} WHERE ID=${userId} RETURNING *;`;
+    return await this.query(query, []);
+  };
+
   addRole(
     role: any,
     success: { (res: any): void; (arg0: any): void },
@@ -954,7 +962,6 @@ export class DatabaseService {
       )}) VALUES(${Object.keys(role)
         .map((key, index) => "$" + (index + 1))
         .join(",")}) RETURNING *`;
-      console.log("TESTING", t);
       if (this.dbConnected) {
         this.execQuery(t, Object.values(role), null, null);
       }
@@ -965,6 +972,26 @@ export class DatabaseService {
           success(results);
         });
     }
+  }
+
+  deleteUserRoleRelationship = async (userId: number) => {
+    const query = `DELETE FROM user_role WHERE user_id= ${userId};`;
+    const res = await this.query(query);
+  };
+
+  getUserAndRoleRelationship(
+    user_id: number,
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const query = `SELECT * FROM user_role WHERE user_id =${user_id}`;
+    if (this.dbConnected) {
+      this.execQuery(query, null, success, errorf);
+    }
+
+    this.electronService.execSqliteQuery(query, []).then((results: any) => {
+      success(results);
+    });
   }
 
   addRolesPrivilegeRelationship(

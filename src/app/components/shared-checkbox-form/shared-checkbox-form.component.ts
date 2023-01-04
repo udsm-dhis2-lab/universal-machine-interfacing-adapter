@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from "@angular/core";
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { CheckBox } from "../../shared/modules/forms/models/check-box.model";
 import { FormValue } from "../../shared/modules/forms/models/form-value.model";
@@ -11,22 +19,29 @@ import { omit } from "lodash";
 })
 export class SharedCheckboxFormComponent implements OnInit {
   @Input() list: any[];
+  @Input() defaultSelectedItems: any;
   formFields: any[];
   values: any = {};
   @Output() optionValues: EventEmitter<any> = new EventEmitter<any>();
   constructor() {}
 
   ngOnInit(): void {
-    this.formFields = this.list?.map((item) => {
-      return new CheckBox({
-        id: item?.id,
-        key: item?.id,
-        label: item?.name,
-        required: true,
+    if (this.defaultSelectedItems) {
+      Object.keys(this.defaultSelectedItems).forEach((key) => {
+        this.values[key] = (this.list?.filter(
+          (item) => Number(item?.id) === Number(key)
+        ) || [])[0];
       });
-    });
+    }
+    // this.formFields = this.list?.map((item) => {
+    //   return new CheckBox({
+    //     id: item?.id,
+    //     key: item?.id,
+    //     label: item?.name,
+    //     required: true,
+    //   });
+    // });
   }
-
   onFormUpdate(formValue: FormValue): void {
     console.log(formValue.getValues());
   }
