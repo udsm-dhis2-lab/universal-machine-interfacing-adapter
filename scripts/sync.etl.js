@@ -31,6 +31,16 @@ const syncData = async (rows) => {
           value: "true",
           providedElsewhere: false,
         },
+        {
+          dataElement: "jYKFZdR99Tz",
+          value: row?.order_id,
+          providedElsewhere: false,
+        },
+        {
+          dataElement: "i5OvzWAY8AK",
+          value: new Date(row?.created_at),
+          providedElsewhere: false,
+        },
       ],
     };
 

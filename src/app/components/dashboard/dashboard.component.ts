@@ -36,6 +36,7 @@ export class DashboardComponent implements OnInit {
   totalRows: number;
   displayedColumns: string[] = [
     "order_id",
+    "test_id",
     "results",
     "test_unit",
     "test_type",
@@ -250,7 +251,6 @@ export class DashboardComponent implements OnInit {
     this.database
       .updateOrder({ id: result.id, can_sync: checked })
       .then((res) => {
-        console.log(res);
         this.openSnackBar({ message: "Status Updated", success: true });
       })
       .catch((e) => {
