@@ -170,6 +170,9 @@ export class DatabaseService {
   }
 
   createNewSecret = async (secret: SecretPayload) => {
+    if (secret.id) {
+      return await this.updateSecret(secret);
+    }
     const query = `INSERT INTO SECRET(${Object.keys(secret).join(
       ","
     )}) VALUES(${Object.keys(secret)

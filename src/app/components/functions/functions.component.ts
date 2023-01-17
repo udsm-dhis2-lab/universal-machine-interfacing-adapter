@@ -72,7 +72,20 @@ export class FunctionsComponent implements OnInit {
       width: "65vw",
       height: "auto",
       disableClose: true,
-      data,
+      data: data ? { ...data, isFunction: true } : { isFunction: true },
+    });
+    createFunctionDialog.afterClosed().subscribe((res) => {
+      if (res) {
+        this.loadFunctions();
+      }
+    });
+  }
+  secrets(): void {
+    const createFunctionDialog = this.dialog.open(CreateEditFunctionComponent, {
+      width: "65vw",
+      height: "auto",
+      disableClose: true,
+      data: { isFunction: false },
     });
     createFunctionDialog.afterClosed().subscribe((res) => {
       if (res) {

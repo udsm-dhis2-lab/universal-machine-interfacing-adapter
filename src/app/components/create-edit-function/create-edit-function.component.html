@@ -188,6 +188,9 @@
 
 <div mat-dialog-actions [align]="'end'">
   <button mat-flat-button mat-dialog-close cdkFocusInitial>Cancel</button>
+  <button *ngIf="editingSecret" mat-raised-button (click)="resetSecretForm()">
+    New Secret
+  </button>
   <button
     [disabled]="!validate"
     color="primary"

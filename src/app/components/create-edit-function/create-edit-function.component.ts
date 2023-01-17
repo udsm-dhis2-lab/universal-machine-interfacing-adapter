@@ -7,10 +7,12 @@ import {
 } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { DatabaseService } from "../../services/database.service";
+import { DatabaseResponse } from "../../shared/interfaces/db.interface";
 import {
   FxPayload,
   FxRequest,
   FxResponse,
+  SecretPayload,
 } from "../../shared/interfaces/fx.interface";
 import { ScheduleComponent } from "../schedule/schedule.component";
 
@@ -28,8 +30,8 @@ export class CreateEditFunctionComponent implements OnInit {
   file: File = null;
   dialogData: any;
   isFunction: boolean = true;
+  editingSecret: boolean;
 
-  selectedSecret: any;
   constructor(
     private service: DatabaseService,
     private formBuilder: FormBuilder,
@@ -39,16 +41,19 @@ export class CreateEditFunctionComponent implements OnInit {
 
     @Inject(MAT_DIALOG_DATA) private data: any
   ) {
-    this.secretForm = this.formBuilder.group({
-      secretValue: this.formBuilder.array([this.addSecretsGroup()]),
-      name: "",
-      description: "",
-    });
-
+    this.secretForm = this.data.secret
+      ? this.data.secret
+      : this.formBuilder.group({
+          secretValue: this.formBuilder.array([this.addSecretsGroup()]),
+          name: "",
+          description: "",
+        });
     this.dialogData = this.data;
+    this.isFunction = data?.isFunction;
   }
 
   ngOnInit() {
+    this.editingSecret = this.dialogData?.editingSecret;
     this.createForm();
     this.getSecrets();
     if (this.dialogData) {
@@ -62,11 +67,20 @@ export class CreateEditFunctionComponent implements OnInit {
     });
   }
 
+  resetSecretForm = () => {
+    this.editingSecret = false;
+    this.secretForm = this.formBuilder.group({
+      secretValue: this.formBuilder.array([this.addSecretsGroup()]),
+      name: "",
+      description: "",
+    });
+  };
+
   private getSecrets = () => {
     this.service
       .getSecrets()
       .then((res) => {
-        this.loadedSecrets = (res || []).map((secret) => {
+        this.loadedSecrets = (res || []).map((secret: SecretPayload) => {
           return {
             ...secret,
             display: secret.description
@@ -165,10 +179,10 @@ export class CreateEditFunctionComponent implements OnInit {
       );
   };
 
-  private addSecretsGroup(): FormGroup {
+  private addSecretsGroup(key?: any, value?: any): FormGroup {
     return this.formBuilder.group({
-      key: "",
-      value: "",
+      key: key ?? "",
+      value: value ?? "",
     });
   }
 
@@ -210,12 +224,12 @@ export class CreateEditFunctionComponent implements OnInit {
 
   getSecretValue = (): any[] => {
     if (!this.secretForm.get("secretValue").value) return [];
-    return this.secretForm
-      .get("secretValue")
-      .value.filter(
-        (data: { key: string; value: string }) =>
-          data.key !== "" && data.value !== ""
-      );
+    const secretForm = this.secretForm?.get("secretValue");
+    if (!secretForm || !secretForm?.value) return [];
+    return (this.secretForm?.get("secretValue")?.value || []).filter(
+      (data: { key: string; value: string }) =>
+        data.key !== "" && data.value !== ""
+    );
   };
 
   onSaveSecrets() {
@@ -226,11 +240,13 @@ export class CreateEditFunctionComponent implements OnInit {
     });
     const name = this.secretForm.get("name").value;
     const description = this.secretForm.get("description").value;
+    const id = this.secretForm.get("id").value;
+    console.log("ID::ID", id);
     this.service
-      .createNewSecret({ value, name, description })
+      .createNewSecret({ value, name, description, id })
       .then((res) => {
         this.updateSecrets(res);
-        this.resetSecretFrom();
+        this.resetSecretForm();
         this.openSnackBar({ message: "Secret Saved", success: true });
         this.getSecrets();
       })
@@ -239,7 +255,7 @@ export class CreateEditFunctionComponent implements OnInit {
       });
   }
 
-  private updateSecrets = (res) => {
+  private updateSecrets = (res: DatabaseResponse | SecretPayload[]) => {
     this.loadedSecrets = [
       {
         ...(Array.isArray(res) ? res : res.rows[0]),
@@ -261,7 +277,14 @@ export class CreateEditFunctionComponent implements OnInit {
 
   onEditSecret(event: Event, secret: any): void {
     event.stopPropagation();
-    this.selectedSecret = secret;
+    this.secretForm = this.formBuilder.group(this.getSecret(secret));
+    this.dialogRef.close();
+    this.dialog.open(CreateEditFunctionComponent, {
+      width: "65vw",
+      height: "auto",
+      disableClose: true,
+      data: { isFunction: false, secret: this.secretForm, editingSecret: true },
+    });
   }
 
   openSnackBar = (data: FxResponse) => {
@@ -273,7 +296,21 @@ export class CreateEditFunctionComponent implements OnInit {
     });
   };
 
-  resetSecretFrom = () => {
-    this.secretForm.reset();
+  private getSecret = (secret: SecretPayload) => {
+    const secretValue = this.getParsedValue(secret.value);
+    return { ...secret, secretValue: this.formBuilder.array(secretValue) };
+  };
+
+  private getParsedValue = (value: any) => {
+    try {
+      let values = [];
+      value = JSON.parse(value);
+      Object.keys(value).forEach((key) => {
+        values = [...values, this.addSecretsGroup(key, value[key])];
+      });
+      return values;
+    } catch (e) {
+      return [];
+    }
   };
 }

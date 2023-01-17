@@ -11,6 +11,16 @@
   <div class="d-flex justify-content-end mb-2">
     <button
       mat-raised-button
+      style="margin-right: 10px !important"
+      class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
+      (click)="secrets()"
+    >
+      <!-- <mat-icon>add</mat-icon> -->
+      <span> Secrets </span>
+    </button>
+
+    <button
+      mat-raised-button
       class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
       (click)="newFunction()"
     >
