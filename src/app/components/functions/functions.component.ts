@@ -144,6 +144,9 @@ export class FunctionsComponent implements OnInit {
     const confirmDialog = this.dialog.open(InfoComponent, {
       width: "300px",
       height: "190px",
+      data: {
+        message: "You are about to delete this function. Are you sure?",
+      },
     });
     confirmDialog.afterClosed().subscribe((res) => {
       if (res) {

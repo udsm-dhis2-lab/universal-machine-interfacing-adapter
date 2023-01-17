@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { async } from "@angular/core/testing";
 import axios from "axios";
 import { Pool } from "pg";
 import { ElectronService } from "../core/services";
@@ -13,7 +12,6 @@ import {
   FxRequest,
   PageDetails,
   SecretPayload,
-  SyncReference,
 } from "../shared/interfaces/fx.interface";
 import { ElectronStoreService } from "./electron-store.service";
 
@@ -90,7 +88,8 @@ export class DatabaseService {
         newParams = [...newParams, param];
       }
     });
-    return await this.electronService.execSqliteQuery(query, newParams);
+    const result = await this.electronService.execSqliteQuery(query, newParams);
+    return result;
   }
 
   fetchFromSqlite = (
@@ -266,6 +265,35 @@ export class DatabaseService {
     } catch (e) {
       return { success: false, message: e.message };
     }
+  };
+  deleteSecret = async (
+    value: number
+  ): Promise<{ message: string; success: boolean }> => {
+    try {
+      const process = await this.customQuery({
+        table: "PROCESS",
+        column: "SECRET_ID",
+        value,
+      });
+      if (process && Array.isArray(process) && process.length > 0) {
+        return {
+          success: false,
+          message: "Secret can not be delete because it belongs to a function",
+        };
+      }
+      const res = await this.query(`DELETE FROM SECRET WHERE ID=${value}`);
+      return {
+        success: Array.isArray(res) ? res.length === 0 : res.rowCount === 1,
+        message: "Function deleted successfully",
+      };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  };
+
+  private customQuery = async ({ column, value, table }) => {
+    const query = `SELECT * FROM ${table} WHERE ${column}=${value}`;
+    return await this.query(query);
   };
 
   private getCron = async (id: number) => {

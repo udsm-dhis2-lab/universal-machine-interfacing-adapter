@@ -1,5 +1,5 @@
-import { Component, OnInit } from "@angular/core";
-import { MatDialogRef } from "@angular/material/dialog";
+import { Component, Inject, OnInit } from "@angular/core";
+import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 @Component({
   selector: "app-info",
@@ -7,7 +7,13 @@ import { MatDialogRef } from "@angular/material/dialog";
   styleUrls: ["./info.component.css"],
 })
 export class InfoComponent implements OnInit {
-  constructor(private dialogRef: MatDialogRef<InfoComponent>) {}
+  data: any;
+  constructor(
+    private dialogRef: MatDialogRef<InfoComponent>,
+    @Inject(MAT_DIALOG_DATA) private dialogData: any
+  ) {
+    this.data = this.dialogData;
+  }
 
   ngOnInit() {}
 }

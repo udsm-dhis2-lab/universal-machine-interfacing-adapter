@@ -14,6 +14,7 @@ import {
   FxResponse,
   SecretPayload,
 } from "../../shared/interfaces/fx.interface";
+import { InfoComponent } from "../info/info.component";
 import { ScheduleComponent } from "../schedule/schedule.component";
 
 @Component({
@@ -215,6 +216,31 @@ export class CreateEditFunctionComponent implements OnInit {
     return this.validateSecret;
   }
 
+  private confirmDeleteSecret = (secret: SecretPayload) => {
+    const confirmDialog = this.dialog.open(InfoComponent, {
+      width: "300px",
+      height: "190px",
+      data: { message: "You are about to delete this secret. Are you sure?" },
+    });
+    confirmDialog.afterClosed().subscribe((res) => {
+      if (res) {
+        this.deleteSecret(secret);
+      }
+    });
+  };
+
+  private deleteSecret = (secret: SecretPayload) => {
+    this.service
+      .deleteSecret(secret.id)
+      .then((res) => {
+        this.getSecrets();
+        this.openSnackBar(res);
+      })
+      .catch((error) => {
+        this.openSnackBar(error);
+      });
+  };
+
   get validateFunction() {
     if (this.dialogData) return true;
     if (this.file && this.getValue("name") && this.getValue("name") !== "")
@@ -291,6 +317,7 @@ export class CreateEditFunctionComponent implements OnInit {
 
   onDeleteSecret(event: Event, secret: any): void {
     event.stopPropagation();
+    this.confirmDeleteSecret(secret);
   }
 
   openSnackBar = (data: FxResponse) => {
