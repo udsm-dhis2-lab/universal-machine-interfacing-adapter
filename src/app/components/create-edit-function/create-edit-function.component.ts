@@ -241,7 +241,6 @@ export class CreateEditFunctionComponent implements OnInit {
     const name = this.secretForm.get("name").value;
     const description = this.secretForm.get("description").value;
     const id = this.secretForm.get("id").value;
-    console.log("ID::ID", id);
     this.service
       .createNewSecret({ value, name, description, id })
       .then((res) => {
