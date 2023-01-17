@@ -240,13 +240,16 @@ export class CreateEditFunctionComponent implements OnInit {
     });
     const name = this.secretForm.get("name").value;
     const description = this.secretForm.get("description").value;
-    const id = this.secretForm.get("id").value;
+    const id = this.secretForm.get("id")?.value;
     this.service
-      .createNewSecret({ value, name, description, id })
+      .createNewSecret({ value: JSON.stringify(value), name, description, id })
       .then((res) => {
         this.updateSecrets(res);
         this.resetSecretForm();
-        this.openSnackBar({ message: "Secret Saved", success: true });
+        this.openSnackBar({
+          message: id ? "Secret Updated" : "Secret Saved",
+          success: true,
+        });
         this.getSecrets();
       })
       .catch((error) => {
@@ -284,6 +287,10 @@ export class CreateEditFunctionComponent implements OnInit {
       disableClose: true,
       data: { isFunction: false, secret: this.secretForm, editingSecret: true },
     });
+  }
+
+  onDeleteSecret(event: Event, secret: any): void {
+    event.stopPropagation();
   }
 
   openSnackBar = (data: FxResponse) => {

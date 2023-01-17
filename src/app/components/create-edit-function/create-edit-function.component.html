@@ -116,6 +116,14 @@
                       <mat-icon>edit</mat-icon>
                       <span>Edit</span>
                     </button>
+
+                    <button
+                      mat-menu-item
+                      (click)="onEditSecret($event, secret)"
+                    >
+                      <mat-icon class="text-danger">delete</mat-icon>
+                      <span>Delete</span>
+                    </button>
                   </mat-menu>
                 </td>
               </tr>

@@ -182,11 +182,12 @@ export class DatabaseService {
   };
 
   updateSecret = async (secret: SecretPayload) => {
+    console.log(secret);
     const secretId = secret?.id;
     const query = `UPDATE SECRET SET ${Object.keys(secret)
       .map((key) => key + "=" + `'${secret[key]}'`)
       .join(",")} WHERE ID=${secretId} RETURNING *;`;
-
+    console.log(query);
     return await this.query(query, []);
   };
 

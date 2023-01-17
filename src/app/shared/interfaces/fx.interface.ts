@@ -29,7 +29,7 @@ export interface SecretPayload {
   id?: number;
   name: string;
   description?: string;
-  value: Record<string, unknown>;
+  value: string;
 }
 
 export interface SyncReference {
