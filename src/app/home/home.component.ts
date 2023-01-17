@@ -3,6 +3,7 @@ import { Router } from "@angular/router";
 import { DatabaseService } from "../services/database.service";
 import { ElectronStoreService } from "../services/electron-store.service";
 import { keyBy } from "lodash";
+import { shell } from "electron";
 
 @Component({
   selector: "app-home",
@@ -83,4 +84,8 @@ export class HomeComponent implements OnInit {
       }
     );
   }
+
+  openUrl = async () => {
+    await shell.openExternal("https://dhis2.udsm.ac.tz");
+  };
 }

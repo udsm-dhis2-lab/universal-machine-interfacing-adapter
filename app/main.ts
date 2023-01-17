@@ -1,7 +1,7 @@
-import { app, BrowserWindow, screen, ipcMain, dialog, Menu } from "electron";
-import * as path from "path";
-import * as fs from "fs";
+import { app, BrowserWindow, dialog, ipcMain, screen, shell } from "electron";
 import * as Store from "electron-store";
+import * as fs from "fs";
+import * as path from "path";
 //import { Sqlite3Helper } from '../src/app/core/sqlite3helper.main';
 
 // const isMac = process.platform === "darwin";
@@ -12,7 +12,6 @@ const items = [
       {
         label: "Learn More",
         click: async () => {
-          const { shell } = require("electron");
           await shell.openExternal("https://electronjs.org");
         },
       },
