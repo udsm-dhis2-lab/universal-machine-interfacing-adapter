@@ -181,12 +181,10 @@ export class DatabaseService {
   };
 
   updateSecret = async (secret: SecretPayload) => {
-    console.log(secret);
     const secretId = secret?.id;
     const query = `UPDATE SECRET SET ${Object.keys(secret)
       .map((key) => key + "=" + `'${secret[key]}'`)
       .join(",")} WHERE ID=${secretId} RETURNING *;`;
-    console.log(query);
     return await this.query(query, []);
   };
 
@@ -197,6 +195,7 @@ export class DatabaseService {
       "context",
       this.appSettings.hasExternalDB ? process?.rows[0]?.code : process[0].code
     );
+    await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
     await runFunc({
       secret,
       db: this.functionsQuery,
@@ -204,6 +203,7 @@ export class DatabaseService {
       http: axios,
       sqlite: this.electronService.sqlite,
       dbPath: this.store.get("appPath"),
+      id,
     });
     return `Process started`;
   };
@@ -393,10 +393,13 @@ export class DatabaseService {
     try {
       const updated = await this.updateFx(data);
       return {
-        success: Array.isArray(updated)
-          ? updated.length === 1
-          : updated.rowCount === 1,
-        message: "Updated successfully",
+        success:
+          typeof updated === "string"
+            ? false
+            : Array.isArray(updated)
+            ? updated.length === 1
+            : updated.rowCount === 1,
+        message: typeof updated === "string" ? updated : "Updated successfully",
       };
     } catch (e) {
       return { success: false, message: e.message };
