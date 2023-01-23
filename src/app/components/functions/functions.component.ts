@@ -80,6 +80,18 @@ export class FunctionsComponent implements OnInit {
       }
     });
   }
+
+  onCancel = (fx: FxPayload) => {
+    this.service
+      .updateFunction({ ...fx, running: 0 })
+      .then((res) => {
+        this.openSnackBar({ ...res, message: "Function cancelled" });
+        this.loadFunctions();
+      })
+      .catch((e) => {
+        this.openSnackBar({ message: e.message, success: false });
+      });
+  };
   secrets(): void {
     const createFunctionDialog = this.dialog.open(CreateEditFunctionComponent, {
       width: "65vw",
@@ -134,6 +146,7 @@ export class FunctionsComponent implements OnInit {
 
   onRun = (fx: FxPayload) => {
     this.service.run(fx.id).then((res) => {
+      this.loadFunctions();
       this.liveLogText = [
         `<span> <span class="text-info">[Info]</span> ${res}</span>`,
       ];

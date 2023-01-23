@@ -18,6 +18,7 @@ export interface FxPayload {
   count: string;
   file?: File;
   secret_id?: number;
+  running?: number;
 }
 
 export interface FxResponse {

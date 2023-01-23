@@ -79,7 +79,14 @@
             </div>
             <div
               class="menu-more-option mat-typography"
-              (click)="onDelete(element)"
+              (click)="
+                element.running ? $event.stopPropagation() : onDelete(element)
+              "
+              [ngClass]="{
+                'cursor-pointer': !element.running,
+                'cursor-disabled': element.running,
+                'text-muted': element.running
+              }"
             >
               <span
                 matRipple
@@ -87,9 +94,23 @@
                 tabindex="0"
                 class="extended-menu-option"
               >
-                <div>
-                  <div class="extended-menu-option-div">
+                <div
+                  [ngClass]="{
+                    'cursor-pointer': !element.running,
+                    'cursor-disabled': element.running,
+                    'text-muted': element.running
+                  }"
+                >
+                  <div
+                    [ngClass]="{
+                      'cursor-pointer': !element.running,
+                      'cursor-disabled': element.running,
+                      'text-muted': element.running
+                    }"
+                    class="extended-menu-option-div"
+                  >
                     <span
+                      [ngClass]="{ 'text-muted': element.running }"
                       class="material-icons menu-label text-danger"
                       color="#da1f05"
                       >delete</span
@@ -101,8 +122,14 @@
             </div>
 
             <div
+              [ngClass]="{
+                'cursor-pointer': !element.running,
+                'cursor-disabled': element.running
+              }"
               class="menu-more-option mat-typography"
-              (click)="onRun(element)"
+              (click)="
+                element.running ? $event.stopPropagation() : onRun(element)
+              "
             >
               <span
                 matRipple
@@ -110,25 +137,53 @@
                 tabindex="0"
                 class="extended-menu-option"
               >
-                <div>
+                <div
+                  [ngClass]="{
+                    'cursor-pointer': !element.running,
+                    'cursor-disabled': element.running
+                  }"
+                >
                   <div class="extended-menu-option-div">
-                    <span class="material-icons menu-label-stop" color="#757575"
+                    <span
+                      [ngClass]="{
+                        'fa-spin': element.running,
+                        'text-muted': element.running
+                      }"
+                      class="material-icons menu-label-stop"
+                      color="#757575"
                       >loop</span
                     >
-                    <div class="edit">Run</div>
+                    <div
+                      [ngClass]="{ 'text-muted': element.running }"
+                      class="edit"
+                    >
+                      {{ element.running ? "Running" : "Run" }}
+                    </div>
                   </div>
                 </div>
               </span>
             </div>
 
-            <div class="menu-more-option mat-typography">
+            <div
+              [ngClass]="{ 'text-muted': element.running }"
+              (click)="
+                element.running ? onCancel(element) : $event.stopPropagation()
+              "
+              class="menu-more-option mat-typography"
+            >
               <span
                 matRipple
                 role="menuitem"
                 tabindex="0"
                 class="extended-menu-option"
+                [ngClass]="{ 'text-muted': !element.running }"
               >
-                <div>
+                <div
+                  [ngClass]="{
+                    'cursor-disabled': !element.running,
+                    'cursor-pointer': element.running
+                  }"
+                >
                   <div class="extended-menu-option-div">
                     <span class="material-icons menu-label-stop" color="#da1f05"
                       >cancel</span

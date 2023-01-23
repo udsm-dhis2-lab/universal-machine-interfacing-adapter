@@ -24,7 +24,7 @@ const start = async () => {
     let sql = `ALTER TABLE PROCESS ADD COLUMN running BOOLEAN;`;
     db.all(sql, [], async (err, rows) => {
       sql = `UPDATE PROCESS SET RUNNING=${false} WHERE ID=${context.id}`
-      closeDB(sql, db)
+      // closeDB(sql, db)
       console.error(err ? err : "No data to sync");
 
       console.log('rows', rows);
