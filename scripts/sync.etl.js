@@ -44,18 +44,17 @@ const syncData = async (rows) => {
       ],
     };
 
-    const eventUrl = `${context.secret.url}/api/events${
-      row?.reference_uuid ? "/" + row?.reference_uuid : ""
-    }.json`;
+    const eventUrl = `${context.secret.url}/api/events${row?.reference_uuid ? "/" + row?.reference_uuid : ""
+      }.json`;
     const eventRes = (await !row?.reference_uuid)
       ? context.http.post(eventUrl, eventPayload, {
-          auth,
-          headers,
-        })
+        auth,
+        headers,
+      })
       : context.http.put(eventUrl, eventPayload, {
-          auth,
-          headers,
-        });
+        auth,
+        headers,
+      });
     const response = eventRes?.data?.response;
     if (response?.imported === 1 || response?.updated === 1) {
       // Went well
@@ -85,14 +84,14 @@ const syncData = async (rows) => {
         const query = `UPDATE orders SET reference_uuid="${reference_uuid}",sync_status="${sync_status}" WHERE id=${row?.id}`;
         db.all(query, [], async (err, rows) => {
           if (!err) {
-            await console.log(rows);
+            console.log(rows);
           } else {
-            await console.error(err);
+            console.error(err);
           }
         });
 
         db.close();
-      } catch (e) {}
+      } catch (e) { }
     }
     // console.log(eventRes);
   }
@@ -119,7 +118,7 @@ const run = async () => {
     });
 
     db.close();
-  } catch (e) {}
+  } catch (e) { }
 };
 
 return run();
