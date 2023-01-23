@@ -136,7 +136,8 @@ export class CreateEditFunctionComponent implements OnInit {
       secret_id: this.getValue("secret_id"),
       file: this.file,
     };
-    if (this.dialogData) {
+    if (this.dialogData.id) {
+      delete this.dialogData.isFunction;
       this.updateFunction({ ...this.dialogData, ...data });
     } else {
       this.saveNewFunction(data);
