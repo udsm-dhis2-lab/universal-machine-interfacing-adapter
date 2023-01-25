@@ -21,7 +21,7 @@ const start = async () => {
       }
     );
 
-    let sql = `ALTER TABLE PROCESS ADD COLUMN running BOOLEAN;`;
+    let sql = `ALTER TABLE PROCESS ADD COLUMN running BOOLEAN; ALTER TABLE ORDERS ADD COLUMN patient_id TEXT;`;
     db.all(sql, [], async (err, rows) => {
       sql = `UPDATE PROCESS SET RUNNING=${false} WHERE ID=${context.id}`
       // closeDB(sql, db)

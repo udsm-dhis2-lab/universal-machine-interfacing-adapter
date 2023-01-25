@@ -735,6 +735,10 @@ export class InterfaceService {
                 ? dataArray["R"][2].replace("^^^", "")
                 : dataArray["R"][2];
               order.test_unit = dataArray["R"][4];
+              order.patient_id =
+                dataArray["P"] && dataArray["P"].length > 3
+                  ? dataArray["P"][4]
+                  : null;
               order.results = dataArray["R"][3];
               order.tested_by = dataArray["R"][10];
               order.analysed_date_time = that.formatRawDate(dataArray["R"][12]);
@@ -747,6 +751,7 @@ export class InterfaceService {
             } else {
               order.test_type = "";
               order.test_unit = "";
+              order.patient_id = "";
               order.results = "Failed";
               order.tested_by = "";
               order.analysed_date_time = "";

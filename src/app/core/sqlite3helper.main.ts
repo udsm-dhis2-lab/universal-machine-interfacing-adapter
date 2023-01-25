@@ -20,6 +20,7 @@ export class Sqlite3Helper {
       'CREATE TABLE IF NOT EXISTS `orders` ( \
       `id` INTEGER NOT NULL, \
       `order_id` TEXT NOT NULL, \
+      `patient_id` TEXT NOT NULL, \
       `test_id` TEXT DEFAULT NULL, \
       `test_type` TEXT NOT NULL, \
       `created_date` date DEFAULT NULL, \
@@ -58,12 +59,12 @@ export class Sqlite3Helper {
 
     database.run(
       `
-     CREATE TABLE IF NOT EXISTS process ( id integer NOT NULL, code text, name text, description text, frequency text, secret_id integer PRIMARY KEY("id" AUTOINCREMENT)); 
+     CREATE TABLE IF NOT EXISTS process ( id integer NOT NULL, code text, name text, description text, frequency text, secret_id integer PRIMARY KEY("id" AUTOINCREMENT));
       `
     );
     database.run(
       `
-     CREATE TABLE IF NOT EXISTS secret ( id integer, name text  NOT NULL, description text, value mediumtext  NOT NULL, PRIMARY KEY("id" AUTOINCREMENT)); 
+     CREATE TABLE IF NOT EXISTS secret ( id integer, name text  NOT NULL, description text, value mediumtext  NOT NULL, PRIMARY KEY("id" AUTOINCREMENT));
       `
     );
 
