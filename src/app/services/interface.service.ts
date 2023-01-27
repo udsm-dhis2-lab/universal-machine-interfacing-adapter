@@ -899,6 +899,10 @@ export class InterfaceService {
               order.test_unit = dataArray["R"][4];
               order.results = dataArray["R"][3];
               order.tested_by = dataArray["R"][10];
+              order.patient_id =
+                dataArray["P"] && dataArray["P"].length > 3
+                  ? dataArray["P"][4]
+                  : null;
               order.analysed_date_time = that.formatRawDate(dataArray["R"][12]);
               order.authorised_date_time = that.formatRawDate(
                 dataArray["R"][12]
