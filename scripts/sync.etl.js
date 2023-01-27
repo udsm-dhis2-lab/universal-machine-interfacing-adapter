@@ -46,7 +46,7 @@ const syncData = async (rows) => {
 
     const eventUrl = `${context.secret.url}/api/events${row?.reference_uuid ? "/" + row?.reference_uuid : ""
       }.json`;
-    const eventRes = (await !row?.reference_uuid)
+    const eventRes = (!row?.reference_uuid)
       ? context.http.post(eventUrl, eventPayload, {
         auth,
         headers,
@@ -90,11 +90,22 @@ const syncData = async (rows) => {
           }
         });
 
-        db.close();
       } catch (e) { }
     }
     // console.log(eventRes);
   }
+
+  const query = `UPDATE PROCESS SET RUNNING=${0} WHERE ID=${context.id}`;
+  db.all(query, [], async (err, rows) => {
+    if (!err) {
+      console.log(rows);
+    } else {
+      console.error(err);
+    }
+  });
+
+  db.close();
+
 };
 const run = async () => {
   try {
@@ -117,7 +128,6 @@ const run = async () => {
       }
     });
 
-    db.close();
   } catch (e) { }
 };
 
