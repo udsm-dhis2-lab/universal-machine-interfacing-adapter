@@ -30,6 +30,7 @@ export class DashboardComponent implements OnInit {
   public interval: any;
   public lastOrders: any;
   public liveLogText = [];
+  isDev: boolean;
   pageSize: number = 10;
   currentPage: number = 0;
   pageSizeOptions: any[] = [5, 10, 50, 100];
@@ -81,7 +82,9 @@ export class DashboardComponent implements OnInit {
     private router: Router,
     private database: DatabaseService,
     private snackBar: MatSnackBar
-  ) {}
+  ) {
+    this.isDev = this.store.get("isDev") === "false" ? true : false;
+  }
 
   ngOnInit() {
     const that = this;
@@ -145,7 +148,7 @@ export class DashboardComponent implements OnInit {
     // let us refresh last orders every 5 minutes
     that.interval = setInterval(() => {
       that.fetchLastOrders();
-    }, 1000 * 60 * 5);
+    }, 1000 * 60 * 1);
   }
 
   fetchLastOrders() {
@@ -312,4 +315,35 @@ export class DashboardComponent implements OnInit {
       }
     );
   }
+
+  testData = () => {
+    console.log("HERE");
+    const data = {
+      order_id: "TRT2300177",
+      test_id: "1",
+      test_type: "^MTBX^^inv^Xpert MTB-XDR^1^INVALID^",
+      test_unit: "",
+      patient_id: "120801104601-0-KK-2023-3",
+      results: "^",
+      tested_by: "Paschal Qwaray",
+      analysed_date_time: "2023-01-13 12:45:59",
+      authorised_date_time: "2023-01-13 12:45:59",
+      result_accepted_date_time: "2023-01-13 12:45:59",
+      result_status: 1,
+      lims_sync_status: 0,
+      test_location: "Blove",
+      machine_used: "GeneXpert",
+      can_sync: "FALSE",
+    };
+    this.database.addOrderTest(
+      data,
+      (res: any) => {
+        console.log(res);
+      },
+      (error: any) => {
+        console.log(error);
+      }
+    );
+    this.fetchLastOrders();
+  };
 }

@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import axios from "axios";
+import * as fs from "fs";
 import { Pool } from "pg";
 import { ElectronService } from "../core/services";
 import {
@@ -204,6 +205,7 @@ export class DatabaseService {
       sqlite: this.electronService.sqlite,
       dbPath: this.store.get("appPath"),
       id,
+      fs,
     });
     return `Process started`;
   };
@@ -476,14 +478,14 @@ export class DatabaseService {
 
   addOrderTest(
     data: { [s: string]: unknown } | ArrayLike<unknown>,
-    success: {
+    success?: {
       (res: any): void;
       (res: any): void;
       (res: any): void;
       (res: any): void;
       (arg0: any): void;
     },
-    errorf: {
+    errorf?: {
       (err: any): void;
       (err: any): void;
       (err: any): void;

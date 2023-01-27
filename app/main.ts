@@ -41,7 +41,10 @@ function createWindow(): BrowserWindow {
     store = new Store();
     sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
     store.set("appPath", sqlitePath);
-  } catch (e) {}
+    store.set("isDev", `${app.isPackaged}`);
+  } catch (e) {
+    store.set("isDev", `${app.isPackaged}`);
+  }
 
   // Create the browser window.
   win = new BrowserWindow({
