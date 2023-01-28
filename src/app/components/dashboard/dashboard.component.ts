@@ -13,6 +13,10 @@ import { DatabaseService } from "../../services/database.service";
 import { FxResponse } from "../../shared/interfaces/fx.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { uniqBy } from "lodash";
+import HLSevenMsg from "../../shared/helpers/HL7/HL7MSG";
+import { decode } from "hl7-object-parser";
+import { HL7Mapping } from "../../shared/helpers/HL7/s12mapping";
+import { HL7ParserFromChartGPT } from "../../shared/helpers/HL7/HL7MSG";
 
 @Component({
   selector: "app-dashboard",
@@ -73,6 +77,8 @@ export class DashboardComponent implements OnInit {
   currentOrderApprovalStatuses: any[] = [];
   currentUserHasAlreadyApproved: boolean = false;
 
+  HL7MessageProcessor: any;
+  public hl7parser = require("hl7parser");
   constructor(
     private store: ElectronStoreService,
     private _ngZone: NgZone,
@@ -81,7 +87,9 @@ export class DashboardComponent implements OnInit {
     private router: Router,
     private database: DatabaseService,
     private snackBar: MatSnackBar
-  ) {}
+  ) {
+    this.HL7MessageProcessor = new HLSevenMsg();
+  }
 
   ngOnInit() {
     const that = this;
@@ -150,25 +158,76 @@ export class DashboardComponent implements OnInit {
 
   fetchLastOrders() {
     const that = this;
-    that.interfaceService.fetchLastOrders(true);
-
-    that.interfaceService.fetchLastSyncTimes((data: any) => {
-      that.lastLimsSync = data?.lastLimsSync;
-      that.lastResultReceived = (data?.lastresultreceived || "")
-        .toString()
-        .split("GMT+0300")
-        .join("");
-    });
-
-    that.interfaceService.lastOrders.subscribe(
-      (lastFewOrders: DatabaseResponse[] | any[]) => {
-        that._ngZone.run(() => {
-          this.totalRows =
-            lastFewOrders[0]?.rowCount ?? lastFewOrders[0]?.length;
-          that.lastOrders = lastFewOrders[0]?.rows ?? lastFewOrders[0];
-        });
-      }
+    console.log("HSHSHSH");
+    that.database.getRawData(
+      (data) => {
+        const rawData = data[0].data;
+        const obj = decode(rawData, HL7Mapping);
+        console.log("NOW", obj);
+        console.log("DATA", data[0].data);
+        const message = that.hl7parser.create(rawData.substring(1));
+        console.log("MESSAGE", message);
+        const hl7ProcessResultMult =
+          this.HL7MessageProcessor.hl7ProcessResultMult(rawData);
+        console.log("hl7ProcessResultMult", hl7ProcessResultMult);
+        const parser = new HL7ParserFromChartGPT(rawData);
+        console.log("Sample ID:", parser.getField("OBX", 1));
+        console.log("HL7 version:", parser.getField("MSH", 11));
+        console.log(
+          "Patient Name:",
+          parser.getComponent("PID", 5, 1) +
+            " " +
+            parser.getComponent("PID", 5, 2) +
+            " " +
+            parser.getComponent("PID", 5, 0)
+        );
+        console.log("Patient Gender:", parser.getField("PID", 8));
+        console.log(
+          "Patient Address:",
+          parser.getComponent("PID", 11, 1) +
+            " " +
+            parser.getComponent("PID", 11, 3) +
+            " " +
+            parser.getComponent("PID", 11, 4) +
+            " " +
+            parser.getComponent("PID", 11, 5) +
+            " " +
+            parser.getComponent("PID", 11, 6)
+        );
+        console.log("Patient Phone:", parser.getField("PID", 13));
+        const res = parser.getSampleParameterResults();
+        console.log("RESULTS", res);
+        // const reshl7SPM = this.HL7MessageProcessor.hl7SPM(rawData);
+        // console.log("reshl7SPM", reshl7SPM);
+        // const reshl7OBR = this.HL7MessageProcessor.hl7OBR(rawData);
+        // console.log("reshl7OBR", reshl7OBR);
+        // const reshl7OBX = this.HL7MessageProcessor.hl7OBX(rawData);
+        // console.log("reshl7OBX", reshl7OBX);
+        // const reshl7ProcessResultSingle =
+        //   this.HL7MessageProcessor.hl7ProcessResultSingle(rawData);
+        // console.log("reshl7ProcessResultSingle", reshl7ProcessResultSingle);
+      },
+      (error) => {}
     );
+    // that.interfaceService.fetchLastOrders(true);
+
+    // that.interfaceService.fetchLastSyncTimes((data: any) => {
+    //   that.lastLimsSync = data?.lastLimsSync;
+    //   that.lastResultReceived = (data?.lastresultreceived || "")
+    //     .toString()
+    //     .split("GMT+0300")
+    //     .join("");
+    // });
+
+    // that.interfaceService.lastOrders.subscribe(
+    //   (lastFewOrders: DatabaseResponse[] | any[]) => {
+    //     that._ngZone.run(() => {
+    //       this.totalRows =
+    //         lastFewOrders[0]?.rowCount ?? lastFewOrders[0]?.length;
+    //       that.lastOrders = lastFewOrders[0]?.rows ?? lastFewOrders[0];
+    //     });
+    //   }
+    // );
   }
 
   pageChanged(event: PageEvent) {

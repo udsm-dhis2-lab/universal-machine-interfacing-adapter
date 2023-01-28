@@ -29,6 +29,7 @@
     "axios": "^1.2.1",
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
+    "hl7-object-parser": "^2.5.0",
     "hl7parser": "^1.0.1",
     "mysql": "^2.18.1",
     "node-cron": "^3.0.2",

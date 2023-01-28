@@ -522,6 +522,21 @@ export class DatabaseService {
     }
   }
 
+  getRawData(
+    success: { (res: any): void; (arg0: any): void },
+    errorf: (err: any) => void
+  ) {
+    const q = "SELECT * FROM raw_data limit 1";
+    if (this.dbConnected) {
+      this.query(q, null, success, errorf);
+    } else {
+      // Fetching from SQLITE
+      this.electronService.execSqliteQuery(q, null).then((results: any) => {
+        success(results);
+      });
+    }
+  }
+
   fetchLastSyncTimes(
     success: { (res: any): void; (arg0: any): void },
     errorf: (err: any) => void
