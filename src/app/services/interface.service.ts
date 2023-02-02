@@ -3,6 +3,7 @@ import { DatabaseService } from "./database.service";
 import { BehaviorSubject } from "rxjs";
 import { ElectronStoreService } from "./electron-store.service";
 import { ElectronService } from "../core/services";
+import { dictionary, separators } from "../shared/constants/shared.constants";
 
 @Injectable({
   providedIn: "root",
@@ -968,6 +969,103 @@ export class InterfaceService {
     });
   }
 
+  hasSetId(fields, segmentName) {
+    let hasId = false;
+    let setId = 0;
+    fields.forEach((field: any, index: number) => {
+      const key = dictionary[segmentName][index + 1];
+      if (key === "Set ID" && (!hasId || !setId)) {
+        hasId = !hasId ? true : hasId;
+        setId = !setId ? Number(field) : setId;
+      }
+    });
+    return { hasId, setId };
+  }
+
+  flattenData(data) {
+    const finalData = {};
+    Object.keys(data).forEach((key) => {
+      if (Array.isArray(data[key])) {
+        finalData[key] = data[key].map((d: any) => this.flattenData(d));
+      } else {
+        const innerData = Object.keys(data[key]);
+        if (innerData.length === 1) {
+          finalData[key] = data[key][innerData[0]];
+        } else {
+          finalData[key] = data[key];
+        }
+      }
+    });
+
+    return finalData;
+  }
+
+  parseHL7DH76(hl7: string) {
+    const data = {};
+    let master = [];
+
+    // This will turn the hl7 into an array seperated by our categories, however in order to keep the categories they stay in their own element
+    const tokens = hl7.split(
+      new RegExp("(" + separators.join("\\||") + "\\|)")
+    );
+
+    // Remove first element which is empty
+    tokens.shift();
+
+    // Here we combine the category name pairs with their values
+    tokens.forEach((token, index) => {
+      master.push(token + tokens[index + 1]);
+      tokens.splice(index, 1);
+    });
+    // Remove empty values
+    master = master.filter(Boolean);
+    // Now that master is populated, we can iterate over it and form the table
+    let inHTML = "";
+    master.forEach((value, index) => {
+      const fields = value.split("|");
+      let subdetail = "";
+      const segmentName = fields[0];
+      fields.shift();
+      const segmentValue = {};
+
+      // Creating the sub rows
+      for (let i = 0; i < fields.length; i++) {
+        let subvalue = fields[i];
+        try {
+          // Hard-code pipe value
+          if (segmentName == "MSH" && i == 0) {
+            subvalue = "|";
+          }
+          // Subtract the index so that they're shifted correctly for MSH
+          else if (segmentName == "MSH") {
+            subvalue = fields[i - 1] || "";
+          }
+
+          subvalue = (subvalue || "")
+            ?.split("^")
+            ?.join(" ")
+            ?.replace(/[\r|\n|\r\n]$/, "");
+          const key = dictionary[segmentName][i + 1];
+          subvalue =
+            dictionary[segmentName][i + 1].includes("Date") &&
+            subvalue &&
+            subvalue !== ""
+              ? this.formatRawDate(subvalue)
+              : subvalue;
+          segmentValue[key] = subvalue;
+        } catch (e) {}
+      }
+      if (!data[segmentName]) {
+        data[segmentName] = segmentValue;
+      } else if (Array.isArray(data[segmentName])) {
+        data[segmentName] = [...data[segmentName], segmentValue];
+      } else {
+        data[segmentName] = [data[segmentName], segmentValue];
+      }
+    });
+    return data;
+  }
+
   fetchLastOrders(summary: boolean) {
     const that = this;
     that.dbService.fetchLastOrders(
@@ -986,10 +1084,12 @@ export class InterfaceService {
     const that = this;
     that.dbService.fetchRecentLogs(
       (res: { log: any }[]) => {
-        res.forEach((r: { log: any }) => {
-          that.logtext.push(r.log);
-          that.liveLogSubject.next(that.logtext);
-        });
+        if (res && Array.isArray(res)) {
+          res.forEach((r: { log: any }) => {
+            that.logtext.push(r.log);
+            that.liveLogSubject.next(that.logtext);
+          });
+        }
       },
       (err) => {
         that.logger("error", "Failed to fetch data " + JSON.stringify(err));

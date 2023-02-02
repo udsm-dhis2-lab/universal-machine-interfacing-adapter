@@ -28,7 +28,7 @@ export class DashboardComponent implements OnInit {
   public lastResultReceived = "";
   public machineName = "";
   public interval: any;
-  public lastOrders: any;
+  public lastOrders: any = [];
   public liveLogText = [];
   isDev: boolean;
   pageSize: number = 10;
@@ -317,7 +317,6 @@ export class DashboardComponent implements OnInit {
   }
 
   testData = () => {
-    console.log("HERE");
     const data = {
       order_id: "TRT2300177",
       test_id: "1",

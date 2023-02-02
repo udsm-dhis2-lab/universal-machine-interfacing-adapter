@@ -497,6 +497,7 @@ export class DatabaseService {
     )}) VALUES(${Object.keys(data)
       .map((key, index) => "$" + (index + 1))
       .join(",")}) RETURNING *`;
+
     if (this.dbConnected) {
       this.query(t, Object.values(data), success, errorf);
     }
@@ -505,7 +506,8 @@ export class DatabaseService {
       .execSqliteQuery(t, Object.values(data))
       .then((results: any) => {
         success(results);
-      });
+      })
+      .catch((e: any) => errorf(e));
   }
 
   fetchLastOrders(
@@ -513,13 +515,17 @@ export class DatabaseService {
     errorf: (err: any) => void,
     summary: boolean
   ) {
-    const t = "SELECT * FROM orders ORDER BY added_on";
+    const t = "SELECT * FROM orders ORDER BY id DESC";
     if (this.dbConnected) {
       this.query(t, null, success, errorf, summary);
     } else {
       // Fetching from SQLITE
       this.electronService.execSqliteQuery(t, null).then((results: any) => {
-        success(results);
+        if (!results || typeof results === "string") {
+          errorf(results ? results : "");
+        } else {
+          success(results);
+        }
       });
     }
   }
@@ -593,7 +599,7 @@ export class DatabaseService {
     success: { (res: any): void; (arg0: any): void },
     errorf: (err: any) => void
   ) {
-    const t = "SELECT * FROM app_log ORDER BY added_on DESC, id DESC LIMIT 500";
+    const t = "SELECT * FROM app_log ORDER BY id DESC, id DESC LIMIT 500";
     if (this.dbConnected) {
       this.query(t, null, success, errorf);
     }
