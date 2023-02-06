@@ -155,6 +155,7 @@ try {
       `patient_id` TEXT NOT NULL, \
       `test_id` TEXT DEFAULT NULL, \
       `test_type` TEXT NOT NULL, \
+      `raw_json` TEXT NOT NULL, \
       `created_date` date DEFAULT NULL, \
       `test_unit` TEXT DEFAULT NULL, \
       `results` TEXT DEFAULT NULL, \

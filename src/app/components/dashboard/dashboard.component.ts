@@ -247,6 +247,7 @@ export class DashboardComponent implements OnInit {
   }
 
   checkedCanSync = (canSync: string) => {
+    if (!canSync) return false;
     return canSync.toLocaleLowerCase() === "false" ? false : true;
   };
 
