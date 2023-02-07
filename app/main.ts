@@ -41,7 +41,10 @@ function createWindow(): BrowserWindow {
     store = new Store();
     sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
     store.set("appPath", sqlitePath);
-  } catch (e) {}
+    store.set("isDev", `${app.isPackaged}`);
+  } catch (e) {
+    store.set("isDev", `${app.isPackaged}`);
+  }
 
   // Create the browser window.
   win = new BrowserWindow({
@@ -152,6 +155,7 @@ try {
       `patient_id` TEXT NOT NULL, \
       `test_id` TEXT DEFAULT NULL, \
       `test_type` TEXT NOT NULL, \
+      `raw_json` TEXT NOT NULL, \
       `created_date` date DEFAULT NULL, \
       `test_unit` TEXT DEFAULT NULL, \
       `results` TEXT DEFAULT NULL, \

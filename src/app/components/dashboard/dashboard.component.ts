@@ -32,8 +32,9 @@ export class DashboardComponent implements OnInit {
   public lastResultReceived = "";
   public machineName = "";
   public interval: any;
-  public lastOrders: any;
+  public lastOrders: any = [];
   public liveLogText = [];
+  isDev: boolean;
   pageSize: number = 10;
   currentPage: number = 0;
   pageSizeOptions: any[] = [5, 10, 50, 100];
@@ -88,7 +89,7 @@ export class DashboardComponent implements OnInit {
     private database: DatabaseService,
     private snackBar: MatSnackBar
   ) {
-    this.HL7MessageProcessor = new HLSevenMsg();
+    this.isDev = this.store.get("isDev") === "false" ? true : false;
   }
 
   ngOnInit() {
@@ -153,81 +154,30 @@ export class DashboardComponent implements OnInit {
     // let us refresh last orders every 5 minutes
     that.interval = setInterval(() => {
       that.fetchLastOrders();
-    }, 1000 * 60 * 5);
+    }, 1000 * 60 * 1);
   }
 
   fetchLastOrders() {
     const that = this;
-    console.log("HSHSHSH");
-    that.database.getRawData(
-      (data) => {
-        const rawData = data[0].data;
-        const obj = decode(rawData, HL7Mapping);
-        console.log("NOW", obj);
-        console.log("DATA", data[0].data);
-        const message = that.hl7parser.create(rawData.substring(1));
-        console.log("MESSAGE", message);
-        const hl7ProcessResultMult =
-          this.HL7MessageProcessor.hl7ProcessResultMult(rawData);
-        console.log("hl7ProcessResultMult", hl7ProcessResultMult);
-        const parser = new HL7ParserFromChartGPT(rawData);
-        console.log("Sample ID:", parser.getField("OBX", 1));
-        console.log("HL7 version:", parser.getField("MSH", 11));
-        console.log(
-          "Patient Name:",
-          parser.getComponent("PID", 5, 1) +
-            " " +
-            parser.getComponent("PID", 5, 2) +
-            " " +
-            parser.getComponent("PID", 5, 0)
-        );
-        console.log("Patient Gender:", parser.getField("PID", 8));
-        console.log(
-          "Patient Address:",
-          parser.getComponent("PID", 11, 1) +
-            " " +
-            parser.getComponent("PID", 11, 3) +
-            " " +
-            parser.getComponent("PID", 11, 4) +
-            " " +
-            parser.getComponent("PID", 11, 5) +
-            " " +
-            parser.getComponent("PID", 11, 6)
-        );
-        console.log("Patient Phone:", parser.getField("PID", 13));
-        const res = parser.getSampleParameterResults();
-        console.log("RESULTS", res);
-        // const reshl7SPM = this.HL7MessageProcessor.hl7SPM(rawData);
-        // console.log("reshl7SPM", reshl7SPM);
-        // const reshl7OBR = this.HL7MessageProcessor.hl7OBR(rawData);
-        // console.log("reshl7OBR", reshl7OBR);
-        // const reshl7OBX = this.HL7MessageProcessor.hl7OBX(rawData);
-        // console.log("reshl7OBX", reshl7OBX);
-        // const reshl7ProcessResultSingle =
-        //   this.HL7MessageProcessor.hl7ProcessResultSingle(rawData);
-        // console.log("reshl7ProcessResultSingle", reshl7ProcessResultSingle);
-      },
-      (error) => {}
+    that.interfaceService.fetchLastOrders(true);
+
+    that.interfaceService.fetchLastSyncTimes((data: any) => {
+      that.lastLimsSync = data?.lastLimsSync;
+      that.lastResultReceived = (data?.lastresultreceived || "")
+        .toString()
+        .split("GMT+0300")
+        .join("");
+    });
+
+    that.interfaceService.lastOrders.subscribe(
+      (lastFewOrders: DatabaseResponse[] | any[]) => {
+        that._ngZone.run(() => {
+          this.totalRows =
+            lastFewOrders[0]?.rowCount ?? lastFewOrders[0]?.length;
+          that.lastOrders = lastFewOrders[0]?.rows ?? lastFewOrders[0];
+        });
+      }
     );
-    // that.interfaceService.fetchLastOrders(true);
-
-    // that.interfaceService.fetchLastSyncTimes((data: any) => {
-    //   that.lastLimsSync = data?.lastLimsSync;
-    //   that.lastResultReceived = (data?.lastresultreceived || "")
-    //     .toString()
-    //     .split("GMT+0300")
-    //     .join("");
-    // });
-
-    // that.interfaceService.lastOrders.subscribe(
-    //   (lastFewOrders: DatabaseResponse[] | any[]) => {
-    //     that._ngZone.run(() => {
-    //       this.totalRows =
-    //         lastFewOrders[0]?.rowCount ?? lastFewOrders[0]?.length;
-    //       that.lastOrders = lastFewOrders[0]?.rows ?? lastFewOrders[0];
-    //     });
-    //   }
-    // );
   }
 
   pageChanged(event: PageEvent) {
@@ -303,6 +253,7 @@ export class DashboardComponent implements OnInit {
   }
 
   checkedCanSync = (canSync: string) => {
+    if (!canSync) return false;
     return canSync.toLocaleLowerCase() === "false" ? false : true;
   };
 
@@ -371,4 +322,34 @@ export class DashboardComponent implements OnInit {
       }
     );
   }
+
+  testData = () => {
+    const data = {
+      order_id: "TRT2300177",
+      test_id: "1",
+      test_type: "^MTBX^^inv^Xpert MTB-XDR^1^INVALID^",
+      test_unit: "",
+      patient_id: "120801104601-0-KK-2023-3",
+      results: "^",
+      tested_by: "Paschal Qwaray",
+      analysed_date_time: "2023-01-13 12:45:59",
+      authorised_date_time: "2023-01-13 12:45:59",
+      result_accepted_date_time: "2023-01-13 12:45:59",
+      result_status: 1,
+      lims_sync_status: 0,
+      test_location: "Blove",
+      machine_used: "GeneXpert",
+      can_sync: "FALSE",
+    };
+    this.database.addOrderTest(
+      data,
+      (res: any) => {
+        console.log(res);
+      },
+      (error: any) => {
+        console.log(error);
+      }
+    );
+    this.fetchLastOrders();
+  };
 }

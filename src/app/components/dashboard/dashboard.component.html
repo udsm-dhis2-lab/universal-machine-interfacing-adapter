@@ -79,13 +79,27 @@
       ><strong>Last Instrument Result Received on :</strong>
       {{ lastResultReceived }}</span
     >
-    <a
-      (click)="clearLiveLog()"
-      class="btn btn-outline-primary btn-sm"
-      style="float: right"
-    >
-      <span>Clear Log</span>
-    </a>
+
+    <div>
+      <div>
+        <a
+          (click)="clearLiveLog()"
+          class="btn btn-outline-primary btn-sm"
+          style="float: right"
+        >
+          <span>Clear Log</span>
+        </a>
+      </div>
+      <div *ngIf="isDev">
+        <a
+          (click)="testData()"
+          class="btn btn-outline-primary btn-sm"
+          style="float: right"
+        >
+          <span>Test</span>
+        </a>
+      </div>
+    </div>
   </div>
 
   <br />

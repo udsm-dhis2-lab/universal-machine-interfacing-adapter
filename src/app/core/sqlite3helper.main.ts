@@ -26,6 +26,7 @@ export class Sqlite3Helper {
       `created_date` date DEFAULT NULL, \
       `test_unit` TEXT DEFAULT NULL, \
       `results` TEXT DEFAULT NULL, \
+      `raw_json` TEXT NOT NULL, \
       `tested_by` TEXT DEFAULT NULL, \
       `analysed_date_time` datetime DEFAULT NULL, \
       `specimen_date_time` datetime DEFAULT NULL, \
