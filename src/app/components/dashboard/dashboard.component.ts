@@ -13,10 +13,6 @@ import { DatabaseService } from "../../services/database.service";
 import { FxResponse } from "../../shared/interfaces/fx.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { uniqBy } from "lodash";
-import HLSevenMsg from "../../shared/helpers/HL7/HL7MSG";
-import { decode } from "hl7-object-parser";
-import { HL7Mapping } from "../../shared/helpers/HL7/s12mapping";
-import { HL7ParserFromChartGPT } from "../../shared/helpers/HL7/HL7MSG";
 
 @Component({
   selector: "app-dashboard",
