@@ -17,6 +17,8 @@ export class HomeComponent implements OnInit {
     password: "",
   };
   hide: boolean = true;
+  externalLoginCheck: boolean = false;
+  loggingIn: boolean = false;
   constructor(
     private router: Router,
     private store: ElectronStoreService,
@@ -42,6 +44,19 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {}
 
   public doLogin() {
+    this.loggingIn = true;
+    if (this.externalLoginCheck) {
+      this.loginExternal();
+    } else {
+      this.loginInternal();
+    }
+  }
+
+  private loginExternal = () => {
+    console.log(this.settings.moduleName);
+  };
+
+  private loginInternal = () => {
     this.databaseService.getUserDetails(
       this.user.login,
       this.user.password,
@@ -72,6 +87,7 @@ export class HomeComponent implements OnInit {
               console.error(err);
             }
           );
+          this.loggingIn = false;
         } else {
           const myNotification = new Notification("Error", {
             body: "Oops! Wrong username or password.",
@@ -83,7 +99,7 @@ export class HomeComponent implements OnInit {
         console.log(err);
       }
     );
-  }
+  };
 
   openUrl = async () => {
     await shell.openExternal("https://dhis2.udsm.ac.tz");
