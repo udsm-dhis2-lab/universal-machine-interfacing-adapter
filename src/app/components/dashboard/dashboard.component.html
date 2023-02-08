@@ -11,20 +11,9 @@
         <h5 class="card-title text-success">
           <span>{{ machineName }}</span> Connected
         </h5>
-        <!-- <p class="card-text">Disconnect to modify settings.</p> -->
         <button (click)="close()" class="btn btn-danger">
           <span>Disconnect {{ machineName }}</span>
         </button>
-        <!-- <button
-          mat-raised-button
-          color="primary"
-          [style.width]="'120px'"
-          class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
-          routerLink="/functions"
-        >
-          <mat-icon>dashboard</mat-icon>
-          <span> Functions </span>
-        </button> -->
       </div>
 
       <ng-template #notConnected>

@@ -89,6 +89,8 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    const token = localStorage.getItem("token");
+    console.log("TOKEN", token);
     const that = this;
     that.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
     that.currentUserId = this.store.get("userid");

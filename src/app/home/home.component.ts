@@ -4,6 +4,9 @@ import { DatabaseService } from "../services/database.service";
 import { ElectronStoreService } from "../services/electron-store.service";
 import { keyBy } from "lodash";
 import { shell } from "electron";
+import { FxResponse } from "../shared/interfaces/fx.interface";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { LoginResponse } from "../shared/interfaces/login.interface";
 
 @Component({
   selector: "app-home",
@@ -22,7 +25,8 @@ export class HomeComponent implements OnInit {
   constructor(
     private router: Router,
     private store: ElectronStoreService,
-    private databaseService: DatabaseService
+    private databaseService: DatabaseService,
+    private snackBar: MatSnackBar
   ) {
     this.databaseService.setDefaultDatabaseData();
     this.settings = this.store.get("appSettings");
@@ -53,7 +57,37 @@ export class HomeComponent implements OnInit {
   }
 
   private loginExternal = () => {
-    console.log(this.settings.moduleName);
+    this.databaseService
+      .run(this.settings.functionId, {
+        identifier: this.user.login,
+        password: this.user.password,
+        url: this.settings.externalLoginUrl,
+        httpMethod: this.settings.httpMethod,
+        authType: this.settings.authType,
+        systemName: this.settings.systemName,
+        moduleName: this.settings.moduleName,
+      })
+      .then((res: LoginResponse) => {
+        if (res.success) {
+          this.openSnackBar({
+            success: true,
+            message: `Successfully logged in with ${this.settings.systemName}`,
+          });
+          this.router.navigate(["/dashboard"]);
+          localStorage.setItem("token", res.token);
+        } else {
+          this.openSnackBar(res);
+        }
+      })
+      .catch((error) => {
+        this.openSnackBar({
+          success: false,
+          message:
+            error.response.data.error ||
+            error.response.data.message ||
+            error.message,
+        });
+      });
   };
 
   private loginInternal = () => {
@@ -87,21 +121,42 @@ export class HomeComponent implements OnInit {
               console.error(err);
             }
           );
-          this.loggingIn = false;
         } else {
-          const myNotification = new Notification("Error", {
+          this.systemNotification({
+            type: "Error",
             body: "Oops! Wrong username or password.",
+          });
+          this.openSnackBar({
+            success: false,
+            message: "Oops! Wrong username or password.",
           });
           this.router.navigate([""]);
         }
       },
       (err) => {
+        this.openSnackBar({ success: true, message: err.message });
         console.log(err);
       }
     );
   };
 
+  systemNotification = ({ body, type }) => {
+    new Notification(type, {
+      body,
+    });
+  };
+
   openUrl = async () => {
     await shell.openExternal("https://dhis2.udsm.ac.tz");
+  };
+
+  openSnackBar = (data: FxResponse) => {
+    this.snackBar.open(data.message, "", {
+      duration: 2500,
+      panelClass: data.success ? ["success"] : ["error"],
+      horizontalPosition: "center",
+      verticalPosition: "bottom",
+    });
+    this.loggingIn = false;
   };
 }
