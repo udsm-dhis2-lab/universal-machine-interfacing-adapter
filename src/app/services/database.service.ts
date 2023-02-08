@@ -189,7 +189,7 @@ export class DatabaseService {
     return await this.query(query, []);
   };
 
-  run = async (id: number): Promise<string> => {
+  run = async (id: number, params?: any): Promise<any> => {
     const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
     const secret = await this.getSecret(process);
     const runFunc = Function(
@@ -197,7 +197,7 @@ export class DatabaseService {
       this.appSettings.hasExternalDB ? process?.rows[0]?.code : process[0].code
     );
     await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
-    await runFunc({
+    return await runFunc({
       secret,
       db: this.functionsQuery,
       settings: this.dbConfig,
@@ -206,8 +206,9 @@ export class DatabaseService {
       dbPath: this.store.get("appPath"),
       id,
       fs,
+      externalParams: params,
     });
-    return `Process started`;
+    // return `Process started`;
   };
 
   private getSecret = async (process: any) => {
