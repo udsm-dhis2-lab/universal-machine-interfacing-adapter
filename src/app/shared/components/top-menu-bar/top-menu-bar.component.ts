@@ -22,6 +22,7 @@ export class TopMenuBarComponent implements OnInit {
     this.store.set("privileges", {});
     this.store.set("userid", null);
     this.store.set("roleids", null);
+    localStorage.removeItem("token");
     this.router.navigate(["/home"]);
   }
 
