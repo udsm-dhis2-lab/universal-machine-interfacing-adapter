@@ -8,7 +8,9 @@
       mat-button
       [matMenuTriggerFor]="settingsMenu"
       *ngIf="
-        keyedCurrentPrivileges['ADD_SETTINGS'] || keyedCurrentPrivileges['ALL']
+        keyedCurrentPrivileges['ADD_SETTINGS'] ||
+        keyedCurrentPrivileges['ALL'] ||
+        token
       "
     >
       <mat-icon>settings</mat-icon>
@@ -18,7 +20,7 @@
       <button
         mat-menu-item
         (click)="onRouteTo($event, 'settings')"
-        *ngIf="keyedCurrentPrivileges['ALL']"
+        *ngIf="keyedCurrentPrivileges['ALL'] || token"
       >
         General settings
       </button>
@@ -27,7 +29,8 @@
         (click)="onRouteTo($event, 'functions')"
         *ngIf="
           keyedCurrentPrivileges['ADD_FUNCTION'] ||
-          keyedCurrentPrivileges['ALL']
+          keyedCurrentPrivileges['ALL'] ||
+          token
         "
       >
         Functions & Secrets

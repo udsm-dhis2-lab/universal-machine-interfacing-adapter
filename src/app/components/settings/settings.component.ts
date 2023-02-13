@@ -60,7 +60,7 @@ export class SettingsComponent implements OnInit {
       this.settings.systemName = appSettings.systemName;
       this.settings.authorizationCount = appSettings.authorizationCount;
       this.settings.moduleName = appSettings.moduleName;
-      this.settings.indetifier = appSettings.indetifier;
+      this.settings.identifier = appSettings.identifier;
     }
   }
 

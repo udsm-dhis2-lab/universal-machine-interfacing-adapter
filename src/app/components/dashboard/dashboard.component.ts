@@ -31,6 +31,7 @@ export class DashboardComponent implements OnInit {
   public lastOrders: any = [];
   public liveLogText = [];
   isDev: boolean;
+  token: string;
   pageSize: number = 10;
   currentPage: number = 0;
   pageSizeOptions: any[] = [5, 10, 50, 100];
@@ -89,8 +90,7 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    const token = localStorage.getItem("token");
-    console.log("TOKEN", token);
+    this.token = localStorage.getItem("token");
     const that = this;
     that.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
     that.currentUserId = this.store.get("userid");
