@@ -22,6 +22,21 @@ export class SettingsComponent implements OnInit {
   methods: string[] = ["POST", "GET", "PUT"];
   authTypes: string[] = ["Basic", "Bearer"];
   functions: any[];
+  protocols: { id: string; name: string }[] = [
+    { id: "astm-elecsys", name: "ASTM/Elecsys (Single Record)" },
+    { id: "astm-concatenated", name: "ASTM (Concatenated)" },
+    { id: "hl7", name: "HL7" },
+    { id: "serial", name: "Serial" },
+  ];
+
+  toolType: { id: string; name: string }[] = [
+    { id: "tcpserver", name: "Server (TCP/IP)" },
+    { id: "tcpclient", name: "Client (TCP/IP)" },
+  ];
+  autoconnect: { id: string; name: string }[] = [
+    { id: "yes", name: "Yes)" },
+    { id: "no", name: "No" },
+  ];
 
   constructor(
     private electronService: ElectronService,
