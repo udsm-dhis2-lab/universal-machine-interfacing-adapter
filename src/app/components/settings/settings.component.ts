@@ -34,7 +34,7 @@ export class SettingsComponent implements OnInit {
     { id: "tcpclient", name: "Client (TCP/IP)" },
   ];
   autoconnect: { id: string; name: string }[] = [
-    { id: "yes", name: "Yes)" },
+    { id: "yes", name: "Yes" },
     { id: "no", name: "No" },
   ];
 
