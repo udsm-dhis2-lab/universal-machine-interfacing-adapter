@@ -1,11 +1,14 @@
 <main role="main" class="container">
   <app-top-menu-bar></app-top-menu-bar>
-  <div class="card mt-4">
-    <div class="card-header">
-      <strong>System Settings</strong>
-    </div>
+  <mat-card class="mt-4">
+    <mat-card-header>
+      <mat-card-title>
+        <strong>{{ settings.moduleName }}</strong>
+      </mat-card-title>
+      <mat-card-subtitle>System Settings</mat-card-subtitle>
+    </mat-card-header>
 
-    <div class="card-body">
+    <mat-card-content class="pl-5">
       <form (submit)="updateSettings()" class="form">
         <div class="row">
           <div class="w-50">
@@ -89,16 +92,18 @@
           </div> -->
 
           <div class="w-50">
-            <mat-form-field class="w-100" appearance="outline">
-              <mat-label>Analyzer/Machine IP Address</mat-label>
-              <input
-                type="text"
-                [(ngModel)]="settings.analyzerMachineHost"
-                name="analyzerMachineHost"
-                placeholder="eg. 198.1.1.1"
-                required
-                matInput
-              />
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Interface Communication Protocol</mat-label>
+              <mat-select [(value)]="settings.interfaceCommunicationProtocol">
+                <mat-option
+                  (click)="
+                    settings.interfaceCommunicationProtocol = protocol.id
+                  "
+                  *ngFor="let protocol of protocols"
+                  [value]="protocol.id"
+                  >{{ protocol.name }}</mat-option
+                >
+              </mat-select>
             </mat-form-field>
           </div>
 
@@ -116,7 +121,10 @@
             />
           </div> -->
 
-          <div class="w-50">
+          <div
+            class="w-50"
+            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
+          >
             <mat-form-field class="w-100" appearance="outline">
               <mat-label>Analyzer/Machine Port No.</mat-label>
               <input
@@ -143,20 +151,21 @@
               required
             />
           </div> -->
-          <div class="w-50">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Interface Communication Protocol</mat-label>
-              <mat-select [(value)]="settings.interfaceCommunicationProtocol">
-                <mat-option>None</mat-option>
-                <mat-option
-                  (click)="
-                    settings.interfaceCommunicationProtocol = protocol.id
-                  "
-                  *ngFor="let protocol of protocols"
-                  [value]="protocol.id"
-                  >{{ protocol.name }}</mat-option
-                >
-              </mat-select>
+
+          <div
+            class="w-50"
+            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
+          >
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Analyzer/Machine IP Address</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.analyzerMachineHost"
+                name="analyzerMachineHost"
+                placeholder="eg. 198.1.1.1"
+                required
+                matInput
+              />
             </mat-form-field>
           </div>
 
@@ -178,10 +187,14 @@
             </select>
           </div> -->
 
-          <div class="w-50">
+          <div
+            class="w-50"
+            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
+          >
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>This Interface Tool is a</mat-label>
               <mat-select [(value)]="settings.interfaceConnectionMode">
+                <mat-option>None</mat-option>
                 <mat-option
                   *ngFor="let tool of toolType"
                   [value]="tool.id"
@@ -208,7 +221,10 @@
             </select>
           </div> -->
 
-          <div class="w-50">
+          <div
+            class="w-50"
+            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
+          >
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Attempt autoconnect?</mat-label>
               <mat-select [(value)]="settings.interfaceAutoConnect">
@@ -274,6 +290,8 @@
               />
             </mat-form-field>
           </div>
+
+          <div class="w-100"></div>
 
           <!-- <div class="form-group col col-sm-6">
             <label for="authorizationCount" class="col-form-label-sm"
@@ -601,6 +619,6 @@
           <span>Back Without Saving</span>
         </button>
       </form>
-    </div>
-  </div>
+    </mat-card-content>
+  </mat-card>
 </main>
