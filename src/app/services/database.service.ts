@@ -269,6 +269,20 @@ export class DatabaseService {
       return { success: false, message: e.message };
     }
   };
+  deleteOrder = async (
+    id: number
+  ): Promise<{ message: string; success: boolean }> => {
+    try {
+      const query = `DELETE FROM ORDERS WHERE ID= ${id};`;
+      const res = await this.query(query);
+      return {
+        success: Array.isArray(res) ? res.length === 0 : res.rowCount === 1,
+        message: "Order deleted successfully",
+      };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  };
   deleteSecret = async (
     value: number
   ): Promise<{ message: string; success: boolean }> => {

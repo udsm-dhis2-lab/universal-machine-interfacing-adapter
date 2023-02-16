@@ -13,6 +13,8 @@ import { DatabaseService } from "../../services/database.service";
 import { FxResponse } from "../../shared/interfaces/fx.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { uniqBy } from "lodash";
+import { InfoComponent } from "../info/info.component";
+import { MatDialog } from "@angular/material/dialog";
 
 @Component({
   selector: "app-dashboard",
@@ -84,7 +86,8 @@ export class DashboardComponent implements OnInit {
     public electronService: ElectronService,
     private router: Router,
     private database: DatabaseService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {
     this.isDev = this.store.get("isDev") === "false" ? true : false;
   }
@@ -292,12 +295,15 @@ export class DashboardComponent implements OnInit {
           this.currentOrderApprovalStatuses?.length ==
           this.appSettings.authorizationCount - 1
         ) {
+          const orderIndex = this.lastOrders.findIndex(
+            (last) => last.id === order.id
+          );
+          this.lastOrders[orderIndex] = { ...order, can_sync: "true" };
           this.changeSyncStatus(true, order);
+          this.fetchLastOrders();
         }
       },
-      (err) => {
-        console.error(err);
-      }
+      (err) => {}
     );
   }
 
@@ -315,9 +321,7 @@ export class DashboardComponent implements OnInit {
             ) || []
           )?.length > 0;
       },
-      (err) => {
-        console.error(err);
-      }
+      (err) => {}
     );
   }
 
@@ -338,16 +342,40 @@ export class DashboardComponent implements OnInit {
       test_location: "Blove",
       machine_used: "GeneXpert",
       can_sync: "FALSE",
+      raw_json: JSON.stringify({ data: "OK" }),
     };
     this.database.addOrderTest(
       data,
-      (res: any) => {
-        console.log(res);
-      },
-      (error: any) => {
-        console.log(error);
-      }
+      (res: any) => {},
+      (error: any) => {}
     );
     this.fetchLastOrders();
+  };
+
+  onDelete = (element: any) => {
+    const confirmDialog = this.dialog.open(InfoComponent, {
+      width: "300px",
+      height: "190px",
+      data: {
+        message: "You are about to delete this order. Are you sure?",
+      },
+    });
+    confirmDialog.afterClosed().subscribe((res) => {
+      if (res) {
+        this.deleteOrder(element);
+      }
+    });
+  };
+
+  private deleteOrder = (element: any) => {
+    this.database
+      .deleteOrder(element.id)
+      .then((res) => {
+        this.openSnackBar(res);
+        this.fetchLastOrders();
+      })
+      .catch((e) => {
+        this.openSnackBar({ message: e.message, success: false });
+      });
   };
 }
