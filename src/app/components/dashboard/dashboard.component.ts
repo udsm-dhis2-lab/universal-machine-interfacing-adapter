@@ -317,7 +317,8 @@ export class DashboardComponent implements OnInit {
         this.currentUserHasAlreadyApproved =
           (
             statuses?.filter(
-              (status) => status?.user_id == this.store.get("userid")
+              (status: { user_id: any }) =>
+                status?.user_id == this.store.get("userid")
             ) || []
           )?.length > 0;
       },

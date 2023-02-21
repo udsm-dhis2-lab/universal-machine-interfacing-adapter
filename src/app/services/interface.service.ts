@@ -261,20 +261,20 @@ export class InterfaceService {
 
   processHL7DataGeneXpert(rawText: string) {
     const that = this;
-    if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
-      that.parseHL7DH76(rawText);
-    } else {
-      that.processHl7V1(rawText);
-    }
+    // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
+    that.parseHL7DH76(rawText);
+    // } else {
+    // that.processHl7V1(rawText);
+    // }
   }
 
   processHL7Data(rawText: string) {
     const that = this;
-    if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
-      that.parseHL7DH76(rawText);
-    } else {
-      that.processHl7V1(rawText);
-    }
+    // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
+    that.parseHL7DH76(rawText);
+    // } else {
+    // that.processHl7V1(rawText);
+    // }
   }
 
   handleTCPResponse(data) {
