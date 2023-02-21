@@ -197,7 +197,7 @@ export class DatabaseService {
       this.appSettings.hasExternalDB ? process?.rows[0]?.code : process[0].code
     );
     await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
-    return await runFunc({
+    const runResults = await runFunc({
       secret,
       db: this.functionsQuery,
       settings: this.dbConfig,
@@ -208,6 +208,8 @@ export class DatabaseService {
       fs,
       externalParams: params,
     });
+    await this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`);
+    return runResults;
     // return `Process started`;
   };
 
