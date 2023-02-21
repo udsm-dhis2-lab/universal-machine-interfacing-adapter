@@ -9,7 +9,35 @@ const syncData = async (rows) => {
     "Access-Control-Allow-Credentials": "true",
     Accept: "*",
   };
+  const mappingReferences = {
+    ywRl88yte5b: {
+      Detected: "Detected",
+      "Not Detected": "Not Detected",
+      Invalid: "Invalid",
+      Errors: "Errors",
+      "Not Results": "Not Results",
+    },
+    nPGTzMkULFh: {
+      "Resistance Not Detected": "Resistance Not Detected",
+      "Low Resistance Detected": "Low Resistance Detected",
+      "Resistance Detected": "Resistance Detected",
+      "Resistance Indeterminate": "Resistance Indeterminate",
+    },
+    GLqRo7AuhJM: {
+      "Resistance Not Detected": "Resistance Not Detected",
+      "Low Resistance Detected": "Low Resistance Detected",
+      "Resistance Detected": "Resistance Detected",
+      "Resistance Indeterminate": "Resistance Indeterminate",
+    },
+    o2zbpZDZele: {
+      "Resistance Not Detected": "Resistance Not Detected",
+      "Low Resistance Detected": "Low Resistance Detected",
+      "Resistance Detected": "Resistance Detected",
+      "Resistance Indeterminate": "Resistance Indeterminate",
+    },
+  };
   for (const row of rows) {
+    console.log(row);
     const url = `${context.secret.url}/api/trackedEntityInstances.json?filter=${
       context.secret.tbAttribute
     }:EQ:${row?.patient_id
@@ -34,6 +62,7 @@ const syncData = async (rows) => {
         program: "tj4u1ip0tTF",
         programStage: "yzu183PkJCH",
         status: "VISITED",
+        eventDate: new Date(row?.analysed_date_time),
         trackedEntityInstance: trackedEntityInstanceData?.trackedEntityInstance,
         dataValues: [
           {
@@ -46,10 +75,30 @@ const syncData = async (rows) => {
             value: row?.order_id,
             providedElsewhere: false,
           },
+          // {
+          //   dataElement: "i5OvzWAY8AK",
+          //   value: new Date(row?.analysed_date_time),
+          //   providedElsewhere: false,
+          // },
           {
-            dataElement: "i5OvzWAY8AK",
-            value: new Date(row?.created_at),
-            providedElsewhere: false,
+            dataElement: "levlyYdnhws",
+            value: "10 Color Module GeneXpert",
+          },
+          {
+            dataElement: "ywRl88yte5b",
+            value: "",
+          },
+          {
+            dataElement: "nPGTzMkULFh",
+            value: "",
+          },
+          {
+            dataElement: "GLqRo7AuhJM",
+            value: "",
+          },
+          {
+            dataElement: "o2zbpZDZele",
+            value: "",
           },
         ],
       };
@@ -92,7 +141,7 @@ const syncData = async (rows) => {
           });
         } catch (e) {}
       } else {
-        window.alert(`NO client Found`);
+        // window.alert(`NO client Found`);
       }
     }
     // console.log(eventRes);
