@@ -1,14 +1,30 @@
 <main role="main" class="container">
   <app-top-menu-bar></app-top-menu-bar>
-  <div class="card mt-4">
-    <div class="card-header">
-      <strong>System Settings</strong>
-    </div>
+  <mat-card class="mt-4">
+    <mat-card-header>
+      <mat-card-title>
+        <strong>{{ settings.moduleName }}</strong>
+      </mat-card-title>
+      <mat-card-subtitle>System Settings</mat-card-subtitle>
+    </mat-card-header>
 
-    <div class="card-body">
+    <mat-card-content class="pl-5">
       <form (submit)="updateSettings()" class="form">
         <div class="row">
-          <div class="form-group col col-sm-6">
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Lab Code/ID</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.labID"
+                name="labID"
+                placeholder="Lab Code/ID"
+                required
+                matInput
+              />
+            </mat-form-field>
+          </div>
+          <!-- <div class="form-group col col-sm-6">
             <label for="labID" class="col-form-label-sm">Lab Code/ID</label>
             <input
               type="text"
@@ -18,8 +34,22 @@
               placeholder="Lab Code/ID"
               required
             />
+          </div> -->
+
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Lab Name</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.labName"
+                name="labName"
+                placeholder="Lab Name"
+                required
+                matInput
+              />
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+          <!-- <div class="form-group col col-sm-6">
             <label for="labName" class="col-form-label-sm">Lab Name</label>
             <input
               type="text"
@@ -29,11 +59,25 @@
               placeholder="Lab Name"
               required
             />
-          </div>
+          </div> -->
         </div>
         <hr />
         <div class="row">
-          <div class="form-group col col-sm-6">
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Analyzer/Machine Name</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.analyzerMachineName"
+                name="analyzerMachineName"
+                placeholder="eg. Roche Cobas48"
+                required
+                matInput
+              />
+            </mat-form-field>
+          </div>
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="analyzerMachineName" class="col-form-label-sm"
               >Analyzer/Machine Name</label
             >
@@ -45,8 +89,25 @@
               placeholder="eg. Roche Cobas48"
               required
             />
+          </div> -->
+
+          <div class="w-50">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Interface Communication Protocol</mat-label>
+              <mat-select [(value)]="settings.interfaceCommunicationProtocol">
+                <mat-option
+                  (click)="
+                    settings.interfaceCommunicationProtocol = protocol.id
+                  "
+                  *ngFor="let protocol of protocols"
+                  [value]="protocol.id"
+                  >{{ protocol.name }}</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="analyzerMachineHost" class="col-form-label-sm"
               >Analyzer/Machine IP Address</label
             >
@@ -58,8 +119,26 @@
               placeholder="eg. 198.1.1.1"
               required
             />
+          </div> -->
+
+          <div
+            class="w-50"
+            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
+          >
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Analyzer/Machine Port No.</mat-label>
+              <input
+                type="number"
+                [(ngModel)]="settings.analyzerMachinePort"
+                name="analyzerMachinePort"
+                placeholder="eg. 3120"
+                required
+                matInput
+              />
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="analyzerMachinePort" class="col-form-label-sm"
               >Analyzer/Machine Port no.</label
             >
@@ -71,8 +150,26 @@
               placeholder="eg. 3120"
               required
             />
+          </div> -->
+
+          <div
+            class="w-50"
+            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
+          >
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Analyzer/Machine IP Address</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.analyzerMachineHost"
+                name="analyzerMachineHost"
+                placeholder="eg. 198.1.1.1"
+                required
+                matInput
+              />
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <!-- <div class="form-group col col-sm-6">
             <label
               for="interfaceCommunicationProtocol"
               class="col-form-label-sm"
@@ -88,8 +185,28 @@
               <option value="astm-concatenated">ASTM (Concatenated)</option>
               <option value="hl7">HL7</option>
             </select>
+          </div> -->
+
+          <div
+            class="w-50"
+            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
+          >
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>This Interface Tool is a</mat-label>
+              <mat-select [(value)]="settings.interfaceConnectionMode">
+                <mat-option>None</mat-option>
+                <mat-option
+                  *ngFor="let tool of toolType"
+                  [value]="tool.id"
+                  (click)="settings.interfaceConnectionMode = tool.id"
+                  >{{ tool.name }}</mat-option
+                >
+                <!-- <mat-option value="tcpclient">Client (TCP/IP)</mat-option> -->
+              </mat-select>
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="interfaceConnectionMode" class="col-form-label-sm"
               >This Interface Tool is a</label
             >
@@ -102,8 +219,27 @@
               <option value="tcpserver">Server (TCP/IP)</option>
               <option value="tcpclient">Client (TCP/IP)</option>
             </select>
+          </div> -->
+
+          <div
+            class="w-50"
+            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
+          >
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Attempt autoconnect?</mat-label>
+              <mat-select [(value)]="settings.interfaceAutoConnect">
+                <mat-option
+                  *ngFor="let auto of autoconnect"
+                  [value]="auto.id"
+                  (click)="settings.interfaceAutoConnect = auto.id"
+                  >{{ auto.name }}</mat-option
+                >
+                <!-- <mat-option value="tcpclient">Client (TCP/IP)</mat-option> -->
+              </mat-select>
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="interfaceAutoConnect" class="col-form-label-sm"
               >Should the interface attempt to autoconnect?</label
             >
@@ -116,8 +252,20 @@
               <option value="yes">Yes</option>
               <option value="no">No</option>
             </select>
+          </div> -->
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>SQLite DB Path</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="appPath"
+                name="appPath"
+                readonly
+                matInput
+              />
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+          <!-- <div class="form-group col col-sm-6">
             <label for="appPath" class="col-form-label-sm"
               >SQLite DB Path</label
             >
@@ -128,8 +276,24 @@
               class="form-control form-control-sm"
               readonly
             />
+          </div> -->
+
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Authorization Count</mat-label>
+              <input
+                type="number"
+                [(ngModel)]="settings.authorizationCount"
+                name="authorizationCount"
+                matInput
+                min="0"
+              />
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <div class="w-100"></div>
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="authorizationCount" class="col-form-label-sm"
               >Authorization Count</label
             >
@@ -140,8 +304,33 @@
               min="0"
               class="form-control form-control-sm"
             />
-          </div>
+          </div> -->
         </div>
+
+        <div class="w-50">
+          <mat-form-field class="w-100" appearance="outline">
+            <mat-label>Module Name</mat-label>
+            <input
+              type="text"
+              [(ngModel)]="settings.moduleName"
+              name="moduleName"
+              placeholder="Module Name"
+              required
+              matInput
+            />
+          </mat-form-field>
+        </div>
+
+        <!-- <div class="form-group col col-sm-6">
+          <label for="moduleName" class="col-form-label-sm">Module Name</label>
+          <input
+            type="text"
+            [(ngModel)]="settings.moduleName"
+            name="moduleName"
+            min="0"
+            class="form-control form-control-sm"
+          />
+        </div> -->
         <hr />
         <div>
           <mat-checkbox
@@ -157,7 +346,21 @@
         </div>
         <hr />
         <div *ngIf="settings.hasExternalDB" class="row">
-          <div class="form-group col col-sm-6">
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Host</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.dbHost"
+                name="dbHost"
+                placeholder="e.g 127.0.0.1"
+                required
+                matInput
+              />
+            </mat-form-field>
+          </div>
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="dbHost" class="col-form-label-sm">Host</label>
             <input
               type="text"
@@ -167,8 +370,23 @@
               placeholder="Enter Database Host"
               required
             />
+          </div> -->
+
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Port</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.dbPort"
+                name="dbPort"
+                placeholder="e.g 5432"
+                required
+                matInput
+              />
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="dbPort" class="col-form-label-sm">Port</label>
             <input
               type="text"
@@ -178,8 +396,23 @@
               placeholder="Enter Port Number"
               required
             />
+          </div> -->
+
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Name</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.dbName"
+                name="dbName"
+                placeholder="Database Name"
+                required
+                matInput
+              />
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="dbName" class="col-form-label-sm">Name</label>
             <input
               type="text"
@@ -189,8 +422,22 @@
               placeholder="Enter Database Name"
               required
             />
+          </div> -->
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>User</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.dbUser"
+                name="dbUser"
+                placeholder="Database User"
+                required
+                matInput
+              />
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="dbUser" class="col-form-label-sm">User</label>
             <input
               type="text"
@@ -200,8 +447,23 @@
               placeholder="Enter Database User"
               required
             />
+          </div> -->
+
+          <div class="w-50">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label>Password</mat-label>
+              <input
+                type="text"
+                [(ngModel)]="settings.dbPassword"
+                name="dbPassword"
+                placeholder="Database Password"
+                required
+                matInput
+              />
+            </mat-form-field>
           </div>
-          <div class="form-group col col-sm-6">
+
+          <!-- <div class="form-group col col-sm-6">
             <label for="dbPassword" class="col-form-label-sm">Password</label>
             <input
               type="text"
@@ -211,7 +473,8 @@
               placeholder="Enter Database Password"
               required
             />
-          </div>
+          </div> -->
+
           <div class="form-group col col-sm-6">
             <label for="" class="col-form-label-sm">&nbsp;&nbsp;</label><br />
             <button
@@ -220,6 +483,123 @@
               type="button"
             >
               Check DB Connection
+            </button>
+          </div>
+        </div>
+        <hr />
+
+        <div>
+          <mat-checkbox
+            [(ngModel)]="settings.hasExternalLogin"
+            [ngModelOptions]="{ standalone: true }"
+            color="accent"
+            (change)="hasExternalLogin($event.checked)"
+          >
+            {{
+              settings.hasExternalLogin
+                ? "External Login Added"
+                : "Add External Login?"
+            }}
+          </mat-checkbox>
+        </div>
+        <hr />
+        <div *ngIf="settings.hasExternalLogin" class="row">
+          <div class="d-flex justify-content-between">
+            <div class="w-50">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label>External Login URL</mat-label>
+                <input
+                  type="text"
+                  [(ngModel)]="settings.externalLoginUrl"
+                  name="externalLoginUrl"
+                  placeholder="Enter External Login URL"
+                  required
+                  matInput
+                />
+              </mat-form-field>
+            </div>
+            <div class="w-25"></div>
+            <div class="w-50">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Function</mat-label>
+                <mat-select [(value)]="settings.functionId">
+                  <mat-option>None</mat-option>
+                  <mat-option
+                    (click)="settings.functionId = function.id"
+                    *ngFor="let function of functions"
+                    [value]="function.id"
+                    >{{ function.display }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="w-50">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Method</mat-label>
+                <mat-select [(value)]="settings.httpMethod">
+                  <mat-option>None</mat-option>
+                  <mat-option
+                    (click)="settings.httpMethod = method"
+                    *ngFor="let method of methods"
+                    [value]="method"
+                    >{{ method }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="w-25"></div>
+            <div class="w-50">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Authentication</mat-label>
+                <mat-select [(value)]="settings.authType">
+                  <mat-option>None</mat-option>
+                  <mat-option
+                    (click)="settings.authType = authType"
+                    *ngFor="let authType of authTypes"
+                    [value]="authType"
+                    >{{ authType }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <div class="w-50">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label>System Name</mat-label>
+                <input
+                  type="text"
+                  [(ngModel)]="settings.systemName"
+                  name="systemName"
+                  placeholder="Enter System Name"
+                  required
+                  matInput
+                />
+              </mat-form-field>
+            </div>
+            <div class="w-25"></div>
+            <div class="w-50">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label>System Identifier</mat-label>
+                <input
+                  type="text"
+                  [(ngModel)]="settings.identifier"
+                  name="identifier"
+                  placeholder="Enter Identifier Name (Username/Email)"
+                  required
+                  matInput
+                />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-group col col-sm-6">
+            <label for="" class="col-form-label-sm">&nbsp;&nbsp;</label><br />
+            <button (click)="ping()" class="btn btn-dark btn-sm" type="button">
+              Test Login
             </button>
           </div>
         </div>
@@ -239,6 +619,6 @@
           <span>Back Without Saving</span>
         </button>
       </form>
-    </div>
-  </div>
+    </mat-card-content>
+  </mat-card>
 </main>

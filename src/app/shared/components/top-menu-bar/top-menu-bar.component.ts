@@ -9,9 +9,11 @@ import { ElectronStoreService } from "../../../services/electron-store.service";
 })
 export class TopMenuBarComponent implements OnInit {
   keyedCurrentPrivileges: any = {};
+  token: string;
   constructor(private store: ElectronStoreService, private router: Router) {}
 
   ngOnInit(): void {
+    this.token = localStorage.getItem("token");
     this.keyedCurrentPrivileges = this.store.get("keyedUserPrivileges");
   }
 
@@ -22,6 +24,7 @@ export class TopMenuBarComponent implements OnInit {
     this.store.set("privileges", {});
     this.store.set("userid", null);
     this.store.set("roleids", null);
+    localStorage.removeItem("token");
     this.router.navigate(["/home"]);
   }
 

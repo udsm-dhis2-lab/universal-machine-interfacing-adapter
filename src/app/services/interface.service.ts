@@ -1,10 +1,9 @@
 import { Injectable } from "@angular/core";
-import { DatabaseService } from "./database.service";
 import { BehaviorSubject } from "rxjs";
-import { ElectronStoreService } from "./electron-store.service";
 import { ElectronService } from "../core/services";
 import { dictionary, separators } from "../shared/constants/shared.constants";
-import { Hl7Interface } from "../shared/interfaces/hl7.interface";
+import { DatabaseService } from "./database.service";
+import { ElectronStoreService } from "./electron-store.service";
 
 @Injectable({
   providedIn: "root",
@@ -262,7 +261,7 @@ export class InterfaceService {
 
   processHL7DataGeneXpert(rawText: string) {
     const that = this;
-    if (rawText.includes("DH76") && rawText.includes("Dymind")) {
+    if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
       that.parseHL7DH76(rawText);
     } else {
       that.processHl7V1(rawText);
@@ -271,7 +270,7 @@ export class InterfaceService {
 
   processHL7Data(rawText: string) {
     const that = this;
-    if (rawText.includes("DH76") && rawText.includes("Dymind")) {
+    if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
       that.parseHL7DH76(rawText);
     } else {
       that.processHl7V1(rawText);
@@ -800,7 +799,7 @@ export class InterfaceService {
   }
 
   parseHL7DH76 = (hl7: string) => {
-    let data: Hl7Interface;
+    const data: any = {};
     let master = [];
 
     // This will turn the hl7 into an array seperated by our categories, however in order to keep the categories they stay in their own element
@@ -862,6 +861,7 @@ export class InterfaceService {
         data[segmentName] = [data[segmentName], segmentValue];
       }
     });
+    this.socketClient.write(this.hl7ACK(data.MSH["Message Control ID"]));
     const order: any = {
       order_id: data.OBR["Filler Order Number"],
       test_type: data.OBR["Principal Result Interpreter +"],
@@ -874,14 +874,17 @@ export class InterfaceService {
       analysed_date_time: data.OBR["Requested Date/Time"],
       authorised_date_time: data.OBR["Requested Date/Time"],
       result_accepted_date_time: data.OBR["Observation End Date/Time #"],
-      raw_data: hl7,
+      raw_text: hl7,
       raw_json: JSON.stringify(data),
     };
+
+    console.log(JSON.stringify(order));
 
     this.dbService.addOrderTest(
       order,
       (res) => {
         this.logger("success", "Result Successfully Added : " + order.order_id);
+        this.logger("success", "Data : " + JSON.stringify(res));
       },
       (err) => {
         this.logger("error", "Failed to add : " + JSON.stringify(err));

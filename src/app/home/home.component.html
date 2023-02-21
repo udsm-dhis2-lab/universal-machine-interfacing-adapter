@@ -1,20 +1,25 @@
 <main class="form-signin">
-  <form (submit)="doLogin()">
+  <form>
     <h1 class="h3 mb-3 fw-normal">
-      ETL & GeneXpert 10 Color Module Intefacing
+      {{ settings.moduleName || "Machine Intefacing" }}
     </h1>
     <div (click)="openUrl()" style="cursor: pointer" class="text-center">
       <img src="assets/icons/logo.png" />
     </div>
     <div class="form-floating mb-3">
       <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Username</mat-label>
+        <mat-label>{{
+          externalLoginCheck ? settings.identifier : "Username"
+        }}</mat-label>
         <input
           matInput
           type="text"
           [(ngModel)]="user.login"
           name="login"
-          placeholder="Enter Your Username"
+          [placeholder]="
+            'Enter Your ' +
+            (externalLoginCheck ? settings.identifier : 'Username')
+          "
         />
       </mat-form-field>
     </div>
@@ -35,17 +40,55 @@
     </div>
 
     <button
-      [disabled]="user.password === '' || user.login === ''"
+      (click)="doLogin()"
+      [disabled]="user.password === '' || user.login === '' || loggingIn"
       mat-flat-button
       class="w-100"
       [style.height]="'50px'"
       [style.background-color]="
-        user.password === '' || user.login === '' ? '' : '#0C6EFD'
+        user.password === '' || user.login === '' || loggingIn
+          ? '#dddddd'
+          : '#0C6EFD'
       "
-      [style.color]="'#FFFFFF'"
-      type="submit"
+      [style.color]="
+        user.password === '' || user.login === '' || loggingIn
+          ? 'black'
+          : '#FFFFFF'
+      "
     >
-      Login
+      <mat-spinner
+        color="primary"
+        *ngIf="loggingIn"
+        [diameter]="20"
+        style="display: inline-block !important; margin-right: 4px"
+      >
+      </mat-spinner>
+      {{ loggingIn ? "Logging in..." : "Login" }}
+    </button>
+
+    <blockquote *ngIf="externalLoginCheck" class="mt-2">
+      You are about to login with {{ settings.systemName }}.
+      <a
+        (click)="externalLoginCheck = !externalLoginCheck; loggingIn = false"
+        style="color: blue; text-decoration: underline; cursor: pointer"
+        >Cancel</a
+      >
+    </blockquote>
+
+    <br *ngIf="!externalLoginCheck" />
+
+    <p *ngIf="!externalLoginCheck" class="mt-3 text-center">OR</p>
+
+    <button
+      *ngIf="settings.hasExternalLogin && !externalLoginCheck"
+      mat-flat-button
+      class="w-100"
+      [style.height]="'50px'"
+      [style.background-color]="!externalLoginCheck ? '#0C6EFD' : ''"
+      [style.color]="'#FFFFFF'"
+      (click)="externalLoginCheck = !externalLoginCheck"
+    >
+      Login with {{ settings.systemName }}
     </button>
     <p (click)="openUrl()" class="mt-5 mb-3 text-muted" style="cursor: pointer">
       &copy; UDSM DHIS2 Lab
