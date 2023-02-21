@@ -264,7 +264,7 @@ export class InterfaceService {
     // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
     that.parseHL7DH76(rawText);
     // } else {
-    that.processHl7V1(rawText);
+    // that.processHl7V1(rawText);
     // }
   }
 
@@ -273,7 +273,7 @@ export class InterfaceService {
     // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
     that.parseHL7DH76(rawText);
     // } else {
-    that.processHl7V1(rawText);
+    // that.processHl7V1(rawText);
     // }
   }
 
