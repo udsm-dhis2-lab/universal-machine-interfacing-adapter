@@ -10,9 +10,8 @@ const start = async () => {
       }
     );
 
-    sql = `ALTER TABLE PROCESS ADD COLUMN running BOOLEAN;`;
-
     try {
+      sql = 'ALTER TABLE ORDERS ADD COLUMN raw_json TEXT;'
       db.all(sql, [], async (err, rows) => {
 
         console.error(err ? err : "No data to sync");
@@ -23,7 +22,7 @@ const start = async () => {
     } catch (e) { }
 
     try {
-      sql = 'ALTER TABLE ORDERS ADD COLUMN patient_id TEXT;'
+      sql = 'ALTER TABLE ORDERS ADD COLUMN added_on datetime;'
       db.all(sql, [], async (err, rows) => {
 
         console.error(err ? err : "No data to sync");
@@ -34,7 +33,7 @@ const start = async () => {
     } catch (e) { }
 
     try {
-      sql = ' DELETE FROM ORDERS;'
+      sql = 'ALTER TABLE app_log ADD COLUMN added_on datetime;'
       db.all(sql, [], async (err, rows) => {
 
         console.error(err ? err : "No data to sync");
@@ -43,15 +42,6 @@ const start = async () => {
 
       });
     } catch (e) { }
-    sql = `UPDATE PROCESS SET running=${0} WHERE ID=${context.id}`
-
-    db.all(sql, [], async (err, rows) => {
-
-      console.error(err ? err : "No data to sync");
-
-      console.log('rows', rows);
-
-    });
 
     db.close()
 

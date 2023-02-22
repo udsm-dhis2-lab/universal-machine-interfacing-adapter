@@ -277,7 +277,7 @@ export class InterfaceService {
     // }
   }
 
-  handleTCPResponse(data) {
+  handleTCPResponse(data: { toString: (arg0: string) => any }) {
     const that = this;
     if (that.appSettings.interfaceCommunicationProtocol === "hl7") {
       that.logger("info", "Receiving HL7 data");
@@ -321,7 +321,23 @@ export class InterfaceService {
         that.processHL7Data(that.strData);
         that.strData = "";
       } else {
-        console.log("NOT a HL7 format");
+        that.logger("error", "NOT a HL7 format or malformatted");
+        const rData: any = {};
+        rData.data = that.strData;
+        rData.machine = that.appSettings.analyzerMachineName;
+
+        that.dbService.addRawData(
+          rData,
+          (res) => {
+            that.logger("success", "Raw data saved for analysis");
+          },
+          (err) => {
+            that.logger(
+              "error",
+              "Not able to save raw data " + JSON.stringify(err)
+            );
+          }
+        );
       }
     } else if (
       that.appSettings.interfaceCommunicationProtocol === "astm-elecsys"

@@ -77,7 +77,12 @@
 
     <br *ngIf="!externalLoginCheck" />
 
-    <p *ngIf="!externalLoginCheck" class="mt-3 text-center">OR</p>
+    <p
+      *ngIf="settings.hasExternalLogin && !externalLoginCheck"
+      class="mt-3 text-center"
+    >
+      OR
+    </p>
 
     <button
       *ngIf="settings.hasExternalLogin && !externalLoginCheck"
