@@ -322,6 +322,7 @@ export class InterfaceService {
         that.strData = "";
       } else {
         that.logger("error", "NOT a HL7 format or malformatted");
+        that.logger("info", that.strData);
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings.analyzerMachineName;
