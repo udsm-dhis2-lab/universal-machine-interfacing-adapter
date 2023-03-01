@@ -1,3 +1,5 @@
+//https://lis.dhis2.udsm.ac.tz/openmrs/ws/rest/v1/session?v=custom:(authenticated,user:(privileges:(uuid,name,roles),roles:(uuid,name)))
+
 const run = async () => {
   const dabs = { data: { yooh: "BaharaJr", hi: "Bennett" }, success: false, message: '✅', params: context.externalParams }
   const Authorization = "Basic YWRtaW46QWRtaW4xMjM=";

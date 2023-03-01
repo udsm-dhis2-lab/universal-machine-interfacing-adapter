@@ -107,7 +107,8 @@
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
-            "browserTarget": "angular-electron:build"
+            "browserTarget": "angular-electron:build",
+            "proxyConfig": "src/proxy.conf.json"
           },
           "configurations": {
             "dev": {
