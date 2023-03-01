@@ -50,11 +50,11 @@ export class DatabaseService {
         database: that.appSettings.dbName,
         port: that.appSettings.dbPort,
         dateStrings: "date",
-        hasExternalDB: that.appSettings.hasExternalDB,
+        hasExternalDB: that.appSettings?.hasExternalDB,
       };
     }
 
-    if (that.appSettings.hasExternalDB) {
+    if (that.appSettings?.hasExternalDB) {
       this.query("SELECT * FROM current_catalog;")
         .then(() => {
           this.dbConnected = true;
@@ -194,7 +194,7 @@ export class DatabaseService {
     const secret = await this.getSecret(process);
     const runFunc = Function(
       "context",
-      this.appSettings.hasExternalDB ? process?.rows[0]?.code : process[0].code
+      this.appSettings?.hasExternalDB ? process?.rows[0]?.code : process[0].code
     );
     await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
     const runResults = await runFunc({
@@ -214,14 +214,14 @@ export class DatabaseService {
   };
 
   private getSecret = async (process: any) => {
-    const secret = this.appSettings.hasExternalDB
+    const secret = this.appSettings?.hasExternalDB
       ? process.rows[0]?.secret_id
       : process[0]?.secret_id;
     if (secret) {
       const secretData = await this.query(
         `SELECT * FROM SECRET WHERE ID=${secret}`
       );
-      return this.appSettings.hasExternalDB
+      return this.appSettings?.hasExternalDB
         ? secretData.rows[0].value
         : this.parseSecret(secretData[0].value);
     }

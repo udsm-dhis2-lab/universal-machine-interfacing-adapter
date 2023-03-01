@@ -66,7 +66,7 @@ export class SettingsComponent implements OnInit {
       this.settings.dbName = appSettings.dbName;
       this.settings.dbUser = appSettings.dbUser;
       this.settings.dbPassword = appSettings.dbPassword;
-      this.settings.hasExternalDB = appSettings.hasExternalDB;
+      this.settings.hasExternalDB = appSettings?.hasExternalDB;
       this.settings.functionId = appSettings.functionId;
       this.settings.hasExternalLogin = appSettings.hasExternalLogin;
       this.settings.externalLoginUrl = appSettings.externalLoginUrl;

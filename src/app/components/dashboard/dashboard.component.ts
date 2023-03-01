@@ -219,7 +219,7 @@ export class DashboardComponent implements OnInit {
         dbUser: appSettings.dbUser,
         dbPassword: appSettings.dbPassword,
       };
-      if (appSettings.hasExternalDB) {
+      if (appSettings?.hasExternalDB) {
         await this.query("SELECT * FROM current_catalog;", settings);
         await this.migrate(settings);
       }
