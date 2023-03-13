@@ -98,7 +98,7 @@ export class DashboardComponent implements OnInit {
     that.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
     that.currentUserId = this.store.get("userid");
     that.appSettings = that.store.get("appSettings");
-    if (that.appSettings && that.appSettings.dbHost) {
+    if (that.appSettings && that.appSettings?.dbHost) {
       that.checkDbConnectionAndMigrate(that.appSettings);
     }
     if (

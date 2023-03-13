@@ -34,12 +34,12 @@ export class DatabaseService {
 
     // Initialize DB connection pool only if settings are available
     if (
-      that.appSettings.dbHost != null &&
-      that.appSettings.dbHost != "" &&
-      that.appSettings.dbUser != null &&
-      that.appSettings.dbUser != "" &&
-      that.appSettings.dbName != null &&
-      that.appSettings.dbName != ""
+      that.appSettings?.dbHost != null &&
+      that.appSettings?.dbHost != "" &&
+      that.appSettings?.dbUser != null &&
+      that.appSettings?.dbUser != "" &&
+      that.appSettings?.dbName != null &&
+      that.appSettings?.dbName != ""
     ) {
       this.dbConfig = {
         ...that.appSettings,
