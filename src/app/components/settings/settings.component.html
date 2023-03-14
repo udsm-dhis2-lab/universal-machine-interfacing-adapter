@@ -3,7 +3,7 @@
   <mat-card class="mt-4">
     <mat-card-header>
       <mat-card-title>
-        <strong>{{ settings.moduleName }}</strong>
+        <strong>{{ settings?.moduleName }}</strong>
       </mat-card-title>
       <mat-card-subtitle>System Settings</mat-card-subtitle>
     </mat-card-header>
@@ -196,12 +196,12 @@
             (change)="addDatabase($event.checked)"
           >
             {{
-              settings.hasExternalDB ? "External DB Added" : "Add External DB?"
+              settings?.hasExternalDB ? "External DB Added" : "Add External DB?"
             }}
           </mat-checkbox>
         </div>
         <hr />
-        <div *ngIf="settings.hasExternalDB" class="row">
+        <div *ngIf="settings?.hasExternalDB" class="row">
           <div class="w-50">
             <mat-form-field class="w-100" appearance="outline">
               <mat-label>Host</mat-label>
@@ -293,14 +293,14 @@
             (change)="hasExternalLogin($event.checked)"
           >
             {{
-              settings.hasExternalLogin
+              settings?.hasExternalLogin
                 ? "External Login Added"
                 : "Add External Login?"
             }}
           </mat-checkbox>
         </div>
         <hr />
-        <div *ngIf="settings.hasExternalLogin" class="row">
+        <div *ngIf="settings?.hasExternalLogin" class="row">
           <div class="d-flex justify-content-between">
             <div class="w-50">
               <mat-form-field class="w-100" appearance="outline">

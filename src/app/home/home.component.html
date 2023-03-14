@@ -1,7 +1,7 @@
 <main class="form-signin">
   <form>
     <h1 class="h3 mb-3 fw-normal">
-      {{ settings.moduleName || "Machine Intefacing" }}
+      {{ settings?.moduleName || "Machine Intefacing" }}
     </h1>
     <div (click)="openUrl()" style="cursor: pointer" class="text-center">
       <img src="assets/icons/logo.png" />
@@ -9,7 +9,7 @@
     <div class="form-floating mb-3">
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>{{
-          externalLoginCheck ? settings.identifier : "Username"
+          externalLoginCheck ? settings?.identifier : "Username"
         }}</mat-label>
         <input
           matInput
@@ -18,7 +18,7 @@
           name="login"
           [placeholder]="
             'Enter Your ' +
-            (externalLoginCheck ? settings.identifier : 'Username')
+            (externalLoginCheck ? settings?.identifier : 'Username')
           "
         />
       </mat-form-field>
@@ -78,14 +78,14 @@
     <br *ngIf="!externalLoginCheck" />
 
     <p
-      *ngIf="settings.hasExternalLogin && !externalLoginCheck"
+      *ngIf="settings?.hasExternalLogin && !externalLoginCheck"
       class="mt-3 text-center"
     >
       OR
     </p>
 
     <button
-      *ngIf="settings.hasExternalLogin && !externalLoginCheck"
+      *ngIf="settings?.hasExternalLogin && !externalLoginCheck"
       mat-flat-button
       class="w-100"
       [style.height]="'50px'"

@@ -109,7 +109,7 @@ export class SettingsComponent implements OnInit {
       dbName: that.settings.dbName,
       dbUser: that.settings.dbUser,
       dbPassword: that.settings.dbPassword,
-      hasExternalDB: that.settings.hasExternalDB,
+      hasExternalDB: that.settings?.hasExternalDB,
       authorizationCount: that.settings.authorizationCount,
       hasExternalLogin: that.settings.hasExternalLogin,
       externalLoginUrl: that.settings.externalLoginUrl,

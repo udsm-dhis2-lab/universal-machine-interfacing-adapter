@@ -72,7 +72,7 @@ export class DatabaseService {
     errorf?: ErrorOf,
     summary?: boolean
   ): Promise<DatabaseResponse> {
-    if (this.dbConfig.hasExternalDB) {
+    if (this.dbConfig?.hasExternalDB) {
       return await this.fetchFromPostgres(
         query,
         params,
