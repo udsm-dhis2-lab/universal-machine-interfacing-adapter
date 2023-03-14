@@ -37,7 +37,8 @@
     "pg": "^8.8.0",
     "pg-native": "^3.0.1",
     "serialport": "^10.5.0",
-    "sqlite3": "^5.1.2"
+    "sqlite3": "^5.1.2",
+    "usb": "^2.8.3"
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "14.1.0",

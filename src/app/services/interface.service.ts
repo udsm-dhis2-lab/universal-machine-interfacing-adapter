@@ -120,108 +120,117 @@ export class InterfaceService {
 
     that.connectionAttempt(true);
 
-    if (that.appSettings.interfaceConnectionMode === "tcpserver") {
+    switch(that.appSettings.interfaceConnectionMode){
+      case "tcpserver":
+        that.tcpServer(that.appSettings)
+      case "tcpclient":
+        that.tcpClient(that.appSettings)
+      case 'serial':
+        that.serialComs()
+      default:
+        that.logger("error", 'Missing communication protocol');
+        break;
+    }
+  }
+
+  private serialComs = () =>{}
+
+  private tcpServer = (appSettings) => {
+    const that = this
+    that.logger(
+      "info",
+      "Listening for connection on port " + appSettings.analyzerMachinePort
+    );
+    that.server = that.net.createServer();
+    that.server.listen(appSettings.analyzerMachinePort);
+
+    const sockets = [];
+
+    that.server.on("connection", function (socket) {
+      // confirm socket connection from client
       that.logger(
         "info",
-        "Listening for connection on port " +
-          that.appSettings.analyzerMachinePort
+        new Date() +
+          " : A remote client has connected to the Interfacing Server"
       );
-      that.server = that.net.createServer();
-      that.server.listen(that.appSettings.analyzerMachinePort);
-
-      const sockets = [];
-
-      that.server.on("connection", function (socket) {
-        // confirm socket connection from client
-        that.logger(
-          "info",
-          new Date() +
-            " : A remote client has connected to the Interfacing Server"
-        );
-        that.connectionStatus(true);
-        sockets.push(socket);
-        that.socketClient = socket;
-        socket.on("data", function (data) {
-          that.handleTCPResponse(data);
-        });
-
-        // Add a 'close' event handler to this instance of socket
-        socket.on("close", function () {
-          const index = sockets.findIndex(function (o) {
-            return (
-              o.analyzerMachineHost === socket.analyzerMachineHost &&
-              o.analyzerMachinePort === socket.analyzerMachinePort
-            );
-          });
-          if (index !== -1) {
-            sockets.splice(index, 1);
-          }
-        });
-      });
-
-      this.server.on("error", function (e) {
-        //that.connectionStatus(false);
-        //that.stopTryingStatus(true);
-        that.logger("error", "Error while connecting " + e.code);
-        that.closeConnection();
-
-        if (that.appSettings.interfaceAutoConnect === "yes") {
-          that.logger(
-            "error",
-            "Interface AutoConnect is enabled: Will restart server in 30 seconds"
-          );
-          setTimeout(() => {
-            that.reconnect();
-          }, 30000);
-        }
-      });
-    } else if (that.appSettings.interfaceConnectionMode === "tcpclient") {
-      that.socketClient = new that.net.Socket();
-      that.connectopts = {
-        port: that.appSettings.analyzerMachinePort,
-        host: that.appSettings.analyzerMachineHost,
-      };
-
-      that.logger("info", "Trying to connect as client");
-      that.connectionTries++; // incrementing the connection tries
-
-      that.socketClient.connect(that.connectopts, function () {
-        that.connectionTries = 0; // resetting connection tries to 0
-        that.connectionStatus(true);
-        that.logger("success", "Connected as client successfully");
-      });
-
-      that.socketClient.on("data", function (data) {
-        that.connectionStatus(true);
+      that.connectionStatus(true);
+      sockets.push(socket);
+      that.socketClient = socket;
+      socket.on("data", function (data) {
         that.handleTCPResponse(data);
       });
 
-      that.socketClient.on("close", function () {
-        // that.socketClient.destroy();
-        // that.connectionStatus(false);
-        // that.logger('info', 'Client Disconnected');
-        // that.closeConnection();
-      });
-
-      that.socketClient.on("error", (e) => {
-        //that.connectionStatus(false);
-        //that.stopTryingStatus(true);
-        that.logger("error", e);
-        that.closeConnection();
-
-        if (that.appSettings.interfaceAutoConnect === "yes") {
-          that.logger(
-            "error",
-            "Interface AutoConnect is enabled: Will re-attempt connection in 30 seconds"
+      // Add a 'close' event handler to this instance of socket
+      socket.on("close", function () {
+        const index = sockets.findIndex(function (o) {
+          return (
+            o.analyzerMachineHost === socket.analyzerMachineHost &&
+            o.analyzerMachinePort === socket.analyzerMachinePort
           );
-          setTimeout(() => {
-            that.reconnect();
-          }, 30000);
+        });
+        if (index !== -1) {
+          sockets.splice(index, 1);
         }
       });
-    } else {
-    }
-  }
+    });
+
+    this.server.on("error", function (e) {
+      //that.connectionStatus(false);
+      //that.stopTryingStatus(true);
+      that.logger("error", "Error while connecting " + e.code);
+      that.closeConnection();
+
+      if (appSettings.interfaceAutoConnect === "yes") {
+        that.logger(
+          "error",
+          "Interface AutoConnect is enabled: Will restart server in 30 seconds"
+        );
+        setTimeout(() => {
+          that.reconnect();
+        }, 30000);
+      }
+    });
+  };
+
+  private tcpClient = (appSettings) => {
+    const that = this;
+    that.socketClient = new that.net.Socket();
+    that.connectopts = {
+      port: appSettings.analyzerMachinePort,
+      host: appSettings.analyzerMachineHost,
+    };
+
+    that.logger("info", "Trying to connect as client");
+    that.connectionTries++; // incrementing the connection tries
+
+    that.socketClient.connect(that.connectopts, function () {
+      that.connectionTries = 0; // resetting connection tries to 0
+      that.connectionStatus(true);
+      that.logger("success", "Connected as client successfully");
+    });
+
+    that.socketClient.on("data", function (data) {
+      that.connectionStatus(true);
+      that.handleTCPResponse(data);
+    });
+
+    that.socketClient.on("error", (e) => {
+      //that.connectionStatus(false);
+      //that.stopTryingStatus(true);
+      that.logger("error", e);
+      that.closeConnection();
+
+      if (appSettings.interfaceAutoConnect === "yes") {
+        that.logger(
+          "error",
+          "Interface AutoConnect is enabled: Will re-attempt connection in 30 seconds"
+        );
+        setTimeout(() => {
+          that.reconnect();
+        }, 30000);
+      }
+    });
+  };
 
   reconnect() {
     this.closeConnection();
