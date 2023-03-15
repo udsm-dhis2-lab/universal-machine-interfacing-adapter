@@ -6,6 +6,8 @@ import { ElectronService } from "../core/services";
 import {
   DatabaseResponse,
   ErrorOf,
+  OrderDataInterface,
+  ResultInterface,
   Success,
 } from "../shared/interfaces/db.interface";
 import {
@@ -200,6 +202,7 @@ export class DatabaseService {
     const runResults = await runFunc({
       secret,
       db: this.functionsQuery,
+      raw: this.processRawData,
       settings: this.dbConfig,
       http: axios,
       sqlite: this.electronService.sqlite,
@@ -1091,4 +1094,131 @@ export class DatabaseService {
         });
     }
   }
+
+  private processRawData = (data: string) => {
+    if (data) {
+      const da = data;
+      let part1 = da.split("H|\\");
+
+      if (part1.length < 2) {
+        part1 = da.split("H|");
+      }
+      const outputData = [];
+      for (let j = 1; j < part1.length; j++) {
+        let orderData: OrderDataInterface = {} as any;
+        const resultData = [];
+
+        //order info
+        let part3 = part1[j].split("O|1|");
+        if (!part3[1]) part3 = part1[j].split("38|1|");
+
+        const header = part3[0].split("|");
+        if (header[3]) {
+          const device = header[3].split("^");
+          orderData.senderName = device[0];
+          orderData.versionNumber = device[1];
+          orderData.serialNumber = device[2];
+        }
+        orderData.processingID = header[10];
+        orderData.versionLevelCSLSI = header[11];
+        orderData.messageDateTime = header[12];
+
+        if (part3[1]) {
+          const order = part3[1].split("|");
+          const samp = order[0].split("^");
+          orderData.sampleID = samp[0];
+          if (order[1]) {
+            const orP = order[1].split("^");
+            orderData.specimenID = orP[0];
+            orderData.rackID = orP[1];
+            orderData.position = orP[2];
+            orderData.bayID = orP[3];
+            orderData.RSMPosition = orP[4];
+          }
+
+          if (order[2]) {
+            const orU = order[2].split("^");
+            orderData.assayNumber = orU[3];
+            orderData.assayName = orU[4];
+            orderData.sampleDilution = orU[5];
+          }
+          orderData.priority = order[3];
+          orderData.actionCode = order[9];
+          orderData.reportType = order[23];
+        }
+
+        //result info
+        for (let i = 1; i < 100; i++) {
+          let result: ResultInterface = {} as any;
+          const part5 = part1[j].split("R|" + i + "|");
+          const part6 = part1[j].split("M|" + i + "|");
+
+          //resultPart
+          if (part5[1]) {
+            const resl = part5[1].split("|");
+            if (resl[0]) {
+              const assy = resl[0].split("^");
+
+              result.assayNumber = assy[3];
+              result.assayName = assy[4];
+              result.assayDilutionType = assy[5];
+              result.resultType = assy[6];
+              if (assy[10]) result.resultType = assy[10];
+            }
+            result.sequenceNumber = i;
+            const presult = resl[1] ? resl[1] : "";
+            result.result = presult;
+
+            if (presult.toLowerCase() == "nonreactive") {
+              result.interpreted = "Negative";
+              result.interpretedAlias = "N";
+            }
+            if (presult.toLowerCase() == "reactive") {
+              result.interpreted = "Positive";
+              result.interpretedAlias = "P";
+            }
+
+            result.unit = resl[2] ? resl[2] : "";
+            result.referenceRange = resl[3] ? resl[3] : "";
+            result.abnormalFlag = resl[4] ? resl[4] : "";
+            result.resultStatus = resl[6] ? resl[6] : "";
+            if (resl[8]) {
+              const user = resl[8].split("^");
+              result.testedBy = user[0] ? user[0] : "";
+              result.releasedBy = user[1] ? user[1] : "";
+            }
+            result.analysisDateTime = resl[10] ? resl[10] : "";
+            if (resl[11]) {
+              const instr = resl[11].split("^");
+              result.instrumentSerial = instr[0];
+              result.processPathID = instr[1];
+              result.processLaneID = instr[2];
+            }
+          }
+
+          //manufacture record
+          if (part6[1]) {
+            const resM = part6[1].split("|");
+            result.mRecordType = resM[0];
+            result.mSequence = i;
+            result.mSubstanceIdentifier = resM[1];
+            result.mSubstanceType = resM[2];
+            result.mInventoryContainer = resM[3];
+            result.mExpireDate = resM[4];
+            result.mCalibrationDate = resM[5];
+            result.mLotNumber = resM[6];
+          }
+          if (result.result || result.mRecordType) {
+            resultData.push(result);
+          }
+        }
+        orderData.resultData = resultData;
+        outputData.push(orderData);
+      }
+
+      return outputData;
+    } else {
+      return [];
+    }
+  };
 }

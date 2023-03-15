@@ -125,3 +125,54 @@ export interface SettingsDB {
   dbUser: string;
   dbPassword: string;
 }
+
+export interface ResultInterface {
+  assayNumber: string;
+  assayName: string;
+  assayDilutionType: string;
+  resultType: string;
+  sequenceNumber: number;
+  result: string;
+  interpreted: string;
+  interpretedAlias: string;
+  unit: string;
+  referenceRange: string;
+  abnormalFlag: string;
+  resultStatus: string;
+  testedBy: string;
+  releasedBy: string;
+  analysisDateTime: string;
+  instrumentSerial: string;
+  processPathID: string;
+  processLaneID: string;
+  mRecordType: string;
+  mSequence: number;
+  mSubstanceIdentifier: string;
+  mSubstanceType: string;
+  mInventoryContainer: string;
+  mExpireDate: string;
+  mCalibrationDate: string;
+  mLotNumber: string;
+}
+
+export interface OrderDataInterface {
+  senderName: string;
+  versionNumber: string;
+  serialNumber: string;
+  processingID: string;
+  versionLevelCSLSI: string;
+  messageDateTime: string;
+  sampleID: string;
+  specimenID: string;
+  rackID: string;
+  position: string;
+  bayID: string;
+  RSMPosition: string;
+  assayNumber: string;
+  assayName: string;
+  sampleDilution: string;
+  priority: string;
+  actionCode: string;
+  reportType: string;
+  resultData: ResultInterface[];
+}
