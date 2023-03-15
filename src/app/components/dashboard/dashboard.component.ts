@@ -329,7 +329,17 @@ export class DashboardComponent implements OnInit {
   }
 
   testData = () => {
-    const data = {
+    const data = readFileSync("./data.txt", "utf-8");
+    this.database.addRawData(
+      { data, machine: this.appSettings.analyzerMachineName },
+      (res) => {
+        this.interfaceService.processASTMElecsysData(data, res[0]?.id);
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+    /*const data = {
       order_id: "TRT2300177",
       test_id: "1",
       test_type: "^MTBX^^inv^Xpert MTB-XDR^1^INVALID^",
@@ -352,7 +362,7 @@ export class DashboardComponent implements OnInit {
       (res: any) => {},
       (error: any) => {}
     );
-    this.fetchLastOrders();
+    this.fetchLastOrders();*/
   };
 
   onDelete = (element: any) => {

@@ -11,7 +11,7 @@ const start = async () => {
     );
 
     try {
-      sql = 'ALTER TABLE ORDERS ADD COLUMN raw_json TEXT;'
+      sql = 'ALTER TABLE ORDERS ADD COLUMN raw_id INTEGER DEFAULT NULL;'
       db.all(sql, [], async (err, rows) => {
 
         console.error(err ? err : "No data to sync");
@@ -21,7 +21,7 @@ const start = async () => {
       });
     } catch (e) { }
 
-    try {
+    /*try {
       sql = 'ALTER TABLE ORDERS ADD COLUMN added_on datetime;'
       db.all(sql, [], async (err, rows) => {
 
@@ -41,7 +41,7 @@ const start = async () => {
         console.log('rows', rows);
 
       });
-    } catch (e) { }
+    } catch (e) { }*/
 
     db.close()
 

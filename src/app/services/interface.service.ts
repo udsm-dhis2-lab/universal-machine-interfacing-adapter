@@ -120,23 +120,23 @@ export class InterfaceService {
 
     that.connectionAttempt(true);
 
-    switch(that.appSettings.interfaceConnectionMode){
+    switch (that.appSettings.interfaceConnectionMode) {
       case "tcpserver":
-        that.tcpServer(that.appSettings)
+        that.tcpServer(that.appSettings);
       case "tcpclient":
-        that.tcpClient(that.appSettings)
-      case 'serial':
-        that.serialComs()
+        that.tcpClient(that.appSettings);
+      case "serial":
+        that.serialComs();
       default:
-        that.logger("error", 'Missing communication protocol');
+        that.logger("error", "Missing communication protocol");
         break;
     }
   }
 
-  private serialComs = () =>{}
+  private serialComs = () => {};
 
   private tcpServer = (appSettings) => {
-    const that = this
+    const that = this;
     that.logger(
       "info",
       "Listening for connection on port " + appSettings.analyzerMachinePort
@@ -146,7 +146,7 @@ export class InterfaceService {
 
     const sockets = [];
 
-    that.server.on("connection", function (socket) {
+    that.server.on("connection", (socket) => {
       // confirm socket connection from client
       that.logger(
         "info",
@@ -156,13 +156,13 @@ export class InterfaceService {
       that.connectionStatus(true);
       sockets.push(socket);
       that.socketClient = socket;
-      socket.on("data", function (data) {
+      socket.on("data", (data) => {
         that.handleTCPResponse(data);
       });
 
       // Add a 'close' event handler to this instance of socket
-      socket.on("close", function () {
-        const index = sockets.findIndex(function (o) {
+      socket.on("close", () => {
+        const index = sockets.findIndex((o) => {
           return (
             o.analyzerMachineHost === socket.analyzerMachineHost &&
             o.analyzerMachinePort === socket.analyzerMachinePort
@@ -174,7 +174,7 @@ export class InterfaceService {
       });
     });
 
-    this.server.on("error", function (e) {
+    this.server.on("error", (e) => {
       //that.connectionStatus(false);
       //that.stopTryingStatus(true);
       that.logger("error", "Error while connecting " + e.code);
@@ -203,13 +203,13 @@ export class InterfaceService {
     that.logger("info", "Trying to connect as client");
     that.connectionTries++; // incrementing the connection tries
 
-    that.socketClient.connect(that.connectopts, function () {
+    that.socketClient.connect(that.connectopts, () => {
       that.connectionTries = 0; // resetting connection tries to 0
       that.connectionStatus(true);
       that.logger("success", "Connected as client successfully");
     });
 
-    that.socketClient.on("data", function (data) {
+    that.socketClient.on("data", (data) => {
       that.connectionStatus(true);
       that.handleTCPResponse(data);
     });
@@ -268,25 +268,26 @@ export class InterfaceService {
     return str;
   }
 
-  processHL7DataGeneXpert(rawText: string) {
+  processHL7DataGeneXpert(rawText: string, raw_id: number) {
     const that = this;
     // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
-    that.parseHL7DH76(rawText);
+    that.parseHL7DH76(rawText, raw_id);
     // } else {
     // that.processHl7V1(rawText);
     // }
   }
 
-  processHL7Data(rawText: string) {
+  processHL7Data(rawText: string, raw_id: number) {
     const that = this;
     // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
-    that.parseHL7DH76(rawText);
+    that.parseHL7DH76(rawText, raw_id);
     // } else {
     // that.processHl7V1(rawText);
     // }
   }
 
   handleTCPResponse(data: { toString: (arg0: string) => any }) {
+    let raw_id: number;
     const that = this;
     if (that.appSettings.interfaceCommunicationProtocol === "hl7") {
       that.logger("info", "Receiving HL7 data");
@@ -306,10 +307,10 @@ export class InterfaceService {
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings.analyzerMachineName;
-
         that.dbService.addRawData(
           rData,
           (res) => {
+            raw_id = res.id;
             that.logger("success", "HL7 Raw data successfully saved");
           },
           (err) => {
@@ -327,7 +328,7 @@ export class InterfaceService {
           "\r"
         );
 
-        that.processHL7Data(that.strData);
+        that.processHL7Data(that.strData, raw_id);
         that.strData = "";
       } else {
         that.logger("error", "NOT a HL7 format or malformatted");
@@ -339,6 +340,7 @@ export class InterfaceService {
         that.dbService.addRawData(
           rData,
           (res) => {
+            raw_id = res.id;
             that.logger("success", "Raw data saved for analysis");
           },
           (err) => {
@@ -372,7 +374,7 @@ export class InterfaceService {
         that.dbService.addRawData(
           rData,
           (res) => {
-            console.log("RES", res);
+            raw_id = res.id;
             that.logger("success", "Raw data successfully saved");
           },
           (err) => {
@@ -384,7 +386,7 @@ export class InterfaceService {
         );
 
         that.logger("info", that.strData);
-        that.processASTMElecsysData(that.strData);
+        that.processASTMElecsysData(that.strData, raw_id);
         that.strData = "";
       } else if (d === "21") {
         that.socketClient.write(that.ACK);
@@ -419,6 +421,7 @@ export class InterfaceService {
         that.dbService.addRawData(
           rData,
           (res) => {
+            raw_id = res.id;
             that.logger("success", "Raw data successfully saved");
           },
           (err) => {
@@ -429,7 +432,7 @@ export class InterfaceService {
           }
         );
 
-        that.processASTMConcatenatedData(that.strData);
+        that.processASTMConcatenatedData(that.strData, raw_id);
         that.strData = "";
       } else if (d === "21") {
         that.socketClient.write(that.ACK);
@@ -485,23 +488,18 @@ export class InterfaceService {
     return d;
   }
 
-  processASTMElecsysData(astmData: string) {
-    //that.logger('info', astmData);
-
+  processASTMElecsysData(astmData: string, raw_id: number) {
     const that = this;
     const fullDataArray = astmData.split("##START##");
 
-    // that.logger('info', "AFTER SPLITTING USING ##START##");
-    // that.logger('info', fullDataArray);
-
-    fullDataArray.forEach(function (partData) {
+    fullDataArray.forEach((partData) => {
       if (partData !== "" && partData !== undefined && partData !== null) {
         let data = partData.replace(/[\x05\x02\x03]/g, "");
         let astmArray = data.split(/\r?\n/);
 
         const dataArray = [];
 
-        astmArray.forEach(function (element) {
+        astmArray.forEach((element) => {
           if (element !== "") {
             element = element.replace(/^\d*/, "");
             if (dataArray[element.substring(0, 1)] === undefined) {
@@ -513,7 +511,6 @@ export class InterfaceService {
             }
           }
         });
-
         that.logger("info", dataArray);
         that.logger("info", dataArray["R"]);
         if (
@@ -549,9 +546,6 @@ export class InterfaceService {
             dataArray["C"] = dataArray["C"].split(",");
           }
 
-          console.warn(dataArray["O"]);
-          console.warn(dataArray["R"]);
-
           if (dataArray["O"] !== undefined && dataArray["O"] !== null) {
             order.order_id = dataArray["O"][2];
             order.test_id = dataArray["O"][1];
@@ -586,17 +580,14 @@ export class InterfaceService {
             order.raw_text = partData;
             order.result_status = 1;
             order.lims_sync_status = 0;
-            order.test_location = that.appSettings.labName;
-            order.machine_used = that.appSettings.analyzerMachineName;
-
+            order.test_location = that.appSettings?.labName;
+            order.machine_used = that.appSettings?.analyzerMachineName;
             if (order.order_id) {
-              that.logger(
-                "info",
-                "Trying to add order :" + JSON.stringify(order)
-              );
+              that.logger("info", "Trying to add order :" + order.order_id);
               that.dbService.addOrderTest(
-                order,
+                { ...order, raw_id },
                 (res) => {
+                  console.log(res);
                   that.logger(
                     "success",
                     "Result Successfully Added : " + order.order_id
@@ -618,16 +609,8 @@ export class InterfaceService {
           }
         } catch (error) {
           that.logger("error", error);
-          console.error(error);
           return;
         }
-
-        //if (dataArray == undefined || dataArray['0'] == undefined ||
-        //      dataArray['O'][3] == undefined || dataArray['O'][3] == null ||
-        //        dataArray['O'][3] == '') return;
-        //if (dataArray == undefined || dataArray['R'] == undefined
-        //        || dataArray['R'][2] == undefined || dataArray['R'][2] == null
-        //        || dataArray['R'][2] == '') return;
       } else {
         that.logger(
           "error",
@@ -637,7 +620,7 @@ export class InterfaceService {
     });
   }
 
-  processASTMConcatenatedData(astmData: string) {
+  processASTMConcatenatedData(astmData: string, raw_id: number) {
     //this.logger('info', astmData);
 
     const that = this;
@@ -657,17 +640,13 @@ export class InterfaceService {
       .replace(/<STX>/g, "");
 
     const fullDataArray = astmData.split("##START##");
-
-    // that.logger('info', "AFTER SPLITTING USING ##START##");
-    // that.logger('info', fullDataArray);
-
-    fullDataArray.forEach(function (partData) {
+    fullDataArray.forEach((partData) => {
       if (partData !== "" && partData !== undefined && partData !== null) {
         const astmArray = partData.split(/<CR>/);
 
         const dataArray = [];
 
-        astmArray.forEach(function (element) {
+        astmArray.forEach((element) => {
           if (element !== "") {
             element = element.replace(/^\d*/, "");
             if (dataArray[element.substring(0, 1)] === undefined) {
@@ -751,12 +730,9 @@ export class InterfaceService {
             order.machine_used = that.appSettings.analyzerMachineName;
 
             if (order.order_id) {
-              that.logger(
-                "info",
-                "Trying to add order :" + JSON.stringify(order)
-              );
+              that.logger("info", "Trying to add order :" + order.order_id);
               that.dbService.addOrderTest(
-                order,
+                { ...order, raw_id },
                 (res) => {
                   that.logger(
                     "success",
@@ -779,21 +755,13 @@ export class InterfaceService {
           }
         } catch (error) {
           that.logger("error", error);
-          console.error(error);
           return;
         }
-
-        //if (dataArray == undefined || dataArray['0'] == undefined ||
-        //      dataArray['O'][3] == undefined || dataArray['O'][3] == null ||
-        //        dataArray['O'][3] == '') return;
-        //if (dataArray == undefined || dataArray['R'] == undefined
-        //        || dataArray['R'][2] == undefined || dataArray['R'][2] == null
-        //        || dataArray['R'][2] == '') return;
       }
     });
   }
 
-  hasSetId(fields, segmentName) {
+  hasSetId(fields: any[], segmentName: string | number) {
     let hasId = false;
     let setId = 0;
     fields.forEach((field: any, index: number) => {
@@ -806,7 +774,7 @@ export class InterfaceService {
     return { hasId, setId };
   }
 
-  flattenData(data) {
+  flattenData(data: { [x: string]: any }) {
     const finalData = {};
     Object.keys(data).forEach((key) => {
       if (Array.isArray(data[key])) {
@@ -824,7 +792,7 @@ export class InterfaceService {
     return finalData;
   }
 
-  parseHL7DH76 = (hl7: string) => {
+  parseHL7DH76 = (hl7: string, raw_id: number) => {
     const data: any = {};
     let master = [];
 
@@ -904,10 +872,8 @@ export class InterfaceService {
       raw_json: JSON.stringify(data),
     };
 
-    console.log(JSON.stringify(order));
-
     this.dbService.addOrderTest(
-      order,
+      { ...order, raw_id },
       (res) => {
         this.logger("success", "Result Successfully Added : " + order.order_id);
         this.logger("success", "Data : " + JSON.stringify(res));
@@ -971,7 +937,7 @@ export class InterfaceService {
     that.liveLogSubject.next(that.logtext);
   }
 
-  logger(logType, message) {
+  logger(logType: string, message: string | any[]) {
     const that = this;
     const moment = require("moment");
     const date = moment(new Date()).format("DD-MMM-YYYY HH:mm:ss");
@@ -1031,7 +997,7 @@ export class InterfaceService {
 
     const spm = message.get("SPM");
     let sampleNumber = 0;
-    spm.forEach(function (singleSpm) {
+    spm.forEach((singleSpm) => {
       //sampleNumber = (singleSpm.get(1).toInteger());
       //const singleObx = obx[(sampleNumber * 2) - 1]; // there are twice as many OBX .. so we take the even number - 1 OBX for each SPM
       const singleObx = obx[0]; // there are twice as many OBX .. so we take the even number - 1 OBX for each SPM
