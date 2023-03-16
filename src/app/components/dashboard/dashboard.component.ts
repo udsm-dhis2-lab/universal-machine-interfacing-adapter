@@ -333,7 +333,7 @@ export class DashboardComponent implements OnInit {
     this.database.addRawData(
       { data, machine: this.appSettings.analyzerMachineName },
       (res) => {
-        this.interfaceService.processASTMElecsysData(data, res[0]?.id);
+        this.interfaceService.processASTMElecsysData(data);
       },
       (error) => {
         console.log(error);

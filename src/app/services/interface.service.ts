@@ -268,19 +268,19 @@ export class InterfaceService {
     return str;
   }
 
-  processHL7DataGeneXpert(rawText: string, raw_id: number) {
+  processHL7DataGeneXpert(rawText: string) {
     const that = this;
     // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
-    that.parseHL7DH76(rawText, raw_id);
+    that.parseHL7DH76(rawText);
     // } else {
     // that.processHl7V1(rawText);
     // }
   }
 
-  processHL7Data(rawText: string, raw_id: number) {
+  processHL7Data(rawText: string) {
     const that = this;
     // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
-    that.parseHL7DH76(rawText, raw_id);
+    that.parseHL7DH76(rawText);
     // } else {
     // that.processHl7V1(rawText);
     // }
@@ -328,7 +328,7 @@ export class InterfaceService {
           "\r"
         );
 
-        that.processHL7Data(that.strData, raw_id);
+        that.processHL7Data(that.strData);
         that.strData = "";
       } else {
         that.logger("error", "NOT a HL7 format or malformatted");
@@ -386,7 +386,7 @@ export class InterfaceService {
         );
 
         that.logger("info", that.strData);
-        that.processASTMElecsysData(that.strData, raw_id);
+        that.processASTMElecsysData(that.strData);
         that.strData = "";
       } else if (d === "21") {
         that.socketClient.write(that.ACK);
@@ -432,7 +432,7 @@ export class InterfaceService {
           }
         );
 
-        that.processASTMConcatenatedData(that.strData, raw_id);
+        that.processASTMConcatenatedData(that.strData);
         that.strData = "";
       } else if (d === "21") {
         that.socketClient.write(that.ACK);
@@ -488,7 +488,7 @@ export class InterfaceService {
     return d;
   }
 
-  processASTMElecsysData(astmData: string, raw_id: number) {
+  processASTMElecsysData(astmData: string) {
     const that = this;
     const fullDataArray = astmData.split("##START##");
 
@@ -585,7 +585,7 @@ export class InterfaceService {
             if (order.order_id) {
               that.logger("info", "Trying to add order :" + order.order_id);
               that.dbService.addOrderTest(
-                { ...order, raw_id },
+                order,
                 (res) => {
                   console.log(res);
                   that.logger(
@@ -620,7 +620,7 @@ export class InterfaceService {
     });
   }
 
-  processASTMConcatenatedData(astmData: string, raw_id: number) {
+  processASTMConcatenatedData(astmData: string) {
     //this.logger('info', astmData);
 
     const that = this;
@@ -732,7 +732,7 @@ export class InterfaceService {
             if (order.order_id) {
               that.logger("info", "Trying to add order :" + order.order_id);
               that.dbService.addOrderTest(
-                { ...order, raw_id },
+                order,
                 (res) => {
                   that.logger(
                     "success",
@@ -792,7 +792,7 @@ export class InterfaceService {
     return finalData;
   }
 
-  parseHL7DH76 = (hl7: string, raw_id: number) => {
+  parseHL7DH76 = (hl7: string) => {
     const data: any = {};
     let master = [];
 
@@ -873,7 +873,7 @@ export class InterfaceService {
     };
 
     this.dbService.addOrderTest(
-      { ...order, raw_id },
+      order,
       (res) => {
         this.logger("success", "Result Successfully Added : " + order.order_id);
         this.logger("success", "Data : " + JSON.stringify(res));
