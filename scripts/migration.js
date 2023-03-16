@@ -21,7 +21,7 @@ const start = async () => {
       });
     } catch (e) { }
 
-    /*try {
+    try {
       sql = 'ALTER TABLE ORDERS ADD COLUMN added_on datetime;'
       db.all(sql, [], async (err, rows) => {
 
@@ -41,7 +41,7 @@ const start = async () => {
         console.log('rows', rows);
 
       });
-    } catch (e) { }*/
+    } catch (e) { }
 
     db.close()
 
