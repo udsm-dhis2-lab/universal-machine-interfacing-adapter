@@ -39,11 +39,12 @@ function createWindow(): BrowserWindow {
   try {
     Store.initRenderer();
     store = new Store();
+    if(store){
     sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
     store.set("appPath", sqlitePath);
     store.set("isDev", `${app.isPackaged}`);
+    }
   } catch (e) {
-    store.set("isDev", `${app.isPackaged}`);
   }
 
   // Create the browser window.

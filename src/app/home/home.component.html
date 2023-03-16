@@ -95,8 +95,18 @@
     >
       Login with {{ settings.systemName }}
     </button>
-    <p (click)="openUrl()" class="mt-5 mb-3 text-muted" style="cursor: pointer">
+    <div class="d-flex justify-content-between">
+      <div>
+<p (click)="openUrl()" class="mt-5 mb-3 text-muted" style="cursor: pointer">
       &copy; UDSM DHIS2 Lab
     </p>
+      </div>
+
+      <div>
+    <p class="mt-5 mb-3 text-muted ">
+      v0.0.1
+    </p>
+      </div>
+    </div>
   </form>
 </main>
