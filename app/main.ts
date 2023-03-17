@@ -39,13 +39,12 @@ function createWindow(): BrowserWindow {
   try {
     Store.initRenderer();
     store = new Store();
-    if(store){
-    sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
-    store.set("appPath", sqlitePath);
-    store.set("isDev", `${app.isPackaged}`);
+    if (store) {
+      sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
+      store.set("appPath", sqlitePath);
+      store.set("isDev", `${app.isPackaged}`);
     }
-  } catch (e) {
-  }
+  } catch (e) {}
 
   // Create the browser window.
   win = new BrowserWindow({
@@ -140,7 +139,14 @@ try {
 
     sqlitePath = path.join(app.getPath("userData"), "/data/", sqliteDbName);
     const database = new sqlite3.Database(sqlitePath, (err) => {
-      if (err) {
+      if (err && store) {
+        store.set(
+          "appPath",
+          path.join(app.getPath("userData"), "/data/", sqliteDbName)
+        );
+        console.error("Database opening error: ", err);
+      } else {
+        store = new Store();
         store.set(
           "appPath",
           path.join(app.getPath("userData"), "/data/", sqliteDbName)

@@ -41,7 +41,7 @@ export class DashboardComponent implements OnInit {
   displayedColumns: string[] = [
     "order_id",
     "test_id",
-    "results",
+    // "results",
     "test_unit",
     "test_type",
     "tested_by",
@@ -63,6 +63,7 @@ export class DashboardComponent implements OnInit {
     },
     2: { icon: "♻️", color: "", spin: true, label: "Synching" },
     3: { icon: "🚫", color: "", spin: false, label: "Failed" },
+    ERROR: { icon: "🚫", color: "", spin: false, label: "Failed" },
   };
 
   statusesForKey = uniqBy(
@@ -166,9 +167,10 @@ export class DashboardComponent implements OnInit {
 
     that.interfaceService.fetchLastSyncTimes((data: any) => {
       that.lastLimsSync = data?.lastLimsSync;
+      const timezone = this.getTimeZone();
       that.lastResultReceived = (data?.lastresultreceived || "")
         .toString()
-        .split("GMT+0300")
+        .split(`GMT${timezone}`)
         .join("");
     });
 
@@ -182,6 +184,15 @@ export class DashboardComponent implements OnInit {
       }
     );
   }
+
+  getTimeZone = () => {
+    const offset = new Date().getTimezoneOffset(),
+      o = Math.abs(offset);
+    return `${offset < 0 ? "+" : "-"}${("00" + Math.floor(o / 60)).slice(-2)}${(
+      "00" +
+      (o % 60)
+    ).slice(-2)}`;
+  };
 
   pageChanged(event: PageEvent) {
     this.pageSize = event.pageSize;
@@ -330,39 +341,8 @@ export class DashboardComponent implements OnInit {
 
   testData = () => {
     const data = readFileSync("./data.txt", "utf-8");
-    this.database.addRawData(
-      { data, machine: this.appSettings.analyzerMachineName },
-      (res) => {
-        this.interfaceService.processASTMElecsysData(data);
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-    /*const data = {
-      order_id: "TRT2300177",
-      test_id: "1",
-      test_type: "^MTBX^^inv^Xpert MTB-XDR^1^INVALID^",
-      test_unit: "",
-      patient_id: "120801104601-0-KK-2023-3",
-      results: "^",
-      tested_by: "Paschal Qwaray",
-      analysed_date_time: "2023-01-13 12:45:59",
-      authorised_date_time: "2023-01-13 12:45:59",
-      result_accepted_date_time: "2023-01-13 12:45:59",
-      result_status: 1,
-      lims_sync_status: 0,
-      test_location: "Blove",
-      machine_used: "GeneXpert",
-      can_sync: "FALSE",
-      raw_json: JSON.stringify({ data: "OK" }),
-    };
-    this.database.addOrderTest(
-      data,
-      (res: any) => {},
-      (error: any) => {}
-    );
-    this.fetchLastOrders();*/
+    this.interfaceService.processASTMConcatenatedData(data);
+    this.fetchLastOrders();
   };
 
   onDelete = (element: any) => {

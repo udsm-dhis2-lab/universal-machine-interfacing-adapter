@@ -498,19 +498,8 @@ export class DatabaseService {
 
   addOrderTest(
     data: { [s: string]: unknown } | ArrayLike<unknown>,
-    success?: {
-      (res: any): void;
-      (res: any): void;
-      (res: any): void;
-      (res: any): void;
-      (arg0: any): void;
-    },
-    errorf?: {
-      (err: any): void;
-      (err: any): void;
-      (err: any): void;
-      (err: any): void;
-    }
+    success?: Success,
+    errorf?: ErrorOf
   ) {
     const t = `INSERT INTO ORDERS(${Object.keys(data).join(
       ","
@@ -518,13 +507,20 @@ export class DatabaseService {
       .map((key, index) => "$" + (index + 1))
       .join(",")}) RETURNING *`;
 
+    const sql = `INSERT INTO ORDERS(${Object.keys(data).join(
+      ","
+    )}) VALUES(${Object.values(data)
+      .map((d) => '"' + d + '"')
+      .join(",")}) RETURNING *`;
+
     if (this.dbConnected) {
       this.query(t, Object.values(data), success, errorf);
     }
-
+    console.log(sql);
     this.electronService
-      .execSqliteQuery(t, Object.values(data))
+      .execSqliteQuery(sql, [])
       .then((results: any) => {
+        console.table("RESULTS", results[0]);
         success(results);
       })
       .catch((e: any) => errorf(e));
@@ -1097,11 +1093,10 @@ export class DatabaseService {
 
   private processRawData = (data: string) => {
     if (data) {
-      const da = data;
-      let part1 = da.split("H|\\");
+      let part1 = data?.split("H|\\");
 
       if (part1.length < 2) {
-        part1 = da.split("H|");
+        part1 = data?.split("H|");
       }
       const outputData = [];
       for (let j = 1; j < part1.length; j++) {
