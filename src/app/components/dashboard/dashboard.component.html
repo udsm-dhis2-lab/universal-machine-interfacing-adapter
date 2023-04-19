@@ -121,10 +121,11 @@
           </button>
         </div>
       </div>
+
       <table mat-table [dataSource]="lastOrders" class="mat-elevation-z2 table">
         <!-- Name Column -->
         <ng-container class="text-center" matColumnDef="order_id">
-          <th style="width: 15% !important" mat-header-cell *matHeaderCellDef>
+          <th style="width: 25% !important" mat-header-cell *matHeaderCellDef>
             Patient ID
           </th>
           <td mat-cell *matCellDef="let element">{{ element?.patient_id }}</td>
@@ -138,12 +139,12 @@
         </ng-container>
 
         <!-- Description Column -->
-        <ng-container matColumnDef="results">
+        <!-- <ng-container matColumnDef="results">
           <th style="width: 15%" mat-header-cell *matHeaderCellDef>
             Test Result
           </th>
           <td mat-cell *matCellDef="let element">{{ element?.results }}</td>
-        </ng-container>
+        </ng-container> -->
 
         <!-- Frequency Column -->
         <ng-container matColumnDef="test_unit">
@@ -243,7 +244,6 @@
             {{ element?.lims_sync_date_time }}
           </td>
         </ng-container>
-
         <!-- Actions Column -->
         <ng-container matColumnDef="actions" lastButton>
           <th mat-header-cell *matHeaderCellDef>Actions</th>
@@ -284,7 +284,9 @@
                 <span>{{
                   !appSettings.authorizationCount ||
                   (appSettings.authorizationCount &&
-                    appSettings.authorizationCount == 0)
+                    (appSettings.authorizationCount == 0 ||
+                      !appSettings.authorizationCount ||
+                      appSettings.authorizationCount == ""))
                     ? "Approve"
                     : appSettings.authorizationCount > 0 &&
                       currentOrderApprovalStatuses?.length <=

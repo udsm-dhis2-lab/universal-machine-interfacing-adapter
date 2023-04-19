@@ -69,6 +69,9 @@ const cleanData = (data) => {
     const testedResults = dataArray.resultData.filter(d => d.testedBy && d.testedBy !== '')
     results = [...results, ...testedResults]
   }
+  const ethr = data.split('ETH Resistance^|')
+  const ethrData = { ...results[0], assayNumber: 'eth', result: ethr.length > 1 ? ethr[1]?.split('|')[0] : null }
+  results = [...results, ethrData]
   return sanitizeResults(results)
 }
 
@@ -175,17 +178,6 @@ const syncData = async (rows) => {
     }
     continue;
   }
-
-  const query = `UPDATE PROCESS SET RUNNING=${0} WHERE ID=${context.id}`;
-  db.all(query, [], async (err, rows) => {
-    if (!err) {
-      console.log(rows);
-    } else {
-      console.error(err);
-    }
-  });
-
-  db.close();
 };
 const run = async () => {
   try {

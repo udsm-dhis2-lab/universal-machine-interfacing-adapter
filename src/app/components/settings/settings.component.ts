@@ -124,7 +124,7 @@ export class SettingsComponent implements OnInit {
       that.store.set("appSettings", appSettings);
     } catch (e) {}
     new Notification("✅", {
-      body: "Updated interfacing settings",
+      body: "Updated Successfully",
       icon: "assets/icons/favicon.png",
       timestamp: new Date().valueOf(),
     });

@@ -43,7 +43,7 @@ export class DashboardComponent implements OnInit {
     "test_id",
     // "results",
     "test_unit",
-    "test_type",
+    // "test_type",
     "tested_by",
     "tested_on",
     "can_sync",
