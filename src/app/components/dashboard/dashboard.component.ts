@@ -166,12 +166,8 @@ export class DashboardComponent implements OnInit {
     that.interfaceService.fetchLastOrders(true);
 
     that.interfaceService.fetchLastSyncTimes((data: any) => {
-      that.lastLimsSync = data?.lastLimsSync;
-      const timezone = this.getTimeZone();
-      that.lastResultReceived = (data?.lastresultreceived || "")
-        .toString()
-        .split(`GMT${timezone}`)
-        .join("");
+      that.lastLimsSync = this.getTimes(data?.lims_sync_date_time);
+      that.lastResultReceived = this.getTimes(data?.added_on);
     });
 
     that.interfaceService.lastOrders.subscribe(
@@ -179,20 +175,19 @@ export class DashboardComponent implements OnInit {
         that._ngZone.run(() => {
           this.totalRows =
             lastFewOrders[0]?.rowCount ?? lastFewOrders[0]?.length;
-          that.lastOrders = lastFewOrders[0]?.rows ?? lastFewOrders[0];
+          that.lastOrders = (lastFewOrders[0]?.rows ?? lastFewOrders[0]) || [];
+
+          that.lastOrders = that.lastOrders.map((order) => {
+            return {
+              ...order,
+              analysed_date_time: this.getTimes(order.analysed_date_time),
+              lims_sync_date_time: this.getTimes(order.lims_sync_date_time),
+            };
+          });
         });
       }
     );
   }
-
-  getTimeZone = () => {
-    const offset = new Date().getTimezoneOffset(),
-      o = Math.abs(offset);
-    return `${offset < 0 ? "+" : "-"}${("00" + Math.floor(o / 60)).slice(-2)}${(
-      "00" +
-      (o % 60)
-    ).slice(-2)}`;
-  };
 
   pageChanged(event: PageEvent) {
     this.pageSize = event.pageSize;
@@ -358,6 +353,29 @@ export class DashboardComponent implements OnInit {
         this.deleteOrder(element);
       }
     });
+  };
+
+  getTimes = (date: string) => {
+    if (!date || date == "") return "";
+    const diffTime = new Date().getTime() - new Date(date).getTime();
+    const days = Math.round(diffTime / (1000 * 3600 * 24));
+    const hours = Math.round(diffTime / (1000 * 3600));
+    const minutes = Math.round(diffTime / (1000 * 60));
+    return this.getTime(days, hours, minutes);
+  };
+
+  private getTime = (days: number, hours: number, minutes: number) => {
+    return days >= 1
+      ? this.getSanitizedTime(days, "day")
+      : hours >= 1
+      ? this.getSanitizedTime(hours, "hour")
+      : minutes >= 1
+      ? this.getSanitizedTime(minutes, "minute")
+      : "A few seconds ago";
+  };
+
+  private getSanitizedTime = (time: number, label: string) => {
+    return `${time} ${time > 1 ? label + "s" : label} ago`;
   };
 
   private deleteOrder = (element: any) => {

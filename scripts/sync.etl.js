@@ -71,7 +71,9 @@ const cleanData = (data) => {
   }
   const ethr = data.split('ETH Resistance^|')
   const ethrData = { ...results[0], assayNumber: 'eth', result: ethr.length > 1 ? ethr[1]?.split('|')[0] : null }
-  results = [...results, ethrData]
+  if (ethrData.result) {
+    results = [...results, ethrData]
+  }
   return sanitizeResults(results)
 }
 
@@ -152,9 +154,10 @@ const syncData = async (rows) => {
           headers,
         });
       const response = data?.response;
-      if (response?.imported === 1 || response?.updated === 1) {
-        const reference_uuid = response?.importSummaries[0]?.reference;
-        const sync_status = response?.importSummaries[0]?.status;
+
+      if (response?.imported || response?.updated) {
+        const reference_uuid = response?.importSummaries ? response.importSummaries[0]?.reference : response.reference;
+        const sync_status = response?.importSummaries ? response?.importSummaries[0]?.status : response.status;
         //   Update the orders table for sync reference references
         try {
           const db = new context.sqlite.Database(
@@ -166,13 +169,16 @@ const syncData = async (rows) => {
             }
           );
 
-          const query = `UPDATE orders SET reference_uuid="${reference_uuid}",sync_status="${sync_status}" WHERE id=${row?.id}`;
+          const query = `UPDATE orders SET reference_uuid="${reference_uuid}",sync_status="${sync_status}", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${row?.id}`;
           db.all(query, [], async (err, rows) => {
-            if (!err) {
+            if (err) {
+              console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', err?.toUpperCase(), ' 🚫')
             } else {
             }
           });
-        } catch (e) { }
+        } catch (e) {
+          console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', e.message.toUpperCase(), ' 🚫')
+        }
       } else {
       }
     }
@@ -190,6 +196,14 @@ const run = async () => {
         }
       }
     );
+
+    if (!context.secret || !context?.secret?.id) {
+      db.all(`SELECT * FROM SECRET WHERE ID=${context.secret_id}`, [], (_err, rows) => {
+        if (rows?.length > 0) {
+          context.secret = context?.parseSecret(rows[0].value)
+        }
+      })
+    }
 
     const sql = `SELECT * FROM orders WHERE CAN_SYNC='true';`;
     db.all(sql, [], async (err, rows) => {

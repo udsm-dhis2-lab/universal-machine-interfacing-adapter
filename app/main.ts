@@ -268,6 +268,8 @@ try {
 
     database.run("PRAGMA journal_mode = WAL;");
 
+    console.log("READY:::READY");
+
     ipcMain.on("sqlite3-query", (event, sql, args) => {
       // event.reply('sqlite3-reply', sql);
       // event.reply('sqlite3-reply', database);

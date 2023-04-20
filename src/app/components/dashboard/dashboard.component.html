@@ -172,16 +172,9 @@
 
         <!-- Frequency Column -->
         <ng-container matColumnDef="tested_on">
-          <th style="width: 10%" mat-header-cell *matHeaderCellDef>
-            Tested On
-          </th>
+          <th style="width: 8%" mat-header-cell *matHeaderCellDef>Tested On</th>
           <td mat-cell *matCellDef="let element">
-            {{
-              (element?.analysed_date_time || "")
-                .toString()
-                .split("GMT+0300 (East Africa Time)")
-                .join(" ")
-            }}
+            {{ element?.analysed_date_time }}
           </td>
         </ng-container>
 
@@ -237,7 +230,7 @@
 
         <!-- Frequency Column -->
         <ng-container matColumnDef="lims_sync_date_time">
-          <th style="width: 5%" mat-header-cell *matHeaderCellDef>
+          <th style="width: 8%" mat-header-cell *matHeaderCellDef>
             Sync Datetime
           </th>
           <td mat-cell *matCellDef="let element">

@@ -944,10 +944,6 @@ export class InterfaceService {
     const that = this;
     that.dbService.fetchLastSyncTimes(
       (res) => {
-        // data.lastLimsSync = (res[0].lastLimsSync);
-        // data.lastResultReceived = (res[0].lastResultReceived);
-        // return data;
-
         callback(res[0]);
       },
       (err) => {

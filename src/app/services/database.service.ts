@@ -208,12 +208,15 @@ export class DatabaseService {
       sqlite: this.electronService.sqlite,
       dbPath: this.store.get("appPath"),
       id,
+      secret_id: this.appSettings?.hasExternalDB
+        ? process?.rows[0]?.secret_id
+        : process[0].secret_id,
       fs,
       externalParams: params,
+      parseScret: this.parseSecret,
     });
     await this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`);
     return runResults;
-    // return `Process started`;
   };
 
   private getSecret = async (process: any) => {
@@ -225,10 +228,10 @@ export class DatabaseService {
         `SELECT * FROM SECRET WHERE ID=${secret}`
       );
       return this.appSettings?.hasExternalDB
-        ? secretData.rows[0].value
+        ? this.parseSecret(secretData.rows[0].value)
         : this.parseSecret(secretData[0].value);
     }
-    return null;
+    return {};
   };
 
   private parseSecret = (value: string) => {
@@ -457,7 +460,7 @@ export class DatabaseService {
     } catch (e) {}
   };
 
-  updateCron = async (process: FxPayload, schedule) => {
+  updateCron = async (process: FxPayload, schedule: any) => {
     const secret = await this.getSecret([process]);
     try {
       if (schedule) {
@@ -469,19 +472,55 @@ export class DatabaseService {
     } catch (e) {}
   };
 
+  scheduleFunctions = () => {
+    const query = "SELECT * FROM PROCESS";
+    this.query(query).then(async (res) => {
+      if (Array.isArray(res)) {
+        for (const fx of res) {
+          const tasks = this.electronService.scheduler.getTasks();
+          const task = tasks.get(`${fx.name}_${fx.id}`);
+          await this.updateCron(fx, task);
+        }
+      }
+    });
+  };
+
   private scheduleFx = (process: FxPayload, secret: SecretPayload) => {
     this.electronService.scheduler.schedule(
       process.frequency,
       async () => {
-        const runFunc = Function("context", process.code);
-        await runFunc({
-          secret,
-          db: this.functionsQuery,
-          settings: this.dbConfig,
-          http: axios,
-          dbPath: this.store.get("appPath"),
-          sqlite: this.electronService.sqlite,
-        });
+        try {
+          const time = new Date();
+          console.log(
+            `⏱️ SCHEDULE RUNNING STARTED __** ${process?.name?.toUpperCase()} **__ `,
+            time,
+            " ⏱️"
+          );
+          const runFunc = Function("context", process.code);
+          await runFunc({
+            secret,
+            db: this.functionsQuery,
+            raw: this.processRawData,
+            settings: this.dbConfig,
+            http: axios,
+            sqlite: this.electronService.sqlite,
+            dbPath: this.store.get("appPath"),
+            id: process.id,
+            secret_id: process?.secret_id,
+            parseSecret: this.parseSecret,
+            fs,
+            externalParams: {},
+          });
+          const finishTime = new Date();
+          console.log("✅ SCHEDULE RUNNING FINISHED ", finishTime, " ✅");
+          console.log(
+            "⏳ TIME TAKEN TO RUN ",
+            ((finishTime.valueOf() - time.valueOf()) / 60000).toFixed(4),
+            " MINUTES ⏳"
+          );
+        } catch (e) {
+          console.log("🚫 ERROR OCCURED ", e.message.toUpperCase(), " 🚫");
+        }
       },
       {
         name: `${process.name}_${process.id}`,
