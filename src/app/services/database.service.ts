@@ -540,6 +540,70 @@ export class DatabaseService {
     success?: Success,
     errorf?: ErrorOf
   ) {
+    if (data["patient_id"] && data["patient_id"] != "") {
+      this.checkExistingOrder(data, success, errorf);
+      return;
+    }
+    this.addNewTest(data, success, errorf);
+  }
+
+  fetchLastOrders(success: Success, errorOf: ErrorOf, summary: boolean) {
+    const t = "SELECT * FROM orders ORDER BY id DESC";
+    if (this.dbConnected) {
+      this.query(t, null, success, errorOf, summary);
+    } else {
+      // Fetching from SQLITE
+      this.electronService.execSqliteQuery(t, null).then((results: any) => {
+        if (!results || typeof results === "string") {
+          errorOf(results ? results : "");
+        } else {
+          success(results);
+        }
+      });
+    }
+  }
+
+  private checkExistingOrder = (
+    data: { [s: string]: unknown } | ArrayLike<unknown>,
+    success: Success,
+    errorOf: ErrorOf
+  ) => {
+    const sql = `SELECT * FROM ORDERS WHERE patient_id=${data["patient_id"]}`;
+    this.electronService
+      .execSqliteQuery(sql, [])
+      .then((results: any) => {
+        if (results.length > 0) {
+          this.updateOrderSqlite(data, success, errorOf, results[0].id);
+        } else {
+          this.addNewTest(data, success, errorOf);
+        }
+      })
+      .catch((e: any) => errorOf(e));
+  };
+
+  private updateOrderSqlite = (
+    data: { [s: string]: unknown } | ArrayLike<unknown>,
+    success: Success,
+    errorOf: ErrorOf,
+    id: number
+  ) => {
+    const sql = `UPDATE ORDERS SET ${Object.keys(data)
+      .map((key) => key + "=" + `'${data[key]}'`)
+      .join(",")} WHERE ID=${id};`;
+
+    this.electronService
+      .execSqliteQuery(sql, [])
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((e: any) => errorOf(e));
+  };
+
+  private addNewTest = (
+    data: { [s: string]: unknown } | ArrayLike<unknown>,
+    success: Success,
+    errorOf: ErrorOf
+  ) => {
     const t = `INSERT INTO ORDERS(${Object.keys(data).join(
       ","
     )}) VALUES(${Object.keys(data)
@@ -553,37 +617,15 @@ export class DatabaseService {
       .join(",")}) RETURNING *`;
 
     if (this.dbConnected) {
-      this.query(t, Object.values(data), success, errorf);
+      this.query(t, Object.values(data), success, errorOf);
     }
-    console.log(sql);
     this.electronService
       .execSqliteQuery(sql, [])
       .then((results: any) => {
-        console.table("RESULTS", results[0]);
         success(results);
       })
-      .catch((e: any) => errorf(e));
-  }
-
-  fetchLastOrders(
-    success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void,
-    summary: boolean
-  ) {
-    const t = "SELECT * FROM orders ORDER BY id DESC";
-    if (this.dbConnected) {
-      this.query(t, null, success, errorf, summary);
-    } else {
-      // Fetching from SQLITE
-      this.electronService.execSqliteQuery(t, null).then((results: any) => {
-        if (!results || typeof results === "string") {
-          errorf(results ? results : "");
-        } else {
-          success(results);
-        }
-      });
-    }
-  }
+      .catch((e: any) => errorOf(e));
+  };
 
   getRawData(
     success: { (res: any): void; (arg0: any): void },
