@@ -123,11 +123,14 @@ export class SettingsComponent implements OnInit {
     try {
       that.store.set("appSettings", appSettings);
     } catch (e) {}
-    new Notification("✅", {
+    const notificationOptions = {
       body: "Updated Successfully",
       icon: "assets/icons/favicon.png",
       timestamp: new Date().valueOf(),
-    });
+      title: "",
+      name: "",
+    };
+    new Notification("", notificationOptions);
     this.router.navigate(["/dashboard"]);
   };
 

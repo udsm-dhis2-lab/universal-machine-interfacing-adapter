@@ -535,17 +535,16 @@ export class DatabaseService {
     return await this.query(query, []);
   };
 
-  addOrderTest(
+  addOrderTest = async (
     data: { [s: string]: unknown } | ArrayLike<unknown>,
     success?: Success,
     errorf?: ErrorOf
-  ) {
+  ) => {
     if (data["patient_id"] && data["patient_id"] != "") {
-      this.checkExistingOrder(data, success, errorf);
-      return;
+      await this.checkExistingOrder(data, success, errorf);
     }
     this.addNewTest(data, success, errorf);
-  }
+  };
 
   fetchLastOrders(success: Success, errorOf: ErrorOf, summary: boolean) {
     const t = "SELECT * FROM orders ORDER BY id DESC";
@@ -563,22 +562,18 @@ export class DatabaseService {
     }
   }
 
-  private checkExistingOrder = (
+  private checkExistingOrder = async (
     data: { [s: string]: unknown } | ArrayLike<unknown>,
     success: Success,
     errorOf: ErrorOf
   ) => {
-    const sql = `SELECT * FROM ORDERS WHERE patient_id=${data["patient_id"]}`;
-    this.electronService
-      .execSqliteQuery(sql, [])
-      .then((results: any) => {
-        if (results.length > 0) {
-          this.updateOrderSqlite(data, success, errorOf, results[0].id);
-        } else {
-          this.addNewTest(data, success, errorOf);
-        }
-      })
-      .catch((e: any) => errorOf(e));
+    const sql = `SELECT * FROM ORDERS WHERE patient_id='${data["patient_id"]}'`;
+    const results = await this.query(sql);
+    if (Array.isArray(results) && results.length > 0) {
+      this.updateOrderSqlite(data, success, errorOf, results[0].id);
+    } else {
+      this.addNewTest(data, success, errorOf);
+    }
   };
 
   private updateOrderSqlite = (

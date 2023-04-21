@@ -585,21 +585,37 @@ export class InterfaceService {
                 "info",
                 "Trying to add order :" + JSON.stringify(order)
               );
-              that.dbService.addOrderTest(
-                order,
-                (res) => {
+              that.dbService
+                .addOrderTest(
+                  order,
+                  (res: any) => {
+                    console.log(res);
+                  },
+                  (err) => {
+                    that.logger(
+                      "error",
+                      "Failed to add : " + JSON.stringify(err)
+                    );
+                  }
+                )
+                .then((res) => {
                   that.logger(
                     "success",
                     "Result Successfully Added : " + order.order_id
                   );
-                },
-                (err) => {
-                  that.logger(
-                    "error",
-                    "Failed to add : " + JSON.stringify(err)
+                  console.log("✅ RESULTS ADDED ✅");
+                })
+                .catch((e) => {
+                  console.log(
+                    "🚫 RESULTS ADDING FAILED ",
+                    `${(e?.message ?? e).toUpperCase()}`,
+                    " 🚫"
                   );
-                }
-              );
+                  that.logger(
+                    "success",
+                    "Result Successfully Added : " + order.order_id
+                  );
+                });
             } else {
               that.logger(
                 "error",
@@ -746,21 +762,37 @@ export class InterfaceService {
                 "info",
                 "Trying to add order :" + JSON.stringify(order)
               );
-              that.dbService.addOrderTest(
-                order,
-                (res) => {
+              that.dbService
+                .addOrderTest(
+                  order,
+                  (res: any) => {
+                    console.log(res);
+                  },
+                  (err) => {
+                    that.logger(
+                      "error",
+                      "Failed to add : " + JSON.stringify(err)
+                    );
+                  }
+                )
+                .then((res) => {
                   that.logger(
                     "success",
                     "Result Successfully Added : " + order.order_id
                   );
-                },
-                (err) => {
-                  that.logger(
-                    "error",
-                    "Failed to add : " + JSON.stringify(err)
+                  console.log("✅ RESULTS ADDED ✅");
+                })
+                .catch((e) => {
+                  console.log(
+                    "🚫 RESULTS ADDING FAILED ",
+                    `${(e?.message ?? e).toUpperCase()}`,
+                    " 🚫"
                   );
-                }
-              );
+                  that.logger(
+                    "success",
+                    "Result Successfully Added : " + order.order_id
+                  );
+                });
             } else {
               that.logger(
                 "error",
@@ -897,16 +929,28 @@ export class InterfaceService {
 
     console.log(JSON.stringify(order));
 
-    this.dbService.addOrderTest(
-      order,
-      (res) => {
+    this.dbService
+      .addOrderTest(
+        order,
+        (res: any) => {
+          console.log(res);
+        },
+        (err) => {
+          this.logger("error", "Failed to add : " + JSON.stringify(err));
+        }
+      )
+      .then((res) => {
         this.logger("success", "Result Successfully Added : " + order.order_id);
-        this.logger("success", "Data : " + JSON.stringify(res));
-      },
-      (err) => {
-        this.logger("error", "Failed to add : " + JSON.stringify(err));
-      }
-    );
+        console.log("✅ RESULTS ADDED ✅");
+      })
+      .catch((e) => {
+        console.log(
+          "🚫 RESULTS ADDING FAILED ",
+          `${(e?.message ?? e).toUpperCase()}`,
+          " 🚫"
+        );
+        this.logger("success", "Result Successfully Added : " + order.order_id);
+      });
   };
 
   fetchLastOrders(summary: boolean) {
@@ -1080,24 +1124,34 @@ export class InterfaceService {
       order.machine_used = that.appSettings?.analyzerMachineName;
 
       if (order.results) {
-        that.dbService.addOrderTest(
-          order,
-          (res) => {
+        that.dbService
+          .addOrderTest(
+            order,
+            (res: any) => {
+              console.log(res);
+            },
+            (err) => {
+              that.logger("error", "Failed to add : " + JSON.stringify(err));
+            }
+          )
+          .then((res) => {
             that.logger(
               "success",
-              "Result Successfully Added : " + order.test_id
+              "Result Successfully Added : " + order.order_id
             );
-          },
-          (err) => {
+            console.log("✅ RESULTS ADDED ✅");
+          })
+          .catch((e) => {
+            console.log(
+              "🚫 RESULTS ADDING FAILED ",
+              `${(e?.message ?? e).toUpperCase()}`,
+              " 🚫"
+            );
             that.logger(
-              "error",
-              "Failed to add result : " +
-                order.test_id +
-                " " +
-                JSON.stringify(err)
+              "success",
+              "Result Successfully Added : " + order.order_id
             );
-          }
-        );
+          });
       } else {
         that.logger("error", "Unable to store data into the database");
       }

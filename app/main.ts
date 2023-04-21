@@ -2,6 +2,11 @@ import { app, BrowserWindow, dialog, ipcMain, screen, shell } from "electron";
 import * as Store from "electron-store";
 import * as fs from "fs";
 import * as path from "path";
+
+if (process.platform === "win32") {
+  app.setAppUserModelId("⚙️");
+}
+
 //import { Sqlite3Helper } from '../src/app/core/sqlite3helper.main';
 
 // const isMac = process.platform === "darwin";
@@ -265,10 +270,6 @@ try {
      CREATE TABLE IF NOT EXISTS secret (id integer NOT NULL, name text  NOT NULL, description text, value mediumtext  NOT NULL, PRIMARY KEY("id" AUTOINCREMENT) );
       `
     );
-
-    database.run("PRAGMA journal_mode = WAL;");
-
-    console.log("READY:::READY");
 
     ipcMain.on("sqlite3-query", (event, sql, args) => {
       // event.reply('sqlite3-reply', sql);
