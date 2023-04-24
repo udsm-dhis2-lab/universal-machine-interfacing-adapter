@@ -44,7 +44,7 @@ const start = async () => {
     } catch (e) { }
 
     try {
-      sql = "DELETE FROM ORDERS WHERE PATIENT_ID !='120801104601-0-KK-2023-3';"
+      sql = "DELETE FROM ORDERS;"
       db.all(sql, [], async (err, rows) => {
 
         console.error(err ? err : "No data to sync");

@@ -3,6 +3,7 @@ import axios from "axios";
 import * as fs from "fs";
 import { Pool } from "pg";
 import { ElectronService } from "../core/services";
+import { MachineData } from "../shared/interfaces/data.interface";
 import {
   DatabaseResponse,
   ErrorOf,
@@ -536,11 +537,12 @@ export class DatabaseService {
   };
 
   addOrderTest = async (
-    data: { [s: string]: unknown } | ArrayLike<unknown>,
+    data: MachineData,
     success?: Success,
     errorf?: ErrorOf
   ) => {
-    if (data["patient_id"] && data["patient_id"] != "") {
+    if (data.patient_id && data.patient_id !== "") {
+      console.log('CHECKING EXISTING DATA', )
       await this.checkExistingOrder(data, success, errorf);
     }
     this.addNewTest(data, success, errorf);
@@ -563,12 +565,13 @@ export class DatabaseService {
   }
 
   private checkExistingOrder = async (
-    data: { [s: string]: unknown } | ArrayLike<unknown>,
+    data: MachineData,
     success: Success,
     errorOf: ErrorOf
   ) => {
-    const sql = `SELECT * FROM ORDERS WHERE patient_id='${data["patient_id"]}'`;
-    const results = await this.query(sql);
+    const sql = `SELECT patient_id FROM orders WHERE patient_id='${data.patient_id}' LIMIT 1`;
+    const results = await this.electronService.execSqliteQuery (sql);
+    console.log('RESULTS', JSON.stringify(results))
     if (Array.isArray(results) && results.length > 0) {
       this.updateOrderSqlite(data, success, errorOf, results[0].id);
     } else {
@@ -577,11 +580,11 @@ export class DatabaseService {
   };
 
   private updateOrderSqlite = (
-    data: { [s: string]: unknown } | ArrayLike<unknown>,
+    data: MachineData,
     success: Success,
     errorOf: ErrorOf,
     id: number
-  ) => {
+  ): void => {
     const sql = `UPDATE ORDERS SET ${Object.keys(data)
       .map((key) => key + "=" + `'${data[key]}'`)
       .join(",")} WHERE ID=${id};`;
@@ -595,7 +598,7 @@ export class DatabaseService {
   };
 
   private addNewTest = (
-    data: { [s: string]: unknown } | ArrayLike<unknown>,
+    data: MachineData,
     success: Success,
     errorOf: ErrorOf
   ) => {
@@ -642,7 +645,7 @@ export class DatabaseService {
     errorf: (err: any) => void
   ) {
     const t =
-      "SELECT MAX(lims_sync_date_time) as lastLimsSync, MAX(added_on) as lastResultReceived FROM orders";
+      "SELECT MAX(lims_sync_date_time) as lastLimsSync, MAX(added_on) as lastResultReceived FROM orders ORDER BY added_on 'DESC'";
 
     if (this.dbConnected) {
       this.query(t, null, success, errorf);
@@ -655,7 +658,7 @@ export class DatabaseService {
   }
 
   addRawData(
-    data: { [s: string]: unknown } | ArrayLike<unknown>,
+    data: MachineData,
     success: {
       (res: any): void;
       (res: any): void;
@@ -682,7 +685,7 @@ export class DatabaseService {
   }
 
   addApplicationLog(
-    data: { [s: string]: unknown } | ArrayLike<unknown>,
+    data: MachineData,
     success: { (res: any): void; (arg0: any): void },
     errorf: (err: any) => void
   ) {

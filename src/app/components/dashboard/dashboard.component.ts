@@ -230,7 +230,7 @@ export class DashboardComponent implements OnInit {
         await this.migrate(settings);
       }
     } catch (e) {
-      new Notification("🚫", {
+      new Notification("", {
         body: e.message,
       });
     }
