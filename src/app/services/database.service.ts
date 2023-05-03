@@ -18,6 +18,7 @@ import {
   SecretPayload,
 } from "../shared/interfaces/fx.interface";
 import { ElectronStoreService } from "./electron-store.service";
+import { BehaviorSubject } from "rxjs";
 
 @Injectable({
   providedIn: "root",
@@ -27,13 +28,17 @@ export class DatabaseService {
   private dbConfig = null;
   public appSettings = null;
   private dbConnected: boolean;
-
+  protected log = null;
+  protected logtext = [];
+  protected liveLogSubject = new BehaviorSubject([]);
+  liveLog = this.liveLogSubject.asObservable();
   constructor(
     private electronService: ElectronService,
     private store: ElectronStoreService
   ) {
     const that = this;
     that.appSettings = that.store.get("appSettings");
+    this.log = this.electronService.log;
 
     // Initialize DB connection pool only if settings are available
     if (
@@ -192,32 +197,78 @@ export class DatabaseService {
     return await this.query(query, []);
   };
 
+  logger(logType: string, message: string) {
+    const moment = require("moment");
+    const date = moment(new Date()).format("DD-MMM-YYYY HH:mm:ss");
+
+    let logMessage = "";
+
+    this.log.transports.file.fileName = `${moment().format("YYYY-MM-DD")}.log`;
+
+    if (logType === "info") {
+      this.log.info(message);
+      logMessage =
+        '<span class="text-info">[info]</span> [' +
+        date +
+        "] " +
+        message +
+        "<br>";
+    } else if (logType === "error") {
+      this.log.error(message);
+      logMessage =
+        '<span class="text-danger">[error]</span> [' +
+        date +
+        "] " +
+        message +
+        "<br>";
+    } else if (logType === "success") {
+      this.log.info(message);
+      logMessage =
+        '<span class="text-success">[success]</span> [' +
+        date +
+        "] " +
+        message +
+        "<br>";
+    }
+
+    return logMessage;
+  }
+
   run = async (id: number, params?: any): Promise<any> => {
-    const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
-    const secret = await this.getSecret(process);
-    const runFunc = Function(
-      "context",
-      this.appSettings?.hasExternalDB ? process?.rows[0]?.code : process[0].code
-    );
-    await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
-    const runResults = await runFunc({
-      secret,
-      db: this.functionsQuery,
-      raw: this.processRawData,
-      settings: this.dbConfig,
-      http: axios,
-      sqlite: this.electronService.sqlite,
-      dbPath: this.store.get("appPath"),
-      id,
-      secret_id: this.appSettings?.hasExternalDB
-        ? process?.rows[0]?.secret_id
-        : process[0].secret_id,
-      fs,
-      externalParams: params,
-      parseScret: this.parseSecret,
-    });
-    await this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`);
-    return runResults;
+    try {
+      const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
+      const secret = await this.getSecret(process);
+      const runFunc = Function(
+        "context",
+        this.appSettings?.hasExternalDB
+          ? process?.rows[0]?.code
+          : process[0].code
+      );
+      await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
+      const runResults = await runFunc({
+        secret,
+        db: this.functionsQuery,
+        raw: this.processRawData,
+        parseSecret: this.parseSecret,
+        settings: this.dbConfig,
+        liveLogSubject: this.liveLogSubject,
+        liveLog: this.liveLog,
+        logtext: this.logtext,
+        http: axios,
+        sqlite: this.electronService.sqlite,
+        dbPath: this.store.get("appPath"),
+        log: this.electronService.log,
+        logger: this.logger,
+        id,
+        secret_id: this.appSettings?.hasExternalDB
+          ? process?.rows[0]?.secret_id
+          : process[0].secret_id,
+        fs,
+        externalParams: params,
+      });
+      await this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`);
+      return runResults;
+    } catch (e) {}
   };
 
   private getSecret = async (process: any) => {
@@ -486,16 +537,19 @@ export class DatabaseService {
     });
   };
 
+  private logs = (message: string): void => {
+    this.logtext.unshift(this.logger("info", message));
+    this.liveLogSubject.next(this.logtext);
+  };
+
   private scheduleFx = (process: FxPayload, secret: SecretPayload) => {
     this.electronService.scheduler.schedule(
       process.frequency,
       async () => {
         try {
           const time = new Date();
-          console.log(
-            `⏱️ SCHEDULE RUNNING STARTED __** ${process?.name?.toUpperCase()} **__ `,
-            time,
-            " ⏱️"
+          this.logs(
+            `⏱️ SCHEDULE RUNNING STARTED __** ${process?.name?.toUpperCase()} **__ ${time} ⏱️`
           );
           const runFunc = Function("context", process.code);
           await runFunc({
@@ -504,23 +558,28 @@ export class DatabaseService {
             raw: this.processRawData,
             settings: this.dbConfig,
             http: axios,
+            log: this.electronService.log,
             sqlite: this.electronService.sqlite,
             dbPath: this.store.get("appPath"),
+            logtext: this.logtext,
+            liveLogSubject: this.liveLogSubject,
             id: process.id,
+            logger: this.logger,
             secret_id: process?.secret_id,
             parseSecret: this.parseSecret,
             fs,
             externalParams: {},
           });
           const finishTime = new Date();
-          console.log("✅ SCHEDULE RUNNING FINISHED ", finishTime, " ✅");
-          console.log(
-            "⏳ TIME TAKEN TO RUN ",
-            ((finishTime.valueOf() - time.valueOf()) / 60000).toFixed(4),
-            " MINUTES ⏳"
+          this.logs(`✅ SCHEDULE RUNNING FINISHED ${finishTime} ✅`);
+          this.logs(
+            `⏳ TIME TAKEN TO RUN ${(
+              (finishTime.valueOf() - time.valueOf()) /
+              60000
+            ).toFixed(4)} MINUTES ⏳`
           );
         } catch (e) {
-          console.log("🚫 ERROR OCCURED ", e.message.toUpperCase(), " 🚫");
+          this.logs(`🚫 ERROR OCCURED  ${e.message.toUpperCase()} 🚫`);
         }
       },
       {
@@ -866,7 +925,7 @@ export class DatabaseService {
       this.electronService
         .execSqliteQuery(t, Object.values(privilege))
         .then((results: any) => {
-          console.log(results);
+          this.logs(results);
         });
     }
 
@@ -883,7 +942,7 @@ export class DatabaseService {
       this.electronService
         .execSqliteQuery(t, Object.values(role))
         .then((results: any) => {
-          console.log(results);
+          this.logs(results);
         });
     }
 
@@ -900,7 +959,7 @@ export class DatabaseService {
       this.electronService
         .execSqliteQuery(t, Object.values(user))
         .then((results: any) => {
-          console.log(results);
+          this.logs(results);
         });
     }
 
@@ -917,7 +976,7 @@ export class DatabaseService {
       this.electronService
         .execSqliteQuery(t, Object.values(roleAndPrivilege))
         .then((results: any) => {
-          console.log(results);
+          this.logs(results);
         });
     }
 
@@ -934,7 +993,7 @@ export class DatabaseService {
       this.electronService
         .execSqliteQuery(t, Object.values(userAndRole))
         .then((results: any) => {
-          console.log(results);
+          this.logs(results);
         });
     }
   }

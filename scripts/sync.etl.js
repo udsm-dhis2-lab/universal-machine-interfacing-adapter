@@ -21,6 +21,24 @@ const stageMappings = {
   GLqRo7AuhJM: { eth: 'ETH Resistance ' }
 }
 
+const capitalizeFirstLetter = (sentence) => {
+  try {
+    return sentence.replace(/\b(\w)/g, (_match, word) => {
+      return word.toUpperCase();
+    });
+  } catch (e) {
+    return sentence?.toUpperCase() ?? null
+  }
+}
+
+const parseSecret = (value) => {
+  try {
+    return JSON.parse(value)
+  } catch (e) {
+    return {}
+  }
+}
+
 const finalResults = (results) => {
   let stage1 = []
   let stage2 = []
@@ -69,8 +87,16 @@ const cleanData = (data) => {
     const testedResults = dataArray.resultData.filter(d => d.testedBy && d.testedBy !== '')
     results = [...results, ...testedResults]
   }
-  const ethr = data.split('ETH Resistance^|')
-  const ethrData = { ...results[0], assayNumber: 'eth', result: ethr.length > 1 ? ethr[1]?.split('|')[0] : null }
+  let ethr = data.split('ETH Resistance^|')
+  let d = data.toLowerCase().split('eth ')
+  let ethrData = {}
+  if (ethr.length <= 1 && d.length > 1) {
+    d = d[1]?.split('|')
+    d = d.length > 0 ? d[1] : null
+    ethrData = { ...results[0], assayNumber: 'eth', result: d ? d?.split('^')?.join('')?.toUpperCase() : null }
+  } else {
+    ethrData = { ...results[0], assayNumber: 'eth', result: ethr.length > 0 ? ethr[1]?.split('|')[0] : null }
+  }
   if (ethrData.result) {
     results = [...results, ethrData]
   }
@@ -124,12 +150,12 @@ const syncData = async (rows) => {
           value: "10 Color Module GeneXpert",
         },
       ]
-      const stages = cleanData(rows[0]?.raw_text)
-      if (stages.stage1.length > 1) {
+      const stages = cleanData(row?.raw_text)
+      if (stages.stage1.length > 0) {
         stage1DataValues = [...stage1DataValues, ...dataValues, ...stages.stage1]
       }
 
-      if (stages.stage2.length > 1) {
+      if (stages.stage2.length > 0) {
         stage2DataValues = [...stage2DataValues, ...dataValues, ...stages.stage2]
       }
       const eventPayload = {
@@ -139,7 +165,7 @@ const syncData = async (rows) => {
         status: "VISITED",
         eventDate: new Date(row?.analysed_date_time),
         trackedEntityInstance: trackedEntityInstanceData?.trackedEntityInstance,
-        dataValues: stages.stage1.length > 1 ? stage1DataValues : stage2DataValues
+        dataValues: stages.stage1.length > 0 ? stage1DataValues : stage2DataValues
       };
 
       const eventUrl = `${context.secret.url}/api/events${row?.reference_uuid ? "/" + row?.reference_uuid : ""
@@ -170,7 +196,7 @@ const syncData = async (rows) => {
           );
 
           const query = `UPDATE orders SET reference_uuid="${reference_uuid}",sync_status="${sync_status}", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${row?.id}`;
-          db.all(query, [], async (err, rows) => {
+          db.all(query, [], async (err, _rows) => {
             if (err) {
               console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', err?.toUpperCase(), ' 🚫')
             } else {
@@ -200,7 +226,7 @@ const run = async () => {
     if (!context.secret || !context?.secret?.id) {
       db.all(`SELECT * FROM SECRET WHERE ID=${context.secret_id}`, [], (_err, rows) => {
         if (rows?.length > 0) {
-          context.secret = context?.parseSecret(rows[0].value)
+          context.secret = parseSecret(rows[0].value)
         }
       })
     }

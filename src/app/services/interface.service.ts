@@ -284,8 +284,6 @@ export class InterfaceService {
       const hl7Text = that.hex2ascii(data.toString("hex"));
       that.strData += hl7Text;
 
-      // that.logger("info", hl7Text);
-
       // If there is a File Separator or 1C or ASCII 28 character,
       // it means the stream has ended and we can proceed with saving this data
       if (that.strData.includes("\x1c")) {
@@ -322,7 +320,6 @@ export class InterfaceService {
         that.strData = "";
       } else {
         that.logger("error", "NOT a HL7 format or malformatted");
-        // that.logger("info", that.strData);
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings?.analyzerMachineName;
@@ -374,7 +371,6 @@ export class InterfaceService {
           }
         );
 
-        // that.logger("info", that.strData);
         that.processASTMElecsysData(that.strData);
         that.strData = "";
       } else if (d === "21") {
@@ -431,7 +427,6 @@ export class InterfaceService {
           text = "##START##" + text;
         }
         that.strData += text;
-        // that.logger("info", that.strData);
         that.socketClient.write(that.ACK);
       }
     }
@@ -505,8 +500,6 @@ export class InterfaceService {
           }
         });
 
-        // that.logger("info", dataArray);
-        // that.logger("info", dataArray["R"]);
         if (
           dataArray === null ||
           dataArray === undefined ||
@@ -583,7 +576,8 @@ export class InterfaceService {
             if (order.order_id) {
               that.logger(
                 "info",
-                "Trying to add order :" + order.order_id ?? 'NEW ORDER'
+                "Trying to add order :" +
+                  JSON.stringify({ ...order, raw_tex: "" })
               );
               that.dbService
                 .addOrderTest(
@@ -619,7 +613,7 @@ export class InterfaceService {
             } else {
               that.logger(
                 "error",
-                "Could NOT add order :" + order.order_id ?? ''
+                "Could NOT add order :" + order.order_id ?? ""
               );
             }
           }
@@ -687,7 +681,6 @@ export class InterfaceService {
           }
         });
 
-        // that.logger("info", dataArray["R"]);
         if (
           dataArray === null ||
           dataArray === undefined ||
@@ -760,7 +753,8 @@ export class InterfaceService {
             if (order.order_id) {
               that.logger(
                 "info",
-                "Trying to add order :" + JSON.stringify(order)
+                "Trying to add order :" +
+                  JSON.stringify({ ...order, raw_text: "" })
               );
               that.dbService
                 .addOrderTest(
@@ -778,9 +772,8 @@ export class InterfaceService {
                 .then((res) => {
                   that.logger(
                     "success",
-                    "Result Successfully Added : " + order.order_id
+                    "✅ Result Successfully Added : " + order.order_id + " ✅"
                   );
-                  console.log("✅ RESULTS ADDED ✅");
                 })
                 .catch((e) => {
                   console.log(
@@ -796,7 +789,8 @@ export class InterfaceService {
             } else {
               that.logger(
                 "error",
-                "Could NOT add order :" + JSON.stringify(order)
+                "Could NOT add order :" +
+                  JSON.stringify({ ...order, raw_text: "" })
               );
             }
           }
@@ -1002,7 +996,7 @@ export class InterfaceService {
     that.liveLogSubject.next(that.logtext);
   }
 
-  logger(logType, message) {
+  logger(logType: string, message: string) {
     const that = this;
     const moment = require("moment");
     const date = moment(new Date()).format("DD-MMM-YYYY HH:mm:ss");

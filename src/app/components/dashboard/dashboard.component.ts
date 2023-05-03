@@ -166,8 +166,16 @@ export class DashboardComponent implements OnInit {
     that.interfaceService.fetchLastOrders(true);
 
     that.interfaceService.fetchLastSyncTimes((data: any) => {
-      that.lastLimsSync = this.getTimes(data?.lims_sync_date_time);
-      that.lastResultReceived = this.getTimes(data?.added_on);
+      console.log(
+        data?.added_on?.split(" ")?.join("T"),
+        data.lims_sync_date_time
+      );
+      that.lastLimsSync = this.getTimes(
+        (data?.lims_sync_date_time ?? "").split(".")[0]
+      );
+      that.lastResultReceived = this.getTimes(
+        (data?.added_on ?? "")?.split(".")[0]
+      );
     });
 
     that.interfaceService.lastOrders.subscribe(
@@ -177,7 +185,7 @@ export class DashboardComponent implements OnInit {
             lastFewOrders[0]?.rowCount ?? lastFewOrders[0]?.length;
           that.lastOrders = (lastFewOrders[0]?.rows ?? lastFewOrders[0]) || [];
 
-          that.lastOrders = that.lastOrders.map((order) => {
+          that.lastOrders = that.lastOrders?.map((order) => {
             return {
               ...order,
               analysed_date_time: this.getTimes(order.analysed_date_time),
