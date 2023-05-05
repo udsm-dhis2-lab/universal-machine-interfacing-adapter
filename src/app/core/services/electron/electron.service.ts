@@ -5,8 +5,6 @@ import { Injectable } from "@angular/core";
 import { ipcRenderer, net, webFrame } from "electron";
 import * as childProcess from "child_process";
 import * as fs from "fs";
-import * as mysql from "mysql";
-import { Pool } from "pg";
 import log from "electron-log";
 import * as cron from "node-cron";
 import axios from "axios";
@@ -19,11 +17,9 @@ export class ElectronService {
   webFrame: typeof webFrame;
   childProcess: typeof childProcess;
   fs: typeof fs;
-  mysql: typeof mysql;
   net: typeof net;
   log: typeof log;
   sqlite: any;
-  postgres: typeof Pool;
   scheduler: typeof cron;
   axios: typeof axios;
 
@@ -35,9 +31,7 @@ export class ElectronService {
 
       this.childProcess = window.require("child_process");
       this.fs = window.require("fs");
-      this.postgres = window.require("pg").Pool;
       this.scheduler = window.require("node-cron");
-      this.mysql = window.require("mysql");
       this.net = window.require("net");
       this.axios = window.require("axios");
       this.log = window.require("electron-log");

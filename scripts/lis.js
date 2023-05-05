@@ -7,7 +7,8 @@ const run = async () => {
   try {
     let data = await fetch('https://icare.dhis2.udsm.ac.tz/openmrs/ws/rest/v1/systemsetting?q=iCare.filters.&v=full', {
       headers,
-      mode: 'no-cors'
+      mode: 'no-cors',
+      method: 'GET'
     })
     console.log(data)
     data = await data.json()

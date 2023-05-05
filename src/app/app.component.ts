@@ -8,22 +8,15 @@ import { DatabaseService } from "./services/database.service";
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"],
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   constructor(
     private electronService: ElectronService,
-    private databaseService: DatabaseService,
     private translate: TranslateService
   ) {
     this.translate.setDefaultLang("en");
     if (this.electronService.isElectron) {
     } else {
       console.log("Running in Browser!!");
-    }
-  }
-
-  ngOnInit(): void {
-    if (this.electronService.isElectron) {
-      this.databaseService.scheduleFunctions();
     }
   }
 }

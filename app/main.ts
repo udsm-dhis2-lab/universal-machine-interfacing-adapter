@@ -184,13 +184,12 @@ try {
       `lims_sync_status` INTEGER DEFAULT "0", \
       `lims_sync_date_time` datetime DEFAULT NULL, \
       `repeated` INTEGER DEFAULT "0", \
-      `raw_id` INTEGER NOT NULL, \
       `test_description` TEXT DEFAULT NULL, \
       `is_printed` INTEGER DEFAULT NULL, \
       `printed_at` INTEGER DEFAULT NULL, \
       `raw_text` mediumtext, \
-      `sync_status` TEXT\
-      `reference_uuid` TEXT\
+      `sync_status` TEXT,\
+      `reference_uuid` TEXT,\
       `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
       PRIMARY KEY("id" AUTOINCREMENT) \
       );'

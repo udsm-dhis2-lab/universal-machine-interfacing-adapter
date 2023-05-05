@@ -1,5 +1,6 @@
 {
   "name": "machine-interfacing",
+  "productName": "Machine Interfacing",
   "version": "0.0.1",
   "description": "Machine Interfacing by UDSM DHIS2",
   "homepage": "https://github.com/udsm-dhis2-lab/GeneXpert",
@@ -29,11 +30,7 @@
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
     "hl7parser": "^1.0.1",
-    "mysql": "2.18.1",
     "node-cron": "^3.0.2",
-    "node-gyp": "^9.3.1",
-    "pg": "^8.8.0",
-    "pg-native": "^3.0.1",
     "sqlite3": "^5.1.2"
   }
 }

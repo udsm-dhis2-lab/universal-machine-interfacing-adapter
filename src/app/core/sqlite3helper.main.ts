@@ -42,7 +42,6 @@ export class Sqlite3Helper {
       `test_description` TEXT DEFAULT NULL, \
       `is_printed` INTEGER DEFAULT NULL, \
       `printed_at` INTEGER DEFAULT NULL, \
-      `raw_id` INTEGER NOT NULL, \
       `raw_text` mediumtext, \
       `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
       PRIMARY KEY("id" AUTOINCREMENT) \

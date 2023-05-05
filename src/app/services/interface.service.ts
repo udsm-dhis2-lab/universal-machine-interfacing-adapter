@@ -4,6 +4,7 @@ import { ElectronService } from "../core/services";
 import { dictionary, separators } from "../shared/constants/shared.constants";
 import { DatabaseService } from "./database.service";
 import { ElectronStoreService } from "./electron-store.service";
+import { formatRawDate } from "../shared/helpers/date.helper";
 
 @Injectable({
   providedIn: "root",
@@ -44,10 +45,6 @@ export class InterfaceService {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   connectionAttemptStatus = this.connectionAttemptStatusSubject.asObservable();
 
-  //protected connectionTriesSubject = new BehaviorSubject(false);
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  //stopTrying = this.connectionTriesSubject.asObservable();
-
   protected lastOrdersSubject = new BehaviorSubject([]);
   // eslint-disable-next-line @typescript-eslint/member-ordering
   lastOrders = this.lastOrdersSubject.asObservable();
@@ -78,12 +75,7 @@ export class InterfaceService {
     this.connectionAttemptStatusSubject.next(interfaceAttempt);
   }
 
-  // Method used to track machine connection status
-  // stopTryingStatus(stopTrying: boolean) {
-  //   this.connectionTriesSubject.next(stopTrying);
-  // }
-
-  hl7ACK(messageID) {
+  hl7ACK(messageID: string | number) {
     const that = this;
 
     if (!messageID || messageID === "") {
@@ -160,8 +152,6 @@ export class InterfaceService {
       });
 
       this.server.on("error", function (e) {
-        //that.connectionStatus(false);
-        //that.stopTryingStatus(true);
         that.logger("error", "Error while connecting " + e.code);
         that.closeConnection();
 
@@ -196,16 +186,9 @@ export class InterfaceService {
         that.handleTCPResponse(data);
       });
 
-      that.socketClient.on("close", function () {
-        // that.socketClient.destroy();
-        // that.connectionStatus(false);
-        // that.logger('info', 'Client Disconnected');
-        // that.closeConnection();
-      });
+      that.socketClient.on("close", function () {});
 
       that.socketClient.on("error", (e) => {
-        //that.connectionStatus(false);
-        //that.stopTryingStatus(true);
         that.logger("error", e);
         that.closeConnection();
 
@@ -259,15 +242,6 @@ export class InterfaceService {
     return str;
   }
 
-  processHL7DataGeneXpert(rawText: string) {
-    const that = this;
-    // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
-    that.parseHL7DH76(rawText);
-    // } else {
-    // that.processHl7V1(rawText);
-    // }
-  }
-
   processHL7Data(rawText: string) {
     const that = this;
     // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
@@ -319,7 +293,7 @@ export class InterfaceService {
         that.processHL7Data(that.strData);
         that.strData = "";
       } else {
-        that.logger("error", "NOT a HL7 format or malformatted");
+        // that.logger("error", "NOT a HL7 format or malformatted");
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings?.analyzerMachineName;
@@ -344,14 +318,9 @@ export class InterfaceService {
 
       const d = data.toString("hex");
 
-      //this.logger('info',"HEX :" + d);
-      //this.logger('info', "TEXT :" + that.hex2ascii(d));
-
       if (d === "04") {
         that.socketClient.write(that.ACK);
         that.logger("info", "Received EOT. Ready to Process");
-        //clearTimeout(that.timer);
-        //this.logger('info',that.strData);
 
         // Let us store this Raw Data before we process it
         const rData: any = {};
@@ -360,7 +329,6 @@ export class InterfaceService {
         that.dbService.addRawData(
           rData,
           (res) => {
-            console.log("RES", res);
             that.logger("success", "Raw data successfully saved");
           },
           (err) => {
@@ -396,10 +364,6 @@ export class InterfaceService {
         that.socketClient.write(that.ACK);
 
         that.logger("info", "Received EOT. Ready to Process");
-        //clearTimeout(that.timer);
-        //this.logger('info',that.strData);
-
-        // Let us store this Raw Data before we process it
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings?.analyzerMachineName;
@@ -441,34 +405,6 @@ export class InterfaceService {
     }
 
     return key in search;
-  }
-
-  formatRawDate(rawDate) {
-    if (
-      rawDate === false ||
-      rawDate === null ||
-      rawDate === "" ||
-      rawDate === undefined ||
-      rawDate.length === 0
-    ) {
-      return null;
-    }
-
-    const len = rawDate.length;
-    const year = rawDate.substring(0, 4);
-    const month = rawDate.substring(4, 6);
-    const day = rawDate.substring(6, 8);
-    let d = year + "-" + month + "-" + day;
-    if (len > 9) {
-      const h = rawDate.substring(8, 10);
-      const m = rawDate.substring(10, 12);
-      let s = "00";
-      if (len > 11) {
-        s = rawDate.substring(12, 14);
-      }
-      d += " " + h + ":" + m + ":" + s;
-    }
-    return d;
   }
 
   processASTMElecsysData(astmData: string) {
@@ -550,11 +486,9 @@ export class InterfaceService {
                   : null;
               order.results = dataArray["R"][3];
               order.tested_by = dataArray["R"][10];
-              order.analysed_date_time = that.formatRawDate(dataArray["R"][12]);
-              order.authorised_date_time = that.formatRawDate(
-                dataArray["R"][12]
-              );
-              order.result_accepted_date_time = that.formatRawDate(
+              order.analysed_date_time = formatRawDate(dataArray["R"][12]);
+              order.authorised_date_time = formatRawDate(dataArray["R"][12]);
+              order.result_accepted_date_time = formatRawDate(
                 dataArray["R"][12]
               );
             } else {
@@ -567,7 +501,7 @@ export class InterfaceService {
               order.authorised_date_time = "";
               order.result_accepted_date_time = "";
             }
-            order.raw_text = partData;
+            order.raw_text = "'" + partData + "'";
             order.result_status = 1;
             order.lims_sync_status = 0;
             order.test_location = that.appSettings?.labName;
@@ -582,9 +516,7 @@ export class InterfaceService {
               that.dbService
                 .addOrderTest(
                   order,
-                  (res: any) => {
-                    console.log(res);
-                  },
+                  (res: any) => {},
                   (err) => {
                     that.logger(
                       "error",
@@ -728,11 +660,9 @@ export class InterfaceService {
                 dataArray["P"] && dataArray["P"].length > 3
                   ? dataArray["P"][4]
                   : null;
-              order.analysed_date_time = that.formatRawDate(dataArray["R"][12]);
-              order.authorised_date_time = that.formatRawDate(
-                dataArray["R"][12]
-              );
-              order.result_accepted_date_time = that.formatRawDate(
+              order.analysed_date_time = formatRawDate(dataArray["R"][12]);
+              order.authorised_date_time = formatRawDate(dataArray["R"][12]);
+              order.result_accepted_date_time = formatRawDate(
                 dataArray["R"][12]
               );
             } else {
@@ -744,7 +674,7 @@ export class InterfaceService {
               order.authorised_date_time = "";
               order.result_accepted_date_time = "";
             }
-            order.raw_text = partData;
+            order.raw_text = "'" + partData + "'";
             order.result_status = 1;
             order.lims_sync_status = 0;
             order.test_location = that.appSettings?.labName;
@@ -759,9 +689,7 @@ export class InterfaceService {
               that.dbService
                 .addOrderTest(
                   order,
-                  (res: any) => {
-                    console.log(res);
-                  },
+                  (res: any) => {},
                   (err) => {
                     that.logger(
                       "error",
@@ -891,7 +819,7 @@ export class InterfaceService {
             dictionary[segmentName][i + 1].includes("Date") &&
             subvalue &&
             subvalue !== ""
-              ? this.formatRawDate(subvalue)
+              ? formatRawDate(subvalue)
               : subvalue;
           segmentValue[key] = subvalue;
         } catch (e) {}
@@ -918,18 +846,13 @@ export class InterfaceService {
       authorised_date_time: data.OBR["Requested Date/Time"],
       result_accepted_date_time: data.OBR["Observation End Date/Time #"],
       raw_text: hl7,
-      raw_json: JSON.stringify(data),
     };
-
-    console.log(JSON.stringify(order));
 
     this.dbService
       .addOrderTest(
         order,
-        (res: any) => {
-          console.log(res);
-        },
-        (err) => {
+        (res: any) => {},
+        (err: any) => {
           this.logger("error", "Failed to add : " + JSON.stringify(err));
         }
       )
@@ -1045,7 +968,7 @@ export class InterfaceService {
     );
   }
 
-  private processHl7V1 = (rawText: string) => {
+  processHl7V1 = (rawText: string) => {
     const that = this;
     const message = that.hl7parser.create(rawText);
     const msgID = message.get("MSH.10").toString();
@@ -1055,7 +978,6 @@ export class InterfaceService {
     const obx = message.get("OBX").toArray();
 
     const spm = message.get("SPM");
-    let sampleNumber = 0;
     spm.forEach(function (singleSpm) {
       //sampleNumber = (singleSpm.get(1).toInteger());
       //const singleObx = obx[(sampleNumber * 2) - 1]; // there are twice as many OBX .. so we take the even number - 1 OBX for each SPM
@@ -1064,7 +986,7 @@ export class InterfaceService {
       const resultOutcome = singleObx.get("OBX.5.1").toString();
 
       const order: any = {};
-      order.raw_text = rawText;
+      order.raw_text = "'" + rawText + "'";
       order.order_id = singleSpm.get("SPM.3").toString().replace("&ROCHE", "");
       order.test_id = singleSpm.get("SPM.3").toString().replace("&ROCHE", "");
 
@@ -1104,14 +1026,14 @@ export class InterfaceService {
       order.tested_by = singleObx.get("OBX.16").toString();
       order.result_status = 1;
       order.lims_sync_status = 0;
-      order.analysed_date_time = that.formatRawDate(
+      order.analysed_date_time = formatRawDate(
         singleObx.get("OBX.19").toString()
       );
       //order.specimen_date_time = this.formatRawDate(message.get('OBX').get(0).get('OBX.19').toString());
-      order.authorised_date_time = that.formatRawDate(
+      order.authorised_date_time = formatRawDate(
         singleObx.get("OBX.19").toString()
       );
-      order.result_accepted_date_time = that.formatRawDate(
+      order.result_accepted_date_time = formatRawDate(
         singleObx.get("OBX.19").toString()
       );
       order.test_location = that.appSettings?.labName;
@@ -1121,9 +1043,7 @@ export class InterfaceService {
         that.dbService
           .addOrderTest(
             order,
-            (res: any) => {
-              console.log(res);
-            },
+            (res: any) => {},
             (err) => {
               that.logger("error", "Failed to add : " + JSON.stringify(err));
             }

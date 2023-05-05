@@ -99,9 +99,6 @@ export class DashboardComponent implements OnInit {
     that.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
     that.currentUserId = this.store.get("userid");
     that.appSettings = that.store.get("appSettings");
-    if (that.appSettings && that.appSettings?.dbHost) {
-      that.checkDbConnectionAndMigrate(that.appSettings);
-    }
     if (
       null === that.appSettings ||
       undefined === that.appSettings ||
@@ -166,10 +163,6 @@ export class DashboardComponent implements OnInit {
     that.interfaceService.fetchLastOrders(true);
 
     that.interfaceService.fetchLastSyncTimes((data: any) => {
-      console.log(
-        data?.added_on?.split(" ")?.join("T"),
-        data.lims_sync_date_time
-      );
       that.lastLimsSync = this.getTimes(
         (data?.lims_sync_date_time ?? "").split(".")[0]
       );
@@ -222,51 +215,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnDestroy() {
     clearInterval(this.interval);
-  }
-
-  private checkDbConnectionAndMigrate = async (appSettings) => {
-    try {
-      const settings: SettingsDB = {
-        dbHost: appSettings.dbHost,
-        dbPort: appSettings.dbPort,
-        dbName: appSettings.dbName,
-        dbUser: appSettings.dbUser,
-        dbPassword: appSettings.dbPassword,
-      };
-      if (appSettings?.hasExternalDB) {
-        await this.query("SELECT * FROM current_catalog;", settings);
-        await this.migrate(settings);
-      }
-    } catch (e) {
-      new Notification("", {
-        body: e.message,
-      });
-    }
-  };
-
-  private migrate = async (settings: SettingsDB) => {
-    try {
-      const sql = readFileSync("./assets/tables.sql", "utf-8");
-      await this.query(sql, settings);
-      return;
-    } catch (e) {
-      return;
-    }
-  };
-
-  private query(text: string, settings: SettingsDB): Promise<DatabaseResponse> {
-    return new Promise((resolve, reject) => {
-      new this.electronService.postgres({
-        connectionString: `postgres://${settings.dbUser}:${settings.dbPassword}@${settings.dbHost}:${settings.dbPort}/${settings.dbName}`,
-      })
-        .query(text, [])
-        .then((res: DatabaseResponse) => {
-          resolve(res);
-        })
-        .catch((err: any) => {
-          reject(err);
-        });
-    });
   }
 
   checkedCanSync = (canSync: string) => {

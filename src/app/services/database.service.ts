@@ -1,8 +1,10 @@
 import { Injectable } from "@angular/core";
 import axios from "axios";
 import * as fs from "fs";
-import { Pool } from "pg";
+import { BehaviorSubject } from "rxjs";
 import { ElectronService } from "../core/services";
+import { dictionary, separators } from "../shared/constants/shared.constants";
+import { formatRawDate } from "../shared/helpers/date.helper";
 import { MachineData } from "../shared/interfaces/data.interface";
 import {
   DatabaseResponse,
@@ -18,20 +20,21 @@ import {
   SecretPayload,
 } from "../shared/interfaces/fx.interface";
 import { ElectronStoreService } from "./electron-store.service";
-import { BehaviorSubject } from "rxjs";
+import { BASICAUTH, BASICHEADERS } from "../shared/helpers/base.helpert";
+import { error } from "console";
+const hl7parser = require("hl7parser");
 
 @Injectable({
   providedIn: "root",
 })
 export class DatabaseService {
-  private mysqlPool = null;
   private dbConfig = null;
   public appSettings = null;
-  private dbConnected: boolean;
   protected log = null;
   protected logtext = [];
   protected liveLogSubject = new BehaviorSubject([]);
   liveLog = this.liveLogSubject.asObservable();
+
   constructor(
     private electronService: ElectronService,
     private store: ElectronStoreService
@@ -52,24 +55,8 @@ export class DatabaseService {
       this.dbConfig = {
         ...that.appSettings,
         connectionLimit: 1000,
-        host: that.appSettings.dbHost,
-        user: that.appSettings.dbUser,
-        password: that.appSettings.dbPassword,
-        database: that.appSettings.dbName,
-        port: that.appSettings.dbPort,
         dateStrings: "date",
-        hasExternalDB: that.appSettings?.hasExternalDB,
       };
-    }
-
-    if (that.appSettings?.hasExternalDB) {
-      this.query("SELECT * FROM current_catalog;")
-        .then(() => {
-          this.dbConnected = true;
-        })
-        .catch(() => {
-          this.dbConnected = false;
-        });
     }
   }
 
@@ -77,18 +64,8 @@ export class DatabaseService {
     query: string,
     params: unknown[] = [],
     success?: Success,
-    errorf?: ErrorOf,
-    summary?: boolean
+    errorOf?: ErrorOf
   ): Promise<DatabaseResponse> {
-    if (this.dbConfig?.hasExternalDB) {
-      return await this.fetchFromPostgres(
-        query,
-        params,
-        success,
-        errorf,
-        summary
-      );
-    }
     let newParams = [];
     params?.forEach((param) => {
       if (typeof param === "object") {
@@ -97,9 +74,51 @@ export class DatabaseService {
         newParams = [...newParams, param];
       }
     });
-    const result = await this.electronService.execSqliteQuery(query, newParams);
-    return result;
+    return await this.electronService
+      .execSqliteQuery(query, newParams)
+      .then((res: any) => {
+        if (success) {
+          success(res);
+          return;
+        }
+        return res;
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
+      });
   }
+
+  private querySqlite = (sql: string, success?: Success, errorOf?: ErrorOf) => {
+    const db = new this.electronService.sqlite.Database(
+      this.store.get("appPath"),
+      this.electronService.sqlite.OPEN_READWRITE,
+      (err: { message: any }) => {
+        if (err) {
+          console.error(err.message);
+        }
+      }
+    );
+    try {
+      db.all(sql, [], (_err: any | null, rows: any[] | null) => {
+        if (_err) {
+          if (errorOf) {
+            errorOf(_err);
+          }
+          return _err;
+        }
+
+        if (success) {
+          success(rows);
+        }
+      });
+    } catch (e) {
+      errorOf(e);
+    }
+  };
 
   fetchFromSqlite = (
     query: string,
@@ -110,7 +129,7 @@ export class DatabaseService {
     return new Promise((resolve, reject) => {
       this.electronService
         .execSqliteQuery(query, params)
-        .then((res) => {
+        .then((res: unknown) => {
           if (success) {
             success(res);
           } else {
@@ -126,56 +145,6 @@ export class DatabaseService {
         });
     });
   };
-
-  private fetchFromPostgres = (
-    query: string,
-    params: unknown[] = [],
-    success?: Success,
-    errorf?: ErrorOf,
-    summary?: boolean
-  ): Promise<DatabaseResponse> => {
-    return new Promise((resolve, reject) => {
-      new this.electronService.postgres({
-        connectionString: `postgres://${this.dbConfig.user}:${
-          this.dbConfig.password
-        }@${this.dbConfig.host}:${this.dbConfig.port || 5432}/${
-          this.dbConfig.database
-        }`,
-      })
-        .query(query, params)
-        .then((res: any) => {
-          if (success) {
-            success(summary ? res : res.rows);
-          } else {
-            resolve(res);
-          }
-        })
-        .catch((err: any) => {
-          if (errorf) {
-            errorf(err);
-          } else {
-            reject(err);
-          }
-        });
-    });
-  };
-
-  private functionsQuery({ query, params = [], settings }): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      new Pool({
-        connectionString: `postgres://${settings.user}:${settings.password}@${
-          settings.host
-        }:${settings.port || 5432}/${settings.database}`,
-      })
-        .query(query, params)
-        .then((res: any) => {
-          resolve(res.rows);
-        })
-        .catch((err: any) => {
-          reject(err);
-        });
-    });
-  }
 
   createNewSecret = async (secret: SecretPayload) => {
     if (secret.id) {
@@ -247,9 +216,14 @@ export class DatabaseService {
       await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
       const runResults = await runFunc({
         secret,
-        db: this.functionsQuery,
+        // db: this.functionsQuery,
         raw: this.processRawData,
         parseSecret: this.parseSecret,
+        hl7V2: this.parseHL7DH76,
+        hl7V1: this.processHl7V1,
+        basicAuth: BASICAUTH,
+        basicHeaders: BASICHEADERS,
+        hl7Parser: hl7parser.create,
         settings: this.dbConfig,
         liveLogSubject: this.liveLogSubject,
         liveLog: this.liveLog,
@@ -268,7 +242,9 @@ export class DatabaseService {
       });
       await this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`);
       return runResults;
-    } catch (e) {}
+    } catch (e) {
+      await this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`);
+    }
   };
 
   private getSecret = async (process: any) => {
@@ -302,8 +278,8 @@ export class DatabaseService {
       data: Array.isArray(results) ? results : results.rows,
       count: Array.isArray(results)
         ? results.length
-        : results.rows.length > 0
-        ? results.rows[0].count
+        : results?.rows?.length > 0
+        ? results?.rows[0]?.count
         : 0,
     };
   };
@@ -395,60 +371,6 @@ export class DatabaseService {
       );
     } catch (e) {}
   };
-
-  execQuery(query: string, data: unknown[], success: Success, errorf: ErrorOf) {
-    if (this.dbConnected) {
-      this.query(query, data, success, errorf);
-    } else {
-      errorf({ error: "Please check your database connection" });
-    }
-  }
-  execWithCallback(
-    query: any,
-    data: any,
-    success: (arg0: any) => void,
-    errorf: (arg0: { error: string }) => void,
-    callback: () => void
-  ) {
-    if (this.dbConnected) {
-      this.mysqlPool.getConnection(
-        (
-          err: any,
-          connection: {
-            release: () => void;
-            query: (arg0: { sql: any }, arg1: any) => any;
-            destroy: () => void;
-          }
-        ) => {
-          if (err) {
-            try {
-              connection.release();
-            } catch (ex) {}
-            errorf(err);
-            return;
-          }
-          const sql = connection.query({ sql: query }, data);
-          sql.on("result", (result: any, index: any) => {
-            success(result);
-          });
-          sql.on("error", (err: any) => {
-            connection.destroy();
-            errorf(err);
-          });
-          sql.on("end", () => {
-            if (callback != null) {
-              callback();
-            }
-            if (connection) {
-              connection.destroy();
-            }
-          });
-        }
-      );
-    } else {
-      errorf({ error: "database not found" });
-    }
-  }
 
   createFunction = async (data: FxRequest): Promise<any> => {
     const bufferArray = await data.file.arrayBuffer();
@@ -554,7 +476,7 @@ export class DatabaseService {
           const runFunc = Function("context", process.code);
           await runFunc({
             secret,
-            db: this.functionsQuery,
+            // db: this.functionsQuery,
             raw: this.processRawData,
             settings: this.dbConfig,
             http: axios,
@@ -567,6 +489,11 @@ export class DatabaseService {
             logger: this.logger,
             secret_id: process?.secret_id,
             parseSecret: this.parseSecret,
+            hl7V2: this.parseHL7DH76,
+            hl7V1: this.processHl7V1,
+            basicAuth: BASICAUTH,
+            basicHeaders: BASICHEADERS,
+            hl7Parser: hl7parser.create,
             fs,
             externalParams: {},
           });
@@ -598,184 +525,131 @@ export class DatabaseService {
   addOrderTest = async (
     data: MachineData,
     success?: Success,
-    errorf?: ErrorOf
+    errorOf?: ErrorOf
   ) => {
-    if (data.patient_id && data.patient_id !== "") {
-      console.log('CHECKING EXISTING DATA', )
-      await this.checkExistingOrder(data, success, errorf);
-    }
-    this.addNewTest(data, success, errorf);
-  };
-
-  fetchLastOrders(success: Success, errorOf: ErrorOf, summary: boolean) {
-    const t = "SELECT * FROM orders ORDER BY id DESC";
-    if (this.dbConnected) {
-      this.query(t, null, success, errorOf, summary);
-    } else {
-      // Fetching from SQLITE
-      this.electronService.execSqliteQuery(t, null).then((results: any) => {
-        if (!results || typeof results === "string") {
-          errorOf(results ? results : "");
-        } else {
-          success(results);
-        }
-      });
-    }
-  }
-
-  private checkExistingOrder = async (
-    data: MachineData,
-    success: Success,
-    errorOf: ErrorOf
-  ) => {
-    const sql = `SELECT patient_id FROM orders WHERE patient_id='${data.patient_id}' LIMIT 1`;
-    const results = await this.electronService.execSqliteQuery (sql);
-    console.log('RESULTS', JSON.stringify(results))
-    if (Array.isArray(results) && results.length > 0) {
-      this.updateOrderSqlite(data, success, errorOf, results[0].id);
-    } else {
-      this.addNewTest(data, success, errorOf);
-    }
-  };
-
-  private updateOrderSqlite = (
-    data: MachineData,
-    success: Success,
-    errorOf: ErrorOf,
-    id: number
-  ): void => {
-    const sql = `UPDATE ORDERS SET ${Object.keys(data)
-      .map((key) => key + "=" + `'${data[key]}'`)
-      .join(",")} WHERE ID=${id};`;
-
-    this.electronService
-      .execSqliteQuery(sql, [])
-      .then((results: any) => {
-        success(results);
-      })
-      .catch((e: any) => errorOf(e));
-  };
-
-  private addNewTest = (
-    data: MachineData,
-    success: Success,
-    errorOf: ErrorOf
-  ) => {
-    const t = `INSERT INTO ORDERS(${Object.keys(data).join(
-      ","
-    )}) VALUES(${Object.keys(data)
-      .map((key, index) => "$" + (index + 1))
-      .join(",")}) RETURNING *`;
-
     const sql = `INSERT INTO ORDERS(${Object.keys(data).join(
       ","
     )}) VALUES(${Object.values(data)
       .map((d) => '"' + d + '"')
       .join(",")}) RETURNING *`;
-
-    if (this.dbConnected) {
-      this.query(t, Object.values(data), success, errorOf);
-    }
-    this.electronService
-      .execSqliteQuery(sql, [])
-      .then((results: any) => {
-        success(results);
-      })
-      .catch((e: any) => errorOf(e));
+    this.querySqlite(sql, success, errorOf);
   };
+
+  fetchLastOrders(success: Success, errorOf: ErrorOf, summary: boolean) {
+    const t = "SELECT * FROM orders ORDER BY id DESC";
+    this.electronService.execSqliteQuery(t, null).then((results: any) => {
+      if (!results || typeof results === "string") {
+        errorOf(results ? results : "");
+      } else {
+        success(results);
+      }
+    });
+  }
 
   getRawData(
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const q = "SELECT * FROM raw_data limit 1";
-    if (this.dbConnected) {
-      this.query(q, null, success, errorf);
-    } else {
-      // Fetching from SQLITE
-      this.electronService.execSqliteQuery(q, null).then((results: any) => {
+    this.electronService
+      .execSqliteQuery(q, null)
+      .then((results: any) => {
         success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
       });
-    }
   }
 
   fetchLastSyncTimes(
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const t =
-      "SELECT MAX(lims_sync_date_time) as lastLimsSync, MAX(added_on) as lastResultReceived FROM orders ORDER BY added_on 'DESC'";
+      "SELECT MAX(lims_sync_date_time) as lastLimsSync, MAX(added_on) as lastResultReceived FROM orders ORDER BY added_on DESC";
 
-    if (this.dbConnected) {
-      this.query(t, null, success, errorf);
-    } else {
-      // Fetching from SQLITE
-      this.electronService.execSqliteQuery(t, null).then((results: any) => {
+    // Fetching from SQLITE
+    this.electronService
+      .execSqliteQuery(t, null)
+      .then((results: any) => {
         success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
       });
-    }
   }
 
-  addRawData(
-    data: MachineData,
-    success: {
-      (res: any): void;
-      (res: any): void;
-      (res: any): void;
-      (arg0: any): void;
-    },
-    errorf: { (err: any): void; (err: any): void; (err: any): void }
-  ) {
+  addRawData(data: MachineData, success: Success, errorOf: ErrorOf) {
     const t = `INSERT INTO RAW_DATA(${Object.keys(data).join(
       ","
     )}) VALUES(${Object.keys(data)
       .map((key, index) => "$" + (index + 1))
       .join(",")}) RETURNING *`;
 
-    if (this.dbConnected) {
-      this.execQuery(t, Object.values(data), success, errorf);
-    } else {
-      this.electronService
-        .execSqliteQuery(t, Object.values(data))
-        .then((results: any) => {
-          success(results);
-        });
-    }
+    this.electronService
+      .execSqliteQuery(t, Object.values(data))
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((e: any) => {
+        if (errorOf) {
+          errorOf(e);
+          return;
+        }
+        return e;
+      });
   }
 
   addApplicationLog(
     data: MachineData,
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const t = `INSERT INTO APP_LOG(${Object.keys(data).join(
       ","
     )}) VALUES(${Object.keys(data)
       .map((key, index) => "$" + (index + 1))
       .join(",")}) RETURNING *`;
-    if (this.dbConnected) {
-      this.execQuery(t, Object.values(data), success, errorf);
-    }
 
     this.electronService
       .execSqliteQuery(t, Object.values(data))
       .then((results: any) => {
         success(results);
+      })
+      .catch((e: any) => {
+        if (errorOf) {
+          errorOf(e);
+          return;
+        }
+        return e;
       });
   }
 
   fetchRecentLogs(
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const t = "SELECT * FROM app_log ORDER BY id DESC, id DESC LIMIT 500";
-    if (this.dbConnected) {
-      this.query(t, null, success, errorf);
-    }
-    // Fetching from SQLITE
-    this.electronService.execSqliteQuery(t, null).then((results: any) => {
-      success(results);
-    });
+    this.electronService
+      .execSqliteQuery(t, null)
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
+      });
   }
 
   setDefaultDatabaseData(): void {
@@ -918,9 +792,6 @@ export class DatabaseService {
       )}) VALUES(${Object.keys(privilege)
         .map((key, index) => "$" + (index + 1))
         .join(",")}) RETURNING *`;
-      if (this.dbConnected) {
-        this.execQuery(t, Object.values(privilege), null, null);
-      }
 
       this.electronService
         .execSqliteQuery(t, Object.values(privilege))
@@ -935,9 +806,6 @@ export class DatabaseService {
       )}) VALUES(${Object.keys(role)
         .map((key, index) => "$" + (index + 1))
         .join(",")}) RETURNING *`;
-      if (this.dbConnected) {
-        this.execQuery(t, Object.values(role), null, null);
-      }
 
       this.electronService
         .execSqliteQuery(t, Object.values(role))
@@ -952,9 +820,6 @@ export class DatabaseService {
       )}) VALUES(${Object.keys(user)
         .map((key, index) => "$" + (index + 1))
         .join(",")}) RETURNING *`;
-      if (this.dbConnected) {
-        this.execQuery(t, Object.values(user), null, null);
-      }
 
       this.electronService
         .execSqliteQuery(t, Object.values(user))
@@ -969,10 +834,6 @@ export class DatabaseService {
       ).join(",")}) VALUES(${Object.keys(roleAndPrivilege)
         .map((key, index) => "$" + (index + 1))
         .join(",")}) RETURNING *`;
-      if (this.dbConnected) {
-        this.execQuery(t, Object.values(roleAndPrivilege), null, null);
-      }
-
       this.electronService
         .execSqliteQuery(t, Object.values(roleAndPrivilege))
         .then((results: any) => {
@@ -986,10 +847,6 @@ export class DatabaseService {
       )}) VALUES(${Object.keys(userAndRole)
         .map((key, index) => "$" + (index + 1))
         .join(",")}) RETURNING *`;
-      if (this.dbConnected) {
-        this.execQuery(t, Object.values(userAndRole), null, null);
-      }
-
       this.electronService
         .execSqliteQuery(t, Object.values(userAndRole))
         .then((results: any) => {
@@ -1002,32 +859,31 @@ export class DatabaseService {
     username: string,
     password: string,
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const userQuery = `SELECT * FROM user LEFT JOIN user_role ON user.id =user_role.user_id LEFT JOIN role ON role.id = user_role.role_id WHERE username="${username}" AND password="${password}"`;
-    if (this.dbConnected) {
-      this.query(userQuery, null, success, errorf);
-    }
-    // Fetching from SQLITE
     this.electronService
       .execSqliteQuery(userQuery, null)
       .then((results: any) => {
         success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
       });
   }
 
   getPrivilegesByRolesDetails(
     roleIds: number[],
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const privilegeQuery = `SELECT DISTINCT * FROM privilege LEFT JOIN role_privilege ON role_privilege.privilege_id =privilege.id WHERE role_privilege.role_id IN (${roleIds.join(
       ","
     )})`;
-    if (this.dbConnected) {
-      this.query(privilegeQuery, null, success, errorf);
-    }
-    // Fetching from SQLITE
     this.electronService
       .execSqliteQuery(privilegeQuery, null)
       .then((results: any) => {
@@ -1038,99 +894,126 @@ export class DatabaseService {
   setApprovalStatus(
     status: any,
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const t = `INSERT INTO order_status(${Object.keys(status).join(
       ","
     )}) VALUES(${Object.keys(status)
       .map((key, index) => "$" + (index + 1))
       .join(",")}) RETURNING *`;
-    if (this.dbConnected) {
-      this.execQuery(t, Object.values(status), null, null);
-    }
 
     this.electronService
       .execSqliteQuery(t, Object.values(status))
       .then((results: any) => {
         success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
       });
   }
 
   getApprovalStatuses(
     order_id: number,
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const query = `SELECT * FROM order_status WHERE order_id = ${order_id}`;
-    if (this.dbConnected) {
-      this.execQuery(query, null, success, errorf);
-    }
-
-    this.electronService.execSqliteQuery(query, []).then((results: any) => {
-      success(results);
-    });
+    this.electronService
+      .execSqliteQuery(query, [])
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
+      });
   }
 
   getPrivileges(
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const query = `SELECT * FROM privilege`;
-    if (this.dbConnected) {
-      this.execQuery(query, null, success, errorf);
-    }
-
-    this.electronService.execSqliteQuery(query, []).then((results: any) => {
-      success(results);
-    });
+    this.electronService
+      .execSqliteQuery(query, [])
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
+      });
   }
 
   getRoles(
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const query = `SELECT * FROM role`;
-    if (this.dbConnected) {
-      this.execQuery(query, null, success, errorf);
-    }
-
-    this.electronService.execSqliteQuery(query, []).then((results: any) => {
-      success(results);
-    });
+    this.electronService
+      .execSqliteQuery(query, [])
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
+      });
   }
 
   getUsers(
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const query = `SELECT * FROM user`;
-    if (this.dbConnected) {
-      this.execQuery(query, null, success, errorf);
-    }
-
-    this.electronService.execSqliteQuery(query, []).then((results: any) => {
-      success(results);
-    });
+    this.electronService
+      .execSqliteQuery(query, [])
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
+      });
   }
 
   addUser(
     user: any,
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const t = `INSERT INTO user(${Object.keys(user).join(
       ","
     )}) VALUES(${Object.keys(user)
       .map((key, index) => "$" + (index + 1))
       .join(",")}) RETURNING *`;
-    if (this.dbConnected) {
-      this.execQuery(t, Object.values(user), null, null);
-    }
-
     this.electronService
       .execSqliteQuery(t, Object.values(user))
       .then((results: any) => {
         success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
       });
   }
 
@@ -1145,28 +1028,31 @@ export class DatabaseService {
   addRole(
     role: any,
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const t = `INSERT INTO role(${Object.keys(role).join(
       ","
     )}) VALUES(${Object.keys(role)
       .map((key, index) => "$" + (index + 1))
       .join(",")}) RETURNING *`;
-    if (this.dbConnected) {
-      this.execQuery(t, Object.values(role), null, null);
-    }
-
     this.electronService
       .execSqliteQuery(t, Object.values(role))
       .then((results: any) => {
         success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
       });
   }
 
   addUserRolesRelationship(
     roles: any[],
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     for (const role of roles) {
       const t = `INSERT INTO user_role(${Object.keys(role).join(
@@ -1174,14 +1060,17 @@ export class DatabaseService {
       )}) VALUES(${Object.keys(role)
         .map((key, index) => "$" + (index + 1))
         .join(",")}) RETURNING *`;
-      if (this.dbConnected) {
-        this.execQuery(t, Object.values(role), null, null);
-      }
-
       this.electronService
         .execSqliteQuery(t, Object.values(role))
         .then((results: any) => {
           success(results);
+        })
+        .catch((error: any) => {
+          if (errorOf) {
+            errorOf(error);
+            return;
+          }
+          return error;
         });
     }
   }
@@ -1194,22 +1083,27 @@ export class DatabaseService {
   getUserAndRoleRelationship(
     user_id: number,
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     const query = `SELECT * FROM user_role WHERE user_id =${user_id}`;
-    if (this.dbConnected) {
-      this.execQuery(query, null, success, errorf);
-    }
-
-    this.electronService.execSqliteQuery(query, []).then((results: any) => {
-      success(results);
-    });
+    this.electronService
+      .execSqliteQuery(query, [])
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((error: any) => {
+        if (errorOf) {
+          errorOf(error);
+          return;
+        }
+        return error;
+      });
   }
 
   addRolesPrivilegeRelationship(
     rolePrivileges: any[],
     success: { (res: any): void; (arg0: any): void },
-    errorf: (err: any) => void
+    errorOf: (err: any) => void
   ) {
     for (const roleAndPrivilege of rolePrivileges) {
       const t = `INSERT INTO role_privilege(${Object.keys(
@@ -1217,14 +1111,17 @@ export class DatabaseService {
       ).join(",")}) VALUES(${Object.keys(roleAndPrivilege)
         .map((key, index) => "$" + (index + 1))
         .join(",")}) RETURNING *`;
-      if (this.dbConnected) {
-        this.execQuery(t, Object.values(roleAndPrivilege), null, null);
-      }
-
       this.electronService
         .execSqliteQuery(t, Object.values(roleAndPrivilege))
         .then((results: any) => {
           success(results);
+        })
+        .catch((error: any) => {
+          if (errorOf) {
+            errorOf(error);
+            return;
+          }
+          return error;
         });
     }
   }
@@ -1353,5 +1250,167 @@ export class DatabaseService {
     } else {
       return [];
     }
+  };
+
+  private processHl7V1 = (message: any) => {
+    // let result = null;
+
+    const obx = message.get("OBX").toArray();
+
+    const spm = message.get("SPM");
+    spm.forEach(
+      (singleSpm: {
+        get: (arg0: string) => {
+          (): any;
+          new (): any;
+          toString: { (): string; new (): any };
+        };
+      }) => {
+        //sampleNumber = (singleSpm.get(1).toInteger());
+        //const singleObx = obx[(sampleNumber * 2) - 1]; // there are twice as many OBX .. so we take the even number - 1 OBX for each SPM
+        const singleObx = obx[0]; // there are twice as many OBX .. so we take the even number - 1 OBX for each SPM
+
+        const resultOutcome = singleObx.get("OBX.5.1").toString();
+
+        const order: any = {};
+        order.order_id = singleSpm
+          .get("SPM.3")
+          .toString()
+          .replace("&ROCHE", "");
+        order.test_id = singleSpm.get("SPM.3").toString().replace("&ROCHE", "");
+
+        if (order.order_id === "") {
+          // const sac = message.get('SAC').toArray();
+          // const singleSAC = sac[0];
+          //Let us use the Sample Container ID as the Order ID
+          order.order_id = message.get("SAC.3").toString();
+          order.test_id = message.get("SAC.3").toString();
+        }
+
+        order.test_type = "HIVVL";
+
+        if (resultOutcome === "Titer") {
+          order.test_unit = singleObx.get("OBX.6.1").toString();
+          order.results = singleObx.get("OBX.5.1").toString();
+        } else if (resultOutcome === "> Titer max") {
+          order.test_unit = "";
+          order.results = ">10000000";
+        } else if (resultOutcome === "Invalid") {
+          order.test_unit = "";
+          order.results = "Invalid";
+        } else if (resultOutcome === "Failed") {
+          order.test_unit = "";
+          order.results = "Failed";
+        } else {
+          order.test_unit = singleObx.get("OBX.6.1").toString();
+          if (!order.test_unit) {
+            order.test_unit = singleObx.get("OBX.6.2").toString();
+          }
+          if (!order.test_unit) {
+            order.test_unit = singleObx.get("OBX.6").toString();
+          }
+          order.results = resultOutcome;
+        }
+
+        order.tested_by = singleObx.get("OBX.16").toString();
+        order.result_status = 1;
+        order.lims_sync_status = 0;
+        order.analysed_date_time = formatRawDate(
+          singleObx.get("OBX.19").toString()
+        );
+        //order.specimen_date_time = this.formatRawDate(message.get('OBX').get(0).get('OBX.19').toString());
+        order.authorised_date_time = formatRawDate(
+          singleObx.get("OBX.19").toString()
+        );
+        order.result_accepted_date_time = formatRawDate(
+          singleObx.get("OBX.19").toString()
+        );
+        return order;
+      }
+    );
+  };
+
+  private parseHL7DH76 = (hl7: string) => {
+    const data: any = {};
+    let master = [];
+
+    // This will turn the hl7 into an array seperated by our categories, however in order to keep the categories they stay in their own element
+    const tokens = hl7.split(
+      new RegExp("(" + separators.join("\\||") + "\\|)")
+    );
+
+    // Remove first element which is empty
+    tokens.shift();
+
+    // Here we combine the category name pairs with their values
+    tokens.forEach((token, index) => {
+      master.push(token + tokens[index + 1]);
+      tokens.splice(index, 1);
+    });
+    // Remove empty values
+    master = master.filter(Boolean);
+    // Now that master is populated, we can iterate over it and form the table
+    let inHTML = "";
+    master.forEach((value, index) => {
+      const fields = value.split("|");
+      let subdetail = "";
+      const segmentName = fields[0];
+      fields.shift();
+      const segmentValue = {};
+
+      // Creating the sub rows
+      for (let i = 0; i < fields.length; i++) {
+        let subvalue = fields[i];
+        try {
+          // Hard-code pipe value
+          if (segmentName == "MSH" && i == 0) {
+            subvalue = "|";
+          }
+          // Subtract the index so that they're shifted correctly for MSH
+          else if (segmentName == "MSH") {
+            subvalue = fields[i - 1] || "";
+          }
+
+          subvalue = (subvalue || "")
+            ?.split("^")
+            ?.join(" ")
+            ?.replace(/[\r|\n|\r\n]$/, "");
+          const key = dictionary[segmentName][i + 1];
+          subvalue =
+            dictionary[segmentName][i + 1].includes("Date") &&
+            subvalue &&
+            subvalue !== ""
+              ? formatRawDate(subvalue)
+              : subvalue;
+          segmentValue[key] = subvalue;
+        } catch (e) {}
+      }
+      if (!data[segmentName]) {
+        data[segmentName] = segmentValue;
+      } else if (Array.isArray(data[segmentName])) {
+        data[segmentName] = [...data[segmentName], segmentValue];
+      } else {
+        data[segmentName] = [data[segmentName], segmentValue];
+      }
+    });
+    const order: any = {
+      order_id: data?.OBR["Filler Order Number"],
+      test_type: data?.OBR["Principal Result Interpreter +"],
+      test_unit: data?.OBX?.find((obx: { Units: string }) => obx.Units !== "")
+        ?.Units,
+      patient_id: data?.PID["Patient ID"],
+      results: data.OBX?.find(
+        (obx: { [x: string]: string }) =>
+          obx["Observation Result Status"] !== ""
+      )["Observation Result Status"],
+      tested_by: data.OBR["Principal Result Interpreter +"],
+      analysed_date_time: data.OBR["Requested Date/Time"],
+      authorised_date_time: data.OBR["Requested Date/Time"],
+      result_accepted_date_time: data.OBR["Observation End Date/Time #"],
+      raw_text: hl7,
+      raw_json: JSON.stringify(data),
+    };
+
+    return order;
   };
 }

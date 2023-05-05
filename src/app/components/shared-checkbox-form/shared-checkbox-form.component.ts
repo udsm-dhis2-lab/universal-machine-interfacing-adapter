@@ -33,17 +33,6 @@ export class SharedCheckboxFormComponent implements OnInit {
         ) || [])[0];
       });
     }
-    // this.formFields = this.list?.map((item) => {
-    //   return new CheckBox({
-    //     id: item?.id,
-    //     key: item?.id,
-    //     label: item?.name,
-    //     required: true,
-    //   });
-    // });
-  }
-  onFormUpdate(formValue: FormValue): void {
-    console.log(formValue.getValues());
   }
 
   onFieldUpdate(event: MatCheckboxChange, item: any): void {

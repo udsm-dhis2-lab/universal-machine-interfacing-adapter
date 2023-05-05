@@ -14,26 +14,27 @@ import { TranslateHttpLoader } from "@ngx-translate/http-loader";
 import { HomeModule } from "./home/home.module";
 
 import { CommonModule } from "@angular/common";
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
+import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { CronEditorModule } from "ngx-cron-editor";
 import { AppComponent } from "./app.component";
 import { AddOrChangeSecretComponent } from "./components/add-or-change-secret/add-or-change-secret.component";
+import { CreateEditFunctionComponent } from "./components/create-edit-function/create-edit-function.component";
 import { DashboardComponent } from "./components/dashboard/dashboard.component";
 import { FunctionsComponent } from "./components/functions/functions.component";
 import { InfoComponent } from "./components/info/info.component";
 import { LogsComponent } from "./components/logs/logs.component";
+import { ManageUserPrivilegesComponent } from "./components/manage-user-privileges/manage-user-privileges.component";
+import { ManageUserRolesComponent } from "./components/manage-user-roles/manage-user-roles.component";
+import { ManageUsersComponent } from "./components/manage-users/manage-users.component";
+import { ScheduleComponent } from "./components/schedule/schedule.component";
 import { SettingsComponent } from "./components/settings/settings.component";
+import { SharedCheckboxFormComponent } from "./components/shared-checkbox-form/shared-checkbox-form.component";
 import { ElectronService } from "./core/services";
 import { DatabaseService } from "./services/database.service";
 import { ElectronStoreService } from "./services/electron-store.service";
 import { InterfaceService } from "./services/interface.service";
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
-import { ScheduleComponent } from "./components/schedule/schedule.component";
-import { CreateEditFunctionComponent } from "./components/create-edit-function/create-edit-function.component";
-import { ManageUserPrivilegesComponent } from './components/manage-user-privileges/manage-user-privileges.component';
-import { ManageUserRolesComponent } from './components/manage-user-roles/manage-user-roles.component';
-import { ManageUsersComponent } from './components/manage-users/manage-users.component';
-import { SharedCheckboxFormComponent } from './components/shared-checkbox-form/shared-checkbox-form.component';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>

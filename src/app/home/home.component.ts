@@ -7,6 +7,7 @@ import { shell } from "electron";
 import { FxResponse } from "../shared/interfaces/fx.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { LoginResponse } from "../shared/interfaces/login.interface";
+import { ElectronService } from "../core/services/electron/electron.service";
 
 @Component({
   selector: "app-home",
@@ -45,7 +46,9 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.databaseService.scheduleFunctions();
+  }
 
   public doLogin() {
     this.loggingIn = true;
@@ -135,7 +138,6 @@ export class HomeComponent implements OnInit {
       },
       (err) => {
         this.openSnackBar({ success: true, message: err.message });
-        console.log(err);
       }
     );
   };

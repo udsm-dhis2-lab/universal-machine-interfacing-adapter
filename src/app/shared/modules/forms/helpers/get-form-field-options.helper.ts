@@ -9,14 +9,6 @@ export function getFormFieldOptions(conceptAnswers: any[]): DropdownOption[] {
       }
 
       const { uuid, display } = answer;
-      // console.log('sashdasas', answer);
-      // const shortName = answer?.names
-      //   ? (answer?.names.filter((name) => name?.conceptNameType === 'SHORT') ||
-      //       [])[0]
-      //   : null;
-      // if (shortName && shortName.toLowerCase().indexOf('prov') > -1) {
-      //   console.log('uiewrywe');
-      // }
       return {
         key: uuid,
         value: uuid,

@@ -83,7 +83,7 @@ export class FunctionsComponent implements OnInit {
 
   onCancel = (fx: FxPayload) => {
     this.service
-      .updateFunction({ ...fx, running: 0 })
+      .updateFunction({ id: fx.id, running: 0 } as FxPayload)
       .then((res) => {
         this.openSnackBar({ ...res, message: "Function cancelled" });
         this.loadFunctions();
