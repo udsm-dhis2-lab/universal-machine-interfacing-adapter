@@ -68,9 +68,7 @@ export class SettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.settings.hasExternalLogin) {
-      this.loadFunctions();
-    }
+    this.loadFunctions();
   }
 
   get isNew() {
@@ -139,9 +137,9 @@ export class SettingsComponent implements OnInit {
           (fx: FxPayload) => {
             return {
               ...fx,
-              display: `${fx.name} ${
+              display: `${fx.name} [${
                 fx.description ? fx.description.substring(0, 20) : ""
-              }`,
+              }]`,
             };
           }
         );

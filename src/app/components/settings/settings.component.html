@@ -167,7 +167,6 @@
         </div>
         <div class="row">
           <div class="w-50 text-muted">
-            <!-- <span>{{appPath}}</span> -->
             <mat-form-field
               aria-disabled="true"
               class="w-100"
@@ -184,10 +183,7 @@
             </mat-form-field>
           </div>
 
-          <div
-            class="w-50"
-            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
-          >
+          <div class="w-50">
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Default Function</mat-label>
               <mat-select [(value)]="settings.functionId">
