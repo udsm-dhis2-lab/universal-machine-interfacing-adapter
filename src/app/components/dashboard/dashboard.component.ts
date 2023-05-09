@@ -38,9 +38,7 @@ export class DashboardComponent implements OnInit {
   displayedColumns: string[] = [
     "order_id",
     "test_id",
-    // "results",
     "test_unit",
-    // "test_type",
     "tested_by",
     "tested_on",
     "can_sync",
@@ -96,6 +94,14 @@ export class DashboardComponent implements OnInit {
     that.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
     that.currentUserId = this.store.get("userid");
     that.appSettings = that.store.get("appSettings");
+    if (
+      !that.appSettings?.authorizationCount ||
+      that.appSettings?.authorizationCount === ""
+    ) {
+      that.displayedColumns = that.displayedColumns.filter(
+        (column) => column !== "can_sync"
+      );
+    }
     if (
       null === that.appSettings ||
       undefined === that.appSettings ||
