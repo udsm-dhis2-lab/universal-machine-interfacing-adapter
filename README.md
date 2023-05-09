@@ -5,4 +5,7 @@
 - run `npm install`
 - to test the app run `npm start`
 - to build the app for production run `npm run electron:build`
-- Once the application runs, ensure you enter proper settings (Machine settings and MySQL settings)
+
+# HL7 Resources
+
+- [OBX Codes](https://hl7-definition.caristix.com/v2/HL7v2.7.1/Segments/OBX)

@@ -1,3 +1,14 @@
+const db = new context.sqlite.Database(
+  context.dbPath,
+  context.sqlite.OPEN_READWRITE,
+  (err) => {
+    if (err) {
+      console.error(err.message);
+    }
+  }
+);
+
+
 const mappings = {
   mtb: 'ywRl88yte5b',
   inh: 'nPGTzMkULFh',
@@ -19,6 +30,19 @@ const stageMappings = {
   ywRl88yte5b: { mtb: 'MTB ' },
   o2zbpZDZele: { flq: 'FLQ Resistance ', lflq: 'FLQ Resistance ' },
   GLqRo7AuhJM: { eth: 'ETH Resistance ' }
+}
+
+const saveStatus = ({ id, reason }) => {
+  try {
+    const query = `UPDATE orders SET reason="${reason}",sync_status="ERROR",lims_sync_status=${3} WHERE id=${id}`;
+    db.all(query, [], async (err, _rows) => {
+      if (err) {
+        console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', err, ' 🚫')
+      }
+    });
+  } catch (e) {
+    console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', e.message.toUpperCase(), ' 🚫')
+  }
 }
 
 const capitalizeFirstLetter = (sentence) => {
@@ -115,113 +139,106 @@ const syncData = async (rows) => {
     Accept: "*",
   };
   for (const row of rows) {
-    if (!row?.patient_id) continue;
-    const url = `${context.secret.url}/api/trackedEntityInstances.json?filter=${context.secret.tbAttribute
-      }:EQ:${row?.patient_id
-        .replace("-", "=")
-        .split("-")
-        .join("/")
-        .replace("=", "-")}&ou=${context.secret.ou}&ouMode=DESCENDANTS&program=${context.secret.program
-      }&fields=attributes[attribute,code,value],enrollments[*],orgUnit,trackedEntityInstance&paging=false`;
-    const res = await context.http.get(url, {
-      auth,
-      headers,
-    });
-    // FOUND CLIENTS
-    if (
-      res?.data?.trackedEntityInstances?.length > 0
-    ) {
-      const trackedEntityInstanceData = res.data?.trackedEntityInstances[0];
-      let stage1DataValues = []
-      let stage2DataValues = []
-      let dataValues = [
-        {
-          dataElement: "LV7d7aBw0fn",
-          value: "true",
-          providedElsewhere: false,
-        },
-        {
-          dataElement: "jYKFZdR99Tz",
-          value: row?.order_id,
-          providedElsewhere: false,
-        },
-        {
-          dataElement: "levlyYdnhws",
-          value: "10 Color Module GeneXpert",
-        },
-      ]
-      const stages = cleanData(row?.raw_text)
-      if (stages.stage1.length > 0) {
-        stage1DataValues = [...stage1DataValues, ...dataValues, ...stages.stage1]
-      }
-
-      if (stages.stage2.length > 0) {
-        stage2DataValues = [...stage2DataValues, ...dataValues, ...stages.stage2]
-      }
-      const eventPayload = {
-        orgUnit: trackedEntityInstanceData?.orgUnit,
-        program: "tj4u1ip0tTF",
-        programStage: "yzu183PkJCH",
-        status: "VISITED",
-        eventDate: new Date(row?.analysed_date_time),
-        trackedEntityInstance: trackedEntityInstanceData?.trackedEntityInstance,
-        dataValues: stages.stage1.length > 0 ? stage1DataValues : stage2DataValues
+    try {
+      if (!row?.patient_id) {
+        saveStatus({ id: row.id, reason: 'Patient ID missing' })
+        continue;
       };
-
-      const eventUrl = `${context.secret.url}/api/events${row?.reference_uuid ? "/" + row?.reference_uuid : ""
-        }.json`;
-      const { data } = !row?.reference_uuid
-        ? await context.http.post(eventUrl, eventPayload, {
-          auth,
-          headers,
-        })
-        : await context.http.put(eventUrl, eventPayload, {
-          auth,
-          headers,
-        });
-      const response = data?.response;
-
-      if (response?.imported || response?.updated) {
-        const reference_uuid = response?.importSummaries ? response.importSummaries[0]?.reference : response.reference;
-        const sync_status = response?.importSummaries ? response?.importSummaries[0]?.status : response.status;
-        //   Update the orders table for sync reference references
-        try {
-          const db = new context.sqlite.Database(
-            context.dbPath,
-            context.sqlite.OPEN_READWRITE,
-            (err) => {
-              if (err) {
-              }
-            }
-          );
-
-          const query = `UPDATE orders SET reference_uuid="${reference_uuid}",sync_status="${sync_status}", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${row?.id}`;
-          db.all(query, [], async (err, _rows) => {
-            if (err) {
-              console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', err?.toUpperCase(), ' 🚫')
-            } else {
-            }
-          });
-        } catch (e) {
-          console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', e.message.toUpperCase(), ' 🚫')
+      const url = `${context.secret.url}/api/trackedEntityInstances.json?filter=${context.secret.tbAttribute
+        }:EQ:${row?.patient_id
+          .replace("-", "=")
+          .split("-")
+          .join("/")
+          .replace("=", "-")}&ou=${context.secret.ou}&ouMode=DESCENDANTS&program=${context.secret.program
+        }&fields=attributes[attribute,code,value],enrollments[*],orgUnit,trackedEntityInstance&paging=false`;
+      const res = await context.http.get(url, {
+        auth,
+        headers,
+      });
+      // FOUND CLIENTS
+      if (
+        res?.data?.trackedEntityInstances?.length > 0
+      ) {
+        const trackedEntityInstanceData = res.data?.trackedEntityInstances[0];
+        let stage1DataValues = []
+        let stage2DataValues = []
+        let dataValues = [
+          {
+            dataElement: "LV7d7aBw0fn",
+            value: "true",
+            providedElsewhere: false,
+          },
+          {
+            dataElement: "jYKFZdR99Tz",
+            value: row?.order_id,
+            providedElsewhere: false,
+          },
+          {
+            dataElement: "levlyYdnhws",
+            value: "10 Color Module GeneXpert",
+          },
+        ]
+        const stages = cleanData(row?.raw_text)
+        if (stages.stage1.length > 0) {
+          stage1DataValues = [...stage1DataValues, ...dataValues, ...stages.stage1]
         }
-      } else {
+
+        if (stages.stage2.length > 0) {
+          stage2DataValues = [...stage2DataValues, ...dataValues, ...stages.stage2]
+        }
+        const eventPayload = {
+          orgUnit: trackedEntityInstanceData?.orgUnit,
+          program: "tj4u1ip0tTF",
+          programStage: "yzu183PkJCH",
+          status: "VISITED",
+          eventDate: new Date(row?.analysed_date_time),
+          trackedEntityInstance: trackedEntityInstanceData?.trackedEntityInstance,
+          dataValues: stages.stage1.length > 0 ? stage1DataValues : stage2DataValues
+        };
+
+        const eventUrl = `${context.secret.url}/api/events${row?.reference_uuid ? "/" + row?.reference_uuid : ""
+          }.json`;
+        const { data } = !row?.reference_uuid
+          ? await context.http.post(eventUrl, eventPayload, {
+            auth,
+            headers,
+          })
+          : await context.http.put(eventUrl, eventPayload, {
+            auth,
+            headers,
+          });
+        const response = data?.response;
+
+        if (response?.imported || response?.updated) {
+          const reference_uuid = response?.importSummaries ? response.importSummaries[0]?.reference : response.reference;
+          const sync_status = response?.importSummaries ? response?.importSummaries[0]?.status : response.status;
+          //   Update the orders table for sync reference references
+          try {
+            const query = `UPDATE orders SET reference_uuid="${reference_uuid}",sync_status="${sync_status}", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${row?.id}`;
+            db.all(query, [], async (err, _rows) => {
+              if (err) {
+                console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', err?.toUpperCase(), ' 🚫')
+              } else {
+              }
+            });
+          } catch (e) {
+            console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', e.message.toUpperCase(), ' 🚫')
+          }
+        } else {
+          saveStatus({ id: row.id, reason: JSON.stringify(response) })
+        }
       }
+
+      saveStatus({ id: row.id, reason: 'Data not available on ETL' })
+      continue;
+    } catch (e) {
+      saveStatus({ id: row.id, reason: e.message })
+
     }
-    continue;
   }
 };
 const run = async () => {
   try {
-    const db = new context.sqlite.Database(
-      context.dbPath,
-      context.sqlite.OPEN_READWRITE,
-      (err) => {
-        if (err) {
-          console.error(err.message);
-        }
-      }
-    );
 
     if (!context.secret || !context?.secret?.id) {
       db.all(`SELECT * FROM SECRET WHERE ID=${context.secret_id}`, [], (_err, rows) => {

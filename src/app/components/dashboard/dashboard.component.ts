@@ -1,20 +1,17 @@
-import { Component, OnInit, NgZone } from "@angular/core";
+import { Component, NgZone, OnInit } from "@angular/core";
+import { MatDialog } from "@angular/material/dialog";
 import { PageEvent } from "@angular/material/paginator";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
-import { ElectronStoreService } from "../../services/electron-store.service";
-import { InterfaceService } from "../../services/interface.service";
-import {
-  DatabaseResponse,
-  SettingsDB,
-} from "../../shared/interfaces/db.interface";
 import { readFileSync } from "fs";
+import { uniqBy } from "lodash";
 import { ElectronService } from "../../core/services";
 import { DatabaseService } from "../../services/database.service";
+import { ElectronStoreService } from "../../services/electron-store.service";
+import { InterfaceService } from "../../services/interface.service";
+import { DatabaseResponse } from "../../shared/interfaces/db.interface";
 import { FxResponse } from "../../shared/interfaces/fx.interface";
-import { MatSnackBar } from "@angular/material/snack-bar";
-import { uniqBy } from "lodash";
 import { InfoComponent } from "../info/info.component";
-import { MatDialog } from "@angular/material/dialog";
 
 @Component({
   selector: "app-dashboard",
@@ -62,8 +59,8 @@ export class DashboardComponent implements OnInit {
       label: "Successfully synced",
     },
     2: { icon: "♻️", color: "", spin: true, label: "Synching" },
-    3: { icon: "🚫", color: "", spin: false, label: "Failed" },
-    ERROR: { icon: "🚫", color: "", spin: false, label: "Failed" },
+    3: { icon: "🚫", color: "", spin: false, label: "Failed", hover: true },
+    ERROR: { icon: "🚫", color: "", spin: false, label: "Failed", hover: true },
   };
 
   statusesForKey = uniqBy(
@@ -253,7 +250,8 @@ export class DashboardComponent implements OnInit {
     };
     this.database.setApprovalStatus(
       status,
-      (status: any) => {
+      (results: any) => {
+        this.sync();
         this.fetchLastOrders();
         if (
           this.currentOrderApprovalStatuses?.length ==
@@ -270,6 +268,15 @@ export class DashboardComponent implements OnInit {
       (err) => {}
     );
   }
+
+  sync = () => {
+    if (this.appSettings.functionId && this.appSettings.functionId !== "") {
+      this.database
+        .run(this.appSettings.functionId)
+        .then((res) => {})
+        .catch((e) => {});
+    }
+  };
 
   getApprovalInfos(event: Event, order: any): void {
     event.stopPropagation();

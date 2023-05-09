@@ -217,14 +217,22 @@
             [ngClass]="{
               'fa-spin': statuses[element?.lims_sync_status]?.spin
             }"
+            [ngClass]="{
+              'show-reason': statuses[element?.lims_sync_status]?.hover
+            }"
           >
-            <mat-icon style="font-size: 1rem; margin-top: 6px">{{
-              statuses[
-                !element?.sync_status
-                  ? element?.lims_sync_status
-                  : element?.sync_status
-              ]?.icon
-            }}</mat-icon>
+            <mat-icon
+              #tooltip="matTooltip"
+              style="font-size: 1rem; margin-top: 6px"
+              [matTooltip]="element.reason ?? ''"
+              >{{
+                statuses[
+                  !element?.sync_status
+                    ? element?.lims_sync_status
+                    : element?.sync_status
+                ]?.icon
+              }}</mat-icon
+            >
           </td>
         </ng-container>
 

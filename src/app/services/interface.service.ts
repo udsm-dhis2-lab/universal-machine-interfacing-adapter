@@ -244,11 +244,11 @@ export class InterfaceService {
 
   processHL7Data(rawText: string) {
     const that = this;
-    // if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
-    that.parseHL7DH76(rawText);
-    // } else {
-    // that.processHl7V1(rawText);
-    // }
+    if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
+      that.parseHL7DH76(rawText);
+    } else {
+      that.processHl7V1(rawText);
+    }
   }
 
   handleTCPResponse(data: { toString: (arg0: string) => any }) {
@@ -297,6 +297,7 @@ export class InterfaceService {
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings?.analyzerMachineName;
+        that.processHL7Data(that.strData);
 
         that.dbService.addRawData(
           rData,
@@ -974,8 +975,8 @@ export class InterfaceService {
     const msgID = message.get("MSH.10").toString();
     that.socketClient.write(that.hl7ACK(msgID));
     // let result = null;
-
     const obx = message.get("OBX").toArray();
+    console.log(obx);
 
     const spm = message.get("SPM");
     spm.forEach(function (singleSpm) {
@@ -991,8 +992,6 @@ export class InterfaceService {
       order.test_id = singleSpm.get("SPM.3").toString().replace("&ROCHE", "");
 
       if (order.order_id === "") {
-        // const sac = message.get('SAC').toArray();
-        // const singleSAC = sac[0];
         //Let us use the Sample Container ID as the Order ID
         order.order_id = message.get("SAC.3").toString();
         order.test_id = message.get("SAC.3").toString();
@@ -1038,7 +1037,7 @@ export class InterfaceService {
       );
       order.test_location = that.appSettings?.labName;
       order.machine_used = that.appSettings?.analyzerMachineName;
-
+      console.log(order);
       if (order.results) {
         that.dbService
           .addOrderTest(

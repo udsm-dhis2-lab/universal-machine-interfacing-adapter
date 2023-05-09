@@ -26,7 +26,6 @@ export class Sqlite3Helper {
       `created_date` date DEFAULT NULL, \
       `test_unit` TEXT DEFAULT NULL, \
       `results` TEXT DEFAULT NULL, \
-      `raw_json` TEXT DEFAULT NULL, \
       `tested_by` TEXT DEFAULT NULL, \
       `analysed_date_time` datetime DEFAULT NULL, \
       `specimen_date_time` datetime DEFAULT NULL, \
@@ -44,6 +43,7 @@ export class Sqlite3Helper {
       `printed_at` INTEGER DEFAULT NULL, \
       `raw_text` mediumtext, \
       `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+      `reason` TEXT DEFAULT NULL, \
       PRIMARY KEY("id" AUTOINCREMENT) \
       );'
     );

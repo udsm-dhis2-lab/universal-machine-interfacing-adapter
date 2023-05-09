@@ -4,6 +4,7 @@ import * as fs from "fs";
 import { BehaviorSubject } from "rxjs";
 import { ElectronService } from "../core/services";
 import { dictionary, separators } from "../shared/constants/shared.constants";
+import { BASICAUTH, BASICHEADERS } from "../shared/helpers/base.helpert";
 import { formatRawDate } from "../shared/helpers/date.helper";
 import { MachineData } from "../shared/interfaces/data.interface";
 import {
@@ -20,8 +21,6 @@ import {
   SecretPayload,
 } from "../shared/interfaces/fx.interface";
 import { ElectronStoreService } from "./electron-store.service";
-import { BASICAUTH, BASICHEADERS } from "../shared/helpers/base.helpert";
-import { error } from "console";
 const hl7parser = require("hl7parser");
 
 @Injectable({
@@ -216,7 +215,7 @@ export class DatabaseService {
       await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
       const runResults = await runFunc({
         secret,
-        // db: this.functionsQuery,
+
         raw: this.processRawData,
         parseSecret: this.parseSecret,
         hl7V2: this.parseHL7DH76,
@@ -476,7 +475,6 @@ export class DatabaseService {
           const runFunc = Function("context", process.code);
           await runFunc({
             secret,
-            // db: this.functionsQuery,
             raw: this.processRawData,
             settings: this.dbConfig,
             http: axios,
@@ -519,7 +517,8 @@ export class DatabaseService {
     const query = `UPDATE ORDERS SET ${Object.keys(data)
       .map((key) => key + "=" + `'${data[key]}'`)
       .join(",")} WHERE ID=${id};`;
-    return await this.query(query, []);
+    const success = await this.query(query, []);
+    return success;
   };
 
   addOrderTest = async (
@@ -1393,24 +1392,7 @@ export class DatabaseService {
         data[segmentName] = [data[segmentName], segmentValue];
       }
     });
-    const order: any = {
-      order_id: data?.OBR["Filler Order Number"],
-      test_type: data?.OBR["Principal Result Interpreter +"],
-      test_unit: data?.OBX?.find((obx: { Units: string }) => obx.Units !== "")
-        ?.Units,
-      patient_id: data?.PID["Patient ID"],
-      results: data.OBX?.find(
-        (obx: { [x: string]: string }) =>
-          obx["Observation Result Status"] !== ""
-      )["Observation Result Status"],
-      tested_by: data.OBR["Principal Result Interpreter +"],
-      analysed_date_time: data.OBR["Requested Date/Time"],
-      authorised_date_time: data.OBR["Requested Date/Time"],
-      result_accepted_date_time: data.OBR["Observation End Date/Time #"],
-      raw_text: hl7,
-      raw_json: JSON.stringify(data),
-    };
 
-    return order;
+    return data;
   };
 }

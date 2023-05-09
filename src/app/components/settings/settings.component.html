@@ -184,7 +184,22 @@
             </mat-form-field>
           </div>
 
-          <div class="w-50"></div>
+          <div
+            class="w-50"
+            *ngIf="settings.interfaceCommunicationProtocol !== 'serial'"
+          >
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Default Function</mat-label>
+              <mat-select [(value)]="settings.functionId">
+                <mat-option
+                  *ngFor="let function of functions"
+                  [value]="function.id"
+                  (click)="settings.functionId = function.id"
+                  >{{ function.name }}</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
+          </div>
         </div>
 
         <hr />

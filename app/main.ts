@@ -188,6 +188,7 @@ try {
       `is_printed` INTEGER DEFAULT NULL, \
       `printed_at` INTEGER DEFAULT NULL, \
       `raw_text` mediumtext, \
+      `reason` TEXT DEFAULT NULL, \
       `sync_status` TEXT,\
       `reference_uuid` TEXT,\
       `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
