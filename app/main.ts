@@ -195,6 +195,18 @@ try {
       PRIMARY KEY("id" AUTOINCREMENT) \
       );'
     );
+    database.run(
+      'CREATE TABLE IF NOT EXISTS `code_parameters` ( \
+      `id` INTEGER NOT NULL, \
+      `test_order` TEXT NOT NULL, \
+      `lis_order` TEXT NOT NULL, \
+      `test_id` TEXT DEFAULT NULL, \
+      `parameters` JSON NOT NULL, \
+      `answers` JSON NOT NULL, \
+      `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+      PRIMARY KEY("id" AUTOINCREMENT) \
+      );'
+    );
 
     database.run(
       'CREATE TABLE IF NOT EXISTS `raw_data` ( \

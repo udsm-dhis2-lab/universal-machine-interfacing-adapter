@@ -41,7 +41,7 @@
             "dev": {
               "optimization": false,
               "outputHashing": "none",
-              "sourceMap": true,
+              "sourceMap": false,
               "namedChunks": false,
               "aot": false,
               "extractLicenses": true,
@@ -73,7 +73,7 @@
             "web": {
               "optimization": false,
               "outputHashing": "none",
-              "sourceMap": true,
+              "sourceMap": false,
               "namedChunks": false,
               "aot": false,
               "extractLicenses": true,

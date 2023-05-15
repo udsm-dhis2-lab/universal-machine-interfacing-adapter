@@ -9,6 +9,7 @@ import { ManageUserPrivilegesComponent } from "./components/manage-user-privileg
 import { ManageUserRolesComponent } from "./components/manage-user-roles/manage-user-roles.component";
 import { ManageUsersComponent } from "./components/manage-users/manage-users.component";
 import { PageNotFoundComponent } from "./shared/components/page-not-found/page-not-found.component";
+import { CodeParamsComponent } from "./components/code-params/code-params.component";
 
 const routes: Routes = [
   {
@@ -39,6 +40,10 @@ const routes: Routes = [
   {
     path: "users",
     component: ManageUsersComponent,
+  },
+  {
+    path: "coded",
+    component: CodeParamsComponent,
   },
   {
     path: "**",

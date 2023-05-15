@@ -11,7 +11,7 @@ const start = async () => {
     );
 
     try {
-      sql = 'ALTER TABLE ORDERS ADD COLUMN raw_id INTEGER DEFAULT NULL;'
+      sql = 'ALTER TABLE ORDERS ADD COLUMN reason TEXT DEFAULT NULL;'
       db.all(sql, [], async (err, rows) => {
 
         console.error(err ? err : "No data to sync");
@@ -20,41 +20,6 @@ const start = async () => {
 
       });
     } catch (e) { }
-
-    try {
-      sql = 'ALTER TABLE ORDERS ADD COLUMN added_on datetime;'
-      db.all(sql, [], async (err, rows) => {
-
-        console.error(err ? err : "No data to sync");
-
-        console.log('rows', rows);
-
-      });
-    } catch (e) { }
-
-    try {
-      sql = 'ALTER TABLE app_log ADD COLUMN added_on datetime;'
-      db.all(sql, [], async (err, rows) => {
-
-        console.error(err ? err : "No data to sync");
-
-        console.log('rows', rows);
-
-      });
-    } catch (e) { }
-
-    try {
-      sql = "DELETE FROM ORDERS;"
-      db.all(sql, [], async (err, rows) => {
-
-        console.error(err ? err : "No data to sync");
-
-        console.log('rows', rows);
-
-      });
-    } catch (e) { }
-
-    db.close()
 
   } catch (e) { }
 

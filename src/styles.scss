@@ -77,6 +77,20 @@ td {
   justify-content: center;
 }
 
+.sticky-paginator {
+  position: sticky;
+  bottom: 0 !important;
+  background-color: white;
+  margin-bottom: 0px !important;
+}
+.sticky-header {
+  position: sticky;
+  top: 0 !important;
+  background-color: white;
+  margin-top: 0px !important;
+  z-index: 999;
+}
+
 .fa-spin {
   -webkit-animation: fa-spin 2s infinite linear;
   animation: fa-spin 2s infinite linear;

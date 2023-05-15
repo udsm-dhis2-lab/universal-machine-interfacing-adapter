@@ -15,7 +15,6 @@ import { HomeModule } from "./home/home.module";
 
 import { CommonModule } from "@angular/common";
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
-import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { CronEditorModule } from "ngx-cron-editor";
 import { AppComponent } from "./app.component";
@@ -35,6 +34,7 @@ import { ElectronService } from "./core/services";
 import { DatabaseService } from "./services/database.service";
 import { ElectronStoreService } from "./services/electron-store.service";
 import { InterfaceService } from "./services/interface.service";
+import { CodeParamsComponent } from "./components/code-params/code-params.component";
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
@@ -55,6 +55,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
     ManageUserRolesComponent,
     ManageUsersComponent,
     SharedCheckboxFormComponent,
+    CodeParamsComponent,
   ],
   imports: [
     BrowserModule,

@@ -136,6 +136,7 @@ export class DatabaseService {
           }
         })
         .catch((err: any) => {
+          console.log("ERROR", err);
           if (errorOf) {
             errorOf(err);
           } else {
@@ -273,6 +274,17 @@ export class DatabaseService {
       pager.pageSize
     } OFFSET ${pager.page * pager.pageSize}`;
     const results = await this.query(query);
+    return {
+      data: Array.isArray(results) ? results : results.rows,
+      count: Array.isArray(results)
+        ? results.length
+        : results?.rows?.length > 0
+        ? results?.rows[0]?.count
+        : 0,
+    };
+  };
+  runQuery = async (query: string, params: string[] = []): Promise<any> => {
+    const results = await this.query(query, params);
     return {
       data: Array.isArray(results) ? results : results.rows,
       count: Array.isArray(results)
