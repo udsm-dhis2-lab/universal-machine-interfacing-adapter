@@ -109,7 +109,7 @@ export class CreateEditFunctionComponent implements OnInit {
   }
 
   //Remove Fields
-  removeAddress(index: number): void {
+  removePair(index: number): void {
     this.secrets.removeAt(index);
   }
 

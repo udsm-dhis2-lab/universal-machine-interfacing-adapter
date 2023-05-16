@@ -12,41 +12,43 @@
         <ng-template matTabContent>
           <div style="max-height: 60vh; overflow: auto">
             <form class="example-form" [formGroup]="secretForm">
-              <mat-form-field class="w-100" appearance="outline">
-                <mat-label>Secret Name</mat-label>
-                <input
-                  type="text"
-                  matInput
-                  placeholder="Secret Name"
-                  formControlName="name"
-                />
-              </mat-form-field>
-              <mat-form-field class="w-100" appearance="outline">
-                <mat-label>Secret Description</mat-label>
-                <input
-                  type="text"
-                  matInput
-                  placeholder="Secret Description"
-                  formControlName="description"
-                />
-              </mat-form-field>
+              <div class="form-group row">
+                <mat-form-field class="w-50" appearance="outline">
+                  <mat-label>Secret Name</mat-label>
+                  <input
+                    type="text"
+                    matInput
+                    placeholder="Secret Name"
+                    formControlName="name"
+                  />
+                </mat-form-field>
+                <mat-form-field class="w-50" appearance="outline">
+                  <mat-label>Secret Description</mat-label>
+                  <input
+                    type="text"
+                    matInput
+                    placeholder="Secret Description"
+                    formControlName="description"
+                  />
+                </mat-form-field>
+              </div>
               <div
                 *ngFor="let group of secrets.controls; let i = index"
                 formArrayName="secretValue"
               >
-                <div class="form-group jumbotron" [formGroupName]="i">
-                  <mat-form-field class="w-100" appearance="outline">
-                    <mat-label>Secret Key</mat-label>
+                <div class="form-group row" [formGroupName]="i">
+                  <mat-form-field class="w-50" appearance="outline">
+                    <mat-label>Name</mat-label>
                     <input
                       type="text"
                       matInput
-                      placeholder="Secret Key"
+                      placeholder="Secret Name"
                       formControlName="key"
                     />
                   </mat-form-field>
 
-                  <mat-form-field class="w-100" appearance="outline">
-                    <mat-label>Secret Value</mat-label>
+                  <mat-form-field class="w-50" appearance="outline">
+                    <mat-label>Value</mat-label>
                     <input
                       type="text"
                       matInput
@@ -55,16 +57,18 @@
                     />
                   </mat-form-field>
 
-                  <button
-                    matTooltip="Delete Above Fields"
-                    matTooltipHideDelay="1000"
-                    mat-flat-button
-                    *ngIf="i > 0"
-                    class="float-end mb-3"
-                    (click)="removeAddress(i)"
-                  >
-                    <mat-icon class="text-danger">delete</mat-icon>
-                  </button>
+                  <div>
+                    <button
+                      matTooltip="Delete Above Fields"
+                      matTooltipHideDelay="1000"
+                      mat-flat-button
+                      *ngIf="i > 0"
+                      class="float-end mb-3"
+                      (click)="removePair(i)"
+                    >
+                      <mat-icon class="text-danger">delete</mat-icon>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div class="d-flex">

@@ -1,10 +1,10 @@
 import { Component, OnInit } from "@angular/core";
 import { PageEvent } from "@angular/material/paginator";
-import { DatabaseService } from "../../services/database.service";
-import { CodedParameters } from "../../shared/interfaces/data.interface";
-import { FxResponse } from "../../shared/interfaces/fx.interface";
+import { DatabaseService } from "../../../services/database.service";
+import { CodedParameters } from "../../../shared/interfaces/data.interface";
+import { FxResponse } from "../../../shared/interfaces/fx.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { InfoComponent } from "../info/info.component";
+import { InfoComponent } from "../../info/info.component";
 import { MatDialog } from "@angular/material/dialog";
 
 @Component({

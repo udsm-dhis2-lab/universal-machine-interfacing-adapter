@@ -1,0 +1,68 @@
+<div class="container">
+  <app-top-menu-bar></app-top-menu-bar>
+  <div class="column mt-5">
+    <form [formGroup]="codeParamsForm">
+      <div class="form-group row">
+        <mat-form-field class="w-50" appearance="outline">
+          <mat-label>LIS Test Order</mat-label>
+          <input
+            type="text"
+            matInput
+            placeholder="LIS Test Order"
+            formControlName="lis_order"
+          />
+        </mat-form-field>
+        <mat-form-field class="w-50" appearance="outline">
+          <mat-label>Machine Test Order</mat-label>
+          <input
+            type="text"
+            matInput
+            placeholder="Machine Test Order"
+            formControlName="test_order"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="form-group column">
+        <h3 class="w-100">Parameters & Answers</h3>
+        <div>
+          <div class="d-flex">
+            <mat-form-field class="w-10" appearance="outline">
+              <mat-label>LIS Parameter</mat-label>
+              <input
+                type="text"
+                matInput
+                placeholder="LIS Parameter"
+                formControlName="test_order"
+              />
+            </mat-form-field>
+
+            <mat-form-field
+              class="w-10"
+              style="margin-left: 5px"
+              appearance="outline"
+            >
+              <mat-label>Machine Parameter</mat-label>
+              <input
+                type="text"
+                matInput
+                placeholder="Machine Parameter"
+                formControlName="test_order"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div mat-dialog-actions [align]="'end'">
+    <button mat-flat-button cdkFocusInitial routerLink="/dashboard">
+      Cancel
+    </button>
+    <button color="primary" mat-flat-button (click)="onSave()">
+      <mat-icon>save</mat-icon>
+      <span> Save </span>
+    </button>
+  </div>
+</div>
