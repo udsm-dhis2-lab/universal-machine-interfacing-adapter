@@ -2,3 +2,7 @@ button,
 button:hover {
   outline: none !important;
 }
+
+.group {
+  overflow-x: hidden;
+}

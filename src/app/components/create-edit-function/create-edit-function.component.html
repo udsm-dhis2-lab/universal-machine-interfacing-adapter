@@ -7,8 +7,8 @@
 <div class="d-flex justify-content-between">
   <div *ngIf="!isFunction" class="pr-5 w-100">
     <h3>Secrets</h3>
-    <mat-tab-group>
-      <mat-tab label="New">
+    <mat-tab-group class="group">
+      <mat-tab class="group" label="New">
         <ng-template matTabContent>
           <div style="max-height: 60vh; overflow: auto">
             <form class="example-form" [formGroup]="secretForm">

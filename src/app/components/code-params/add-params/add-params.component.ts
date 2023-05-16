@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { FormBuilder, FormGroup } from "@angular/forms";
+import { FormArray, FormBuilder, FormGroup } from "@angular/forms";
 
 @Component({
   selector: "app-add-params",
@@ -10,7 +10,7 @@ export class AddParamsComponent implements OnInit {
   codeParamsForm: FormGroup;
   constructor(private formBuilder: FormBuilder) {
     this.codeParamsForm = this.formBuilder.group({
-      secretValue: this.formBuilder.array([this.addSecretsGroup()]),
+      parameters: this.formBuilder.array([this.addParametersGroup()]),
       lis_order: "",
       test_order: "",
     });
@@ -18,7 +18,15 @@ export class AddParamsComponent implements OnInit {
 
   ngOnInit() {}
 
-  private addSecretsGroup(key?: any, value?: any): FormGroup {
+  private addParametersGroup(key?: any, value?: any): FormGroup {
+    return this.formBuilder.group({
+      answers: this.formBuilder.array([this.addAnswersGroup()]),
+      key: key ?? "",
+      value: value ?? "",
+    });
+  }
+
+  private addAnswersGroup(key?: any, value?: any): FormGroup {
     return this.formBuilder.group({
       key: key ?? "",
       value: value ?? "",
@@ -36,5 +44,8 @@ export class AddParamsComponent implements OnInit {
 
   getValue(input: string) {
     return this.codeParamsForm.get(input)?.value;
+  }
+  get secrets(): FormArray {
+    return <FormArray>this.codeParamsForm.get("secretValue");
   }
 }
