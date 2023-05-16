@@ -618,6 +618,26 @@ export class DatabaseService {
         return e;
       });
   }
+  genericAdd(data: any, table: string, success: Success, errorOf: ErrorOf) {
+    const t = `INSERT INTO ${table}(${Object.keys(data).join(
+      ","
+    )}) VALUES(${Object.keys(data)
+      .map((key, index) => "$" + (index + 1))
+      .join(",")}) RETURNING *`;
+
+    this.electronService
+      .execSqliteQuery(t, Object.values(data))
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((e: any) => {
+        if (errorOf) {
+          errorOf(e);
+          return;
+        }
+        return e;
+      });
+  }
 
   addApplicationLog(
     data: MachineData,

@@ -25,41 +25,111 @@
 
       <div class="form-group column">
         <h3 class="w-100">Parameters & Answers</h3>
-        <div>
-          <div class="d-flex">
-            <mat-form-field class="w-10" appearance="outline">
-              <mat-label>LIS Parameter</mat-label>
-              <input
-                type="text"
-                matInput
-                placeholder="LIS Parameter"
-                formControlName="test_order"
-              />
-            </mat-form-field>
+        <div
+          *ngFor="let group of parameters.controls; let i = index"
+          formArrayName="parameters"
+        >
+          <div class="form-group row w-25" [formGroupName]="i">
+            <div class="d-flex">
+              <mat-form-field class="w-10" appearance="outline">
+                <mat-label>LIS Parameter</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  placeholder="LIS Parameter"
+                  formControlName="key"
+                />
+              </mat-form-field>
 
-            <mat-form-field
-              class="w-10"
-              style="margin-left: 5px"
-              appearance="outline"
-            >
-              <mat-label>Machine Parameter</mat-label>
-              <input
-                type="text"
-                matInput
-                placeholder="Machine Parameter"
-                formControlName="test_order"
-              />
-            </mat-form-field>
+              <mat-form-field
+                class="w-10"
+                style="margin-left: 5px"
+                appearance="outline"
+              >
+                <mat-label>Machine Parameter</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  placeholder="Machine Parameter"
+                  formControlName="value"
+                />
+              </mat-form-field>
+
+              <div
+                *ngFor="let group of getAnswers(i); let n = index"
+                formArrayName="answers"
+              >
+                <div [formGroupName]="i">
+                  <mat-form-field
+                    class="w-10 ml-5"
+                    style="margin-left: 5px"
+                    appearance="outline"
+                  >
+                    <mat-label>LIS Parameter</mat-label>
+                    <input
+                      type="text"
+                      matInput
+                      placeholder="LIS Parameter"
+                      formControlName="key"
+                    />
+                  </mat-form-field>
+
+                  <mat-form-field
+                    class="w-10"
+                    style="margin-left: 5px"
+                    appearance="outline"
+                  >
+                    <mat-label>Machine Parameter</mat-label>
+                    <input
+                      type="text"
+                      matInput
+                      placeholder="Machine Parameter"
+                      formControlName="value"
+                    />
+                  </mat-form-field>
+                </div>
+                <div class="d-flex justify-content-start mb-3">
+                  <button
+                    matTooltip="Delete Above Fields"
+                    matTooltipHideDelay="1000"
+                    mat-flat-button
+                    (click)="removeAnswer(i)"
+                  >
+                    <mat-icon class="text-danger">delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <div class="ml-5">
+                <button mat-flat-button (click)="addAnswersFields(i)">
+                  <mat-icon>add</mat-icon> Add Answers
+                </button>
+              </div>
+            </div>
+            <div class="d-flex justify-content-start mb-3">
+              <button
+                matTooltip="Delete Above Fields"
+                matTooltipHideDelay="1000"
+                mat-flat-button
+                *ngIf="i > 0"
+                (click)="removePair(i)"
+              >
+                <mat-icon class="text-danger">delete</mat-icon>
+              </button>
+            </div>
           </div>
+        </div>
+
+        <div class="d-flex">
+          <button mat-flat-button (click)="addParameterFields()">
+            <mat-icon>add</mat-icon> Add Parameters
+          </button>
         </div>
       </div>
     </form>
   </div>
 
   <div mat-dialog-actions [align]="'end'">
-    <button mat-flat-button cdkFocusInitial routerLink="/dashboard">
-      Cancel
-    </button>
+    <button mat-flat-button cdkFocusInitial routerLink="/coded">Cancel</button>
     <button color="primary" mat-flat-button (click)="onSave()">
       <mat-icon>save</mat-icon>
       <span> Save </span>
