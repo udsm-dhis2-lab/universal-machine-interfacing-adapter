@@ -14,7 +14,7 @@ import { MatDialog } from "@angular/material/dialog";
 })
 export class CodeParamsComponent implements OnInit {
   parameters = [];
-  columns = ["order_test", "machine_test", "parameters", "answers", "actions"];
+  columns = ["order_test", "machine_test", "parameters", "actions"];
   totalRows = 0;
   currentPage = 0;
   pageSize = 5;
@@ -30,6 +30,16 @@ export class CodeParamsComponent implements OnInit {
   }
 
   pageChanged = (e: PageEvent) => {};
+
+  getData = (data: string, answers: boolean) => {
+    try {
+      const parsedData = JSON.parse(data);
+      return answers ? parsedData.map((d) => d.answers).flatten() : parsedData;
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  };
 
   onDelete = (parameter: CodedParameters) => {
     const confirmDialog = this.dialog.open(InfoComponent, {

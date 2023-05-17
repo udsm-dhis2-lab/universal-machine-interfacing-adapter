@@ -201,8 +201,8 @@ try {
       `test_order` TEXT NOT NULL, \
       `lis_order` TEXT NOT NULL, \
       `test_id` TEXT DEFAULT NULL, \
-      `parameters` JSON NOT NULL, \
-      `answers` JSON NOT NULL, \
+      `parameters` JSON DEFAULT NULL, \
+      `answers` JSON DEFAULT NULL, \
       `added_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \
       PRIMARY KEY("id" AUTOINCREMENT) \
       );'

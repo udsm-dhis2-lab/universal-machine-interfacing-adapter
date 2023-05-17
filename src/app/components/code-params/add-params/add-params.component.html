@@ -130,7 +130,12 @@
 
   <div mat-dialog-actions [align]="'end'">
     <button mat-flat-button cdkFocusInitial routerLink="/coded">Cancel</button>
-    <button color="primary" mat-flat-button (click)="onSave()">
+    <button
+      [disabled]="codeParamsForm.invalid"
+      color="primary"
+      mat-flat-button
+      (click)="onSave()"
+    >
       <mat-icon>save</mat-icon>
       <span> Save </span>
     </button>

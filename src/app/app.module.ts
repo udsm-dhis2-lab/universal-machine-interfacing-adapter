@@ -36,6 +36,7 @@ import { ElectronStoreService } from "./services/electron-store.service";
 import { InterfaceService } from "./services/interface.service";
 import { CodeParamsComponent } from "./components/code-params/home/code-params.component";
 import { AddParamsComponent } from "./components/code-params/add-params/add-params.component";
+import { ParameterTableComponent } from "./components/code-params/parameter-table/parameter-table.component";
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
@@ -58,6 +59,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
     SharedCheckboxFormComponent,
     CodeParamsComponent,
     AddParamsComponent,
+    ParameterTableComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,6 +1,9 @@
 import { Component, OnInit } from "@angular/core";
-import { FormArray, FormBuilder, FormGroup } from "@angular/forms";
+import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { DatabaseService } from "../../../services/database.service";
+import { Router } from "@angular/router";
+import { FxResponse } from "../../../shared/interfaces/fx.interface";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
   selector: "app-add-params",
@@ -9,12 +12,27 @@ import { DatabaseService } from "../../../services/database.service";
 })
 export class AddParamsComponent implements OnInit {
   codeParamsForm: FormGroup;
-  constructor(private formBuilder: FormBuilder, private db: DatabaseService) {
+  constructor(
+    private formBuilder: FormBuilder,
+    private db: DatabaseService,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {
     this.codeParamsForm = this.formBuilder.group({
       parameters: this.formBuilder.array([this.addParametersGroup()]),
       answers: this.formBuilder.array([this.addAnswersGroup()]),
-      lis_order: "",
-      test_order: "",
+      lis_order: [
+        "",
+        {
+          validators: [Validators.required],
+        },
+      ],
+      test_order: [
+        "",
+        {
+          validators: [Validators.required],
+        },
+      ],
     });
   }
 
@@ -40,19 +58,39 @@ export class AddParamsComponent implements OnInit {
     const data = {
       lis_order: this.getValue("lis_order"),
       test_order: this.getValue("test_order"),
-      parameters: JSON.stringify(this.getValue("parameters")),
-      answers: JSON.stringify(this.getValue("answers")),
+      parameters: JSON.stringify(
+        this.getValue("parameters")?.filter((parameter) => parameter.i != "")
+      ),
+      answers: JSON.stringify(
+        this.getValue("answers")?.filter((answers) => answers.i != "")
+      ),
     };
+
+    console.log(data);
+
     this.db.genericAdd(
       data,
       "code_parameters",
-      (res) => {
-        console.log(res);
+      () => {
+        this.openSnackBar({
+          success: true,
+          message: "Parameter created successfully",
+        });
+        this.router.navigate(["/coded"]);
       },
       (error) => {
-        console.log(error);
+        this.openSnackBar({ success: false, message: error });
       }
     );
+  };
+
+  openSnackBar = (data: FxResponse) => {
+    this.snackBar.open(data.message, "", {
+      duration: 2500,
+      panelClass: data.success ? ["success"] : ["error"],
+      horizontalPosition: "center",
+      verticalPosition: "bottom",
+    });
   };
 
   getValue(input: string) {
