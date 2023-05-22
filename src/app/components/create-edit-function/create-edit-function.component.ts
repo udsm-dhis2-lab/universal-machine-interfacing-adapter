@@ -47,6 +47,7 @@ export class CreateEditFunctionComponent implements OnInit {
       : this.formBuilder.group({
           secretValue: this.formBuilder.array([this.addSecretsGroup()]),
           name: "",
+          func_code: "",
           description: "",
         });
     this.dialogData = this.data;
@@ -73,6 +74,7 @@ export class CreateEditFunctionComponent implements OnInit {
     this.secretForm = this.formBuilder.group({
       secretValue: this.formBuilder.array([this.addSecretsGroup()]),
       name: "",
+      func_code: "",
       description: "",
     });
   };

@@ -37,6 +37,10 @@ import { InterfaceService } from "./services/interface.service";
 import { CodeParamsComponent } from "./components/code-params/home/code-params.component";
 import { AddParamsComponent } from "./components/code-params/add-params/add-params.component";
 import { ParameterTableComponent } from "./components/code-params/parameter-table/parameter-table.component";
+import { MappingHomeComponent } from './pages/mapping-home/mapping-home.component';
+import { WorksheetHomeComponent } from './pages/worksheet-home/worksheet-home.component';
+import { MappingFormComponent } from './components/mapping-form/mapping-form.component';
+import { MappingItemComponent } from './components/mapping-item/mapping-item.component';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
@@ -60,6 +64,10 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
     CodeParamsComponent,
     AddParamsComponent,
     ParameterTableComponent,
+    MappingHomeComponent,
+    WorksheetHomeComponent,
+    MappingFormComponent,
+    MappingItemComponent,
   ],
   imports: [
     BrowserModule,

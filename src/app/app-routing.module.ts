@@ -11,6 +11,8 @@ import { ManageUsersComponent } from "./components/manage-users/manage-users.com
 import { PageNotFoundComponent } from "./shared/components/page-not-found/page-not-found.component";
 import { CodeParamsComponent } from "./components/code-params/home/code-params.component";
 import { AddParamsComponent } from "./components/code-params/add-params/add-params.component";
+import { MappingHomeComponent } from "./pages/mapping-home/mapping-home.component";
+import { WorksheetHomeComponent } from "./pages/worksheet-home/worksheet-home.component";
 
 const routes: Routes = [
   {
@@ -49,6 +51,14 @@ const routes: Routes = [
   {
     path: "add-coded",
     component: AddParamsComponent,
+  },
+  {
+    path: "mapping",
+    component: MappingHomeComponent,
+  },
+  {
+    path: "worksheet",
+    component: WorksheetHomeComponent,
   },
   {
     path: "**",
