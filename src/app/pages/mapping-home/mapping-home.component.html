@@ -1,0 +1,18 @@
+<div class="container">
+  <app-top-menu-bar></app-top-menu-bar>
+  <app-form
+    *ngIf="testOrderField"
+    [fields]="[testOrderField]"
+    (formUpdate)="onFormUpdate($event)"
+  ></app-form>
+  <div class="w-100 mt-2" *ngIf="selectedTestOrder">
+    <app-form
+      [fields]="[machineTestOrderField]"
+      (formUpdate)="getMachineTestValue($event)"
+    ></app-form>
+    <app-mapping-form
+      [testOrder]="selectedTestOrder"
+      (testParametersMapping)="onGetTestParametersMapping($event)"
+    ></app-mapping-form>
+  </div>
+</div>

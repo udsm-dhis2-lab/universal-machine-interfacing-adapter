@@ -203,9 +203,11 @@ export class DatabaseService {
     return logMessage;
   }
 
-  run = async (id: number, params?: any): Promise<any> => {
+  run = async (id: number, params?: any, name?: string): Promise<any> => {
     try {
-      const process = await this.query(`SELECT * FROM PROCESS WHERE ID=${id}`);
+      const process: any = await (id
+        ? this.query(`SELECT * FROM PROCESS WHERE ID=${id}`)
+        : this.query(`SELECT * FROM PROCESS WHERE NAME="${name}"`));
       const secret = await this.getSecret(process);
       const runFunc = Function(
         "context",
@@ -240,10 +242,14 @@ export class DatabaseService {
         fs,
         externalParams: params,
       });
-      await this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`);
+      await (id
+        ? this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`)
+        : this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE NAME=${name}`));
       return runResults;
     } catch (e) {
-      await this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`);
+      await (id
+        ? this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`)
+        : this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE NAME=${name}`));
     }
   };
 
