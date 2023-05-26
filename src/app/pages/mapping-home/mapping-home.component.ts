@@ -32,16 +32,16 @@ export class MappingHomeComponent implements OnInit {
       this.testOrderField = new Dropdown({
         id: "testOrder",
         key: "testOrder",
-        label: "Select test order",
+        label: "Search Test order",
         shouldHaveLiveSearchForDropDownFields: false,
         required: true,
         controlType: "concept",
         options: this.testOrders?.map((testOrder: any) => {
           return {
             key: testOrder?.uuid,
-            label: testOrder?.display,
+            label: testOrder?.display?.replace("TEST_ORDERS:", ""),
             value: testOrder?.uuid,
-            name: testOrder?.display,
+            name: testOrder?.display?.replace("TEST_ORDERS:", ""),
           };
         }),
       });
@@ -103,6 +103,10 @@ export class MappingHomeComponent implements OnInit {
       }
     );
   };
+
+  onCancel(): void {
+    this.router.navigate(["/coded"]);
+  }
 
   openSnackBar = (data: FxResponse) => {
     this.snackBar.open(data.message, "", {

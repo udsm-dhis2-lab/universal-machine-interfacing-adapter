@@ -1,23 +1,29 @@
 <div class="container">
   <app-top-menu-bar></app-top-menu-bar>
-  <app-form
-    *ngIf="testOrderField"
-    [fields]="[testOrderField]"
-    (formUpdate)="onFormUpdate($event)"
-  ></app-form>
-  <div class="w-100 mt-2" *ngIf="selectedTestOrder">
+  <div class="h4">New Mapping</div>
+  <div class="w-100" style="margin-top: 12px">
     <app-form
-      [fields]="[machineTestOrderField]"
-      (formUpdate)="getMachineTestValue($event)"
+      *ngIf="testOrderField"
+      [fields]="[testOrderField]"
+      (formUpdate)="onFormUpdate($event)"
     ></app-form>
-    <app-mapping-form
-      [testOrder]="selectedTestOrder"
-      (testParametersMapping)="onGetTestParametersMapping($event)"
-    ></app-mapping-form>
+    <div class="w-100 mt-2" *ngIf="selectedTestOrder">
+      <app-form
+        [fields]="[machineTestOrderField]"
+        (formUpdate)="getMachineTestValue($event)"
+      ></app-form>
+      <app-mapping-form
+        [testOrder]="selectedTestOrder"
+        (testParametersMapping)="onGetTestParametersMapping($event)"
+      ></app-mapping-form>
+    </div>
   </div>
   <div mat-dialog-actions [align]="'end'">
-    <button mat-flat-button cdkFocusInitial>Cancel</button>
+    <button mat-stroked-button cdkFocusInitial (click)="onCancel()">
+      Cancel
+    </button>
     <button
+      style="margin-left: 8px"
       [disabled]="!validResults"
       color="primary"
       mat-flat-button

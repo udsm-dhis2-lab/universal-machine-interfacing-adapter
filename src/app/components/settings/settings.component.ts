@@ -64,6 +64,7 @@ export class SettingsComponent implements OnInit {
       this.settings.authorizationCount = appSettings.authorizationCount;
       this.settings.moduleName = appSettings.moduleName;
       this.settings.identifier = appSettings.identifier;
+      this.settings.instrumentCode = appSettings.instrumentCode;
     }
   }
 
@@ -105,6 +106,7 @@ export class SettingsComponent implements OnInit {
       systemName: that.settings.systemName,
       moduleName: that.settings.moduleName,
       identifier: that.settings.identifier,
+      instrumentCode: that.settings.instrumentCode,
     };
     try {
       that.store.set("appSettings", appSettings);
