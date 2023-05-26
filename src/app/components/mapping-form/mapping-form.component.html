@@ -1,0 +1,105 @@
+<div class="w-100" style="overflow: auto; height: 600px; overflow: auto">
+  <table class="table table-bordered">
+    <thead>
+      <tr style="text-align: center">
+        <th style="width: 40px">SN</th>
+        <th colspan="2">Parameter</th>
+        <th colspan="2">Answer</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container
+        *ngFor="let parameter of testOrder?.setMembers; let paraCount = index"
+      >
+        <ng-container *ngIf="parameter?.answers?.length > 0">
+          <tr *ngFor="let answer of parameter?.answers; let ansCount = index">
+            <!-- <td
+              *ngIf="paraCount === 0 && ansCount === 0"
+              [attr.rowspan]="testOrderColumns"
+              class="test-order"
+            >
+              {{ testOrder?.display }}
+            </td>
+            <td
+              *ngIf="paraCount === 0 && ansCount === 0"
+              [attr.rowspan]="testOrderColumns"
+              class="test-order"
+            ></td> -->
+            <td
+              style="width: 40px"
+              *ngIf="ansCount === 0"
+              [attr.rowspan]="parameter?.answers.length"
+            >
+              {{ paraCount + 1 }}
+            </td>
+            <td
+              style="vertical-align: top"
+              class="parameter"
+              *ngIf="ansCount === 0"
+              [attr.rowspan]="parameter?.answers?.length"
+            >
+              {{ parameter?.displayName }}
+            </td>
+            <td
+              style="vertical-align: top"
+              class="parameter"
+              *ngIf="ansCount === 0"
+              [attr.rowspan]="parameter?.answers?.length"
+            >
+              <app-mapping-item
+                [itemType]="'PARAMETER'"
+                [label]="'Parameter'"
+                [reference]="parameter"
+                (mappingReference)="getMappingReference($event)"
+              ></app-mapping-item>
+            </td>
+            <td class="answer">
+              {{ answer?.display }}
+            </td>
+            <td class="answer">
+              <app-mapping-item
+                [itemType]="'ANSWER'"
+                [label]="'Answer'"
+                [reference]="answer"
+                (mappingReference)="getMappingReference($event)"
+              ></app-mapping-item>
+            </td>
+          </tr>
+        </ng-container>
+        <ng-container *ngIf="parameter?.answers?.length === 0">
+          <tr>
+            <!-- <td class="test-order" *ngIf="paraCount === 0">
+              {{ testOrder?.display }}
+            </td>
+            <td class="test-order" *ngIf="paraCount === 0"></td> -->
+            <td style="width: 40px">
+              {{ paraCount + 1 }}
+            </td>
+            <td class="parameter" style="vertical-align: top">
+              {{ parameter?.displayName }}
+            </td>
+            <td class="parameter" style="vertical-align: top">
+              <app-mapping-item
+                [itemType]="'PARAMETER'"
+                [label]="'Parameter'"
+                [reference]="parameter"
+                (mappingReference)="getMappingReference($event)"
+              ></app-mapping-item>
+            </td>
+            <td class="answer">
+              {{ answer?.display }}
+            </td>
+            <td class="answer">
+              <app-mapping-item
+                [itemType]="'ANSWER'"
+                [label]="'Answer'"
+                [reference]="answer"
+                (mappingReference)="getMappingReference($event)"
+              ></app-mapping-item>
+            </td>
+          </tr>
+        </ng-container>
+      </ng-container>
+    </tbody>
+  </table>
+</div>
