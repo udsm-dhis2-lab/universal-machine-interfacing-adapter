@@ -1,7 +1,7 @@
 import { DropdownOption } from "./dropdown-option.model";
 
 export class Field<T> {
-  value: T;
+  value: any;
   id: string;
   key: string;
   label: string;
@@ -31,7 +31,7 @@ export class Field<T> {
 
   constructor(
     options: {
-      value?: T;
+      value?: any;
       key?: string;
       id?: string;
       label?: string;

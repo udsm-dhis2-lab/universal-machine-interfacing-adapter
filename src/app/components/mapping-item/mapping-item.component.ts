@@ -11,6 +11,7 @@ export class MappingItemComponent implements OnInit {
   @Input() itemType: string;
   @Input() label: string;
   @Input() reference: any;
+  @Input() data: any;
   mappingField: any;
   @Output() mappingReference: EventEmitter<any> = new EventEmitter<any>();
   constructor() {}
@@ -19,6 +20,7 @@ export class MappingItemComponent implements OnInit {
     this.mappingField = new Textbox({
       id: "item",
       key: "item",
+      value: this.data?.value,
       label: this.label ? this.label : "Machine",
       required: true,
     });

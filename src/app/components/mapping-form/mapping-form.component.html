@@ -52,6 +52,7 @@
               <app-mapping-item
                 [itemType]="'PARAMETER'"
                 [label]="'Parameter'"
+                [data]="testOrder?.parameters[parameter?.uuid]"
                 [reference]="parameter"
                 (mappingReference)="getMappingReference($event)"
               ></app-mapping-item>
@@ -63,6 +64,7 @@
               <app-mapping-item
                 [itemType]="'ANSWER'"
                 [label]="'Answer'"
+                [data]="testOrder?.answers[answer?.uuid]"
                 [reference]="answer"
                 (mappingReference)="getMappingReference($event)"
               ></app-mapping-item>
@@ -86,6 +88,7 @@
                 [itemType]="'PARAMETER'"
                 [label]="'Parameter'"
                 [reference]="parameter"
+                [data]="testOrder?.parameters[parameter?.uuid]"
                 (mappingReference)="getMappingReference($event)"
               ></app-mapping-item>
             </td>
@@ -97,6 +100,7 @@
                 [itemType]="'ANSWER'"
                 [label]="'Answer'"
                 [reference]="answer"
+                [data]="testOrder?.answers[answer?.uuid]"
                 (mappingReference)="getMappingReference($event)"
               ></app-mapping-item>
             </td>

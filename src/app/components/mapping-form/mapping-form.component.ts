@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from "@angular/core";
 import { sum } from "lodash";
 
 @Component({
@@ -6,7 +14,7 @@ import { sum } from "lodash";
   templateUrl: "./mapping-form.component.html",
   styleUrls: ["./mapping-form.component.scss"],
 })
-export class MappingFormComponent implements OnInit {
+export class MappingFormComponent implements OnInit, OnChanges {
   @Input() testOrder: any;
   testOrderColumns: number = 0;
   mappings: any = {};
@@ -14,7 +22,18 @@ export class MappingFormComponent implements OnInit {
   answer: any;
   constructor() {}
 
-  ngOnInit(): void {
+  ngOnInit(): void {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.testOrder = {
+      ...this.testOrder,
+      parameters: this.testOrder?.parameters
+        ? JSON.parse(this.testOrder?.parameters)
+        : null,
+      answers: this.testOrder?.answers
+        ? JSON.parse(this.testOrder?.answers)
+        : null,
+    };
     this.testOrderColumns = sum(
       this.testOrder?.setMembers?.map((parameter: any) =>
         parameter?.answers?.length > 0 ? parameter?.answers?.length : 1

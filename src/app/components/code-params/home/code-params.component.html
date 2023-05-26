@@ -52,25 +52,14 @@
         >
           <mat-icon class="d-flex justify-content-center">more_vert</mat-icon>
           <mat-menu #appMenu="matMenu">
-            <div
-              class="menu-more-option mat-typography"
-              (click)="onDelete(element)"
-            >
-              <span
-                matRipple
-                role="menuitem"
-                tabindex="0"
-                class="extended-menu-option"
-              >
-                <div class="extended-menu-option-div">
-                  <span
-                    class="d-flex justify-content-center cursor-pointer material-icons menu-label text-danger"
-                    color="#da1f05"
-                    >delete</span
-                  >
-                </div>
-              </span>
-            </div>
+            <button mat-menu-item (click)="onEdit(element)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item (click)="onDelete(element)">
+              <mat-icon style="color: #da1f05">delete</mat-icon>
+              <span>Delete</span>
+            </button>
           </mat-menu>
         </td>
       </ng-container>

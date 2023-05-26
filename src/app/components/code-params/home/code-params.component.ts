@@ -6,6 +6,7 @@ import { FxResponse } from "../../../shared/interfaces/fx.interface";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { InfoComponent } from "../../info/info.component";
 import { MatDialog } from "@angular/material/dialog";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-code-params",
@@ -22,7 +23,8 @@ export class CodeParamsComponent implements OnInit {
   constructor(
     private db: DatabaseService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -43,8 +45,8 @@ export class CodeParamsComponent implements OnInit {
 
   onDelete = (parameter: CodedParameters) => {
     const confirmDialog = this.dialog.open(InfoComponent, {
-      width: "300px",
-      height: "190px",
+      maxWidth: "300px",
+      minHeight: "200px",
       data: {
         message: `You are about to delete coded parameter [${
           parameter.lis_order ?? ""
@@ -63,6 +65,14 @@ export class CodeParamsComponent implements OnInit {
             this.openSnackBar({ success: false, message: error });
           });
       }
+    });
+  };
+
+  onEdit = (parameter: CodedParameters) => {
+    this.router.navigate(["/mapping"], {
+      queryParams: {
+        id: parameter.id,
+      },
     });
   };
 

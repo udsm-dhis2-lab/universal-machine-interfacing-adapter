@@ -645,6 +645,25 @@ export class DatabaseService {
       });
   }
 
+  genericUpdate(data: any, table: string, success: Success, errorOf: ErrorOf) {
+    const query = `UPDATE ${table} SET ${Object.keys(data)
+      ?.filter((key) => key !== "id")
+      .map((key) => key + "=" + `'${data[key]}'`)
+      .join(",")} WHERE id=${Number(data["id"])};`;
+    this.electronService
+      .execSqliteQuery(query)
+      .then((results: any) => {
+        success(results);
+      })
+      .catch((e: any) => {
+        if (errorOf) {
+          errorOf(e);
+          return;
+        }
+        return e;
+      });
+  }
+
   addApplicationLog(
     data: MachineData,
     success: { (res: any): void; (arg0: any): void },
