@@ -30,7 +30,7 @@
             "polyfills": "src/polyfills.ts",
             "inlineStyleLanguage": "scss",
             "assets": ["src/favicon.ico", "src/assets", "src/other"],
-            "styles": ["src/styles.scss", "src/material.scss"],
+            "styles": ["src/styles.scss", "./src/material.scss"],
             "scripts": [],
             "customWebpackConfig": {
               "path": "./angular.webpack.js",
@@ -139,7 +139,7 @@
             "karmaConfig": "src/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "scripts": [],
-            "styles": ["src/styles.scss", "src/material.scss"],
+            "styles": ["src/styles.scss", "./src/material.scss"],
 
             "assets": ["src/favicon.ico", "src/assets", "src/other"],
             "customWebpackConfig": {
