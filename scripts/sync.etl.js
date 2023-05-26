@@ -18,18 +18,20 @@ const mappings = {
   lflq: 'o2zbpZDZele' //DST Result Fluoroquinolone
 }
 
+const assays = ['mtb', 'inh', 'linh', 'flq', 'lflq', 'eth']
+
 const mapping = {
   ywRl88yte5b: ['mtb'],
   nPGTzMkULFh: ['inh', 'linh'],
   o2zbpZDZele: ['flq', 'lflq'],
-  GLqRo7AuhJM: ['eth']
+  GLqRo7AuhJM: ['eth', 'ethr']
 }
 
 const stageMappings = {
   nPGTzMkULFh: { inh: 'INH Resistance ', linh: 'INH Resistance ' },
   ywRl88yte5b: { mtb: 'MTB ' },
   o2zbpZDZele: { flq: 'FLQ Resistance ', lflq: 'FLQ Resistance ' },
-  GLqRo7AuhJM: { eth: 'ETH Resistance ' }
+  GLqRo7AuhJM: { ethr: 'ETH Resistance ', }
 }
 
 const saveStatus = ({ id, reason }) => {
@@ -37,7 +39,8 @@ const saveStatus = ({ id, reason }) => {
     const query = `UPDATE orders SET reason="${reason}",sync_status="ERROR",lims_sync_status=${3} WHERE id=${id}`;
     db.all(query, [], async (err, _rows) => {
       if (err) {
-        console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', err, ' 🚫')
+        console.error('🚫 ERROR WHILE UPDATING SYNC STATUS ', err, ' 🚫')
+        console.log(query)
       }
     });
   } catch (e) {
@@ -111,18 +114,22 @@ const cleanData = (data) => {
     const testedResults = dataArray.resultData.filter(d => d.testedBy && d.testedBy !== '')
     results = [...results, ...testedResults]
   }
-  let ethr = data.split('ETH Resistance^|')
-  let d = data.toLowerCase().split('eth ')
-  let ethrData = {}
-  if (ethr.length <= 1 && d.length > 1) {
-    d = d[1]?.split('|')
-    d = d.length > 0 ? d[1] : null
-    ethrData = { ...results[0], assayNumber: 'eth', result: d ? d?.split('^')?.join('')?.toUpperCase() : null }
-  } else {
-    ethrData = { ...results[0], assayNumber: 'eth', result: ethr.length > 0 ? ethr[1]?.split('|')[0] : null }
-  }
-  if (ethrData.result) {
-    results = [...results, ethrData]
+
+  const ethr = results.find(({ assayNumber }) => assayNumber === 'ethr')
+  if (!ethr) {
+    let ethr = data.split('ETH Resistance^|')
+    let d = data.toLowerCase().split('eth ')
+    let ethrData = {}
+    if (ethr.length <= 1 && d.length > 1) {
+      d = d[1]?.split('|')
+      d = d.length > 0 ? d[1] : null
+      ethrData = { ...results[0], assayNumber: 'ethr', result: d ? d?.split('^')?.join('')?.toUpperCase() : null }
+    } else {
+      ethrData = { ...results[0], assayNumber: 'ethr', result: ethr.length > 0 ? ethr[1]?.split('|')[0] : null }
+    }
+    if (ethrData.result) {
+      results = [...results, ethrData]
+    }
   }
   return sanitizeResults(results)
 }
@@ -209,7 +216,7 @@ const syncData = async (rows) => {
           });
         const response = data?.response;
 
-        if (response?.imported || response?.updated) {
+        if (response?.imported || response?.status === 'SUCCESS') {
           const reference_uuid = response?.importSummaries ? response.importSummaries[0]?.reference : response.reference;
           const sync_status = response?.importSummaries ? response?.importSummaries[0]?.status : response.status;
           //   Update the orders table for sync reference references
@@ -227,10 +234,9 @@ const syncData = async (rows) => {
         } else {
           saveStatus({ id: row.id, reason: JSON.stringify(response) })
         }
+      } else {
+        saveStatus({ id: row.id, reason: 'Data not available on ETL' })
       }
-
-      saveStatus({ id: row.id, reason: 'Data not available on ETL' })
-      continue;
     } catch (e) {
       saveStatus({ id: row.id, reason: e.message })
 

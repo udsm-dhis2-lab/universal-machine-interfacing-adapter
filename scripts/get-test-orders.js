@@ -12,22 +12,11 @@ const run = async () => {
       "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "*",
     };
-    const headers = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "*",
-      "access-control-expose-headers": "*",
-      "Access-Control-Allow-Headers": "*",
-      "Access-Control-Allow-Credentials": "true",
-      Accept: "*",
-      Authorization: "Basic " + basicAuthToken,
-      crossDomain: true,
-      crossOrigin: true,
-    };
     const BASE_URL = "https://lis.dhis2.udsm.ac.tz/openmrs/ws/rest/v1/";
     const url =
       BASE_URL +
-      "icare/concept?limit=10&conceptClass=Test&searchTerm=TEST_ORDERS";
-    const testOrders = {
+      "icare/concept?limit=100&conceptClass=Test&searchTerm=TEST_ORDERS&detailed=true";
+    /*const testOrders = {
       results: [
         {
           mappings: [],
@@ -51905,15 +51894,17 @@ const run = async () => {
           },
         },
       ],
-    };
-    // await context.http.get(url, {
-    //   auth: {
-    //     username: "admin",
-    //     password: "Admin123",
-    //   },
-    //   headers: headersList,
-    // });
-    return testOrders?.results;
+    };*/
+
+    const { data } = await context.http.get(url, {
+      auth: {
+        username: "admin",
+        password: "Admin123",
+      },
+      headers: headersList,
+    });
+    console.log(data.results)
+    return data?.results;
   } catch (e) {
     console.log(e);
   }

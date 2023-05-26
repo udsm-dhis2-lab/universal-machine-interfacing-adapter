@@ -164,7 +164,7 @@ try {
       'CREATE TABLE IF NOT EXISTS `orders` ( \
       `id` INTEGER NOT NULL, \
       `order_id` TEXT NOT NULL, \
-      `patient_id` TEXT NOT NULL, \
+      `patient_id` TEXT DEFAULT NULL, \
       `test_id` TEXT DEFAULT NULL, \
       `test_type` TEXT NOT NULL, \
       `raw_json` TEXT DEFAULT NULL, \

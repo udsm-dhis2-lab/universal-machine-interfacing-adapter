@@ -849,6 +849,8 @@ export class InterfaceService {
       raw_text: hl7,
     };
 
+    console.log(JSON.stringify(order));
+
     this.dbService
       .addOrderTest(
         order,
