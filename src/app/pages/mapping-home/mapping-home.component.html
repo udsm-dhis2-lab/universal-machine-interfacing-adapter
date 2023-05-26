@@ -9,7 +9,7 @@
     ></app-form>
     <div
       class="w-100 mt-2"
-      *ngIf="selectedTestOrder || (renderMappingForm && mappingId)"
+      *ngIf="selectedTestOrder?.uuid || (renderMappingForm && mappingId)"
     >
       <app-form
         [fields]="[machineTestOrderField]"

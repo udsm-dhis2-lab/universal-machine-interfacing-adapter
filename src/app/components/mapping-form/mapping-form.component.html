@@ -52,7 +52,12 @@
               <app-mapping-item
                 [itemType]="'PARAMETER'"
                 [label]="'Parameter'"
-                [data]="testOrder?.parameters[parameter?.uuid]"
+                [data]="
+                  testOrder?.parameters &&
+                  testOrder?.parameters[parameter?.uuid]
+                    ? testOrder?.parameters[parameter?.uuid]
+                    : null
+                "
                 [reference]="parameter"
                 (mappingReference)="getMappingReference($event)"
               ></app-mapping-item>
@@ -64,7 +69,11 @@
               <app-mapping-item
                 [itemType]="'ANSWER'"
                 [label]="'Answer'"
-                [data]="testOrder?.answers[answer?.uuid]"
+                [data]="
+                  testOrder?.answers && testOrder?.answers[answer?.uuid]
+                    ? testOrder?.answers[answer?.uuid]
+                    : null
+                "
                 [reference]="answer"
                 (mappingReference)="getMappingReference($event)"
               ></app-mapping-item>
@@ -88,7 +97,12 @@
                 [itemType]="'PARAMETER'"
                 [label]="'Parameter'"
                 [reference]="parameter"
-                [data]="testOrder?.parameters[parameter?.uuid]"
+                [data]="
+                  testOrder?.parameters &&
+                  testOrder?.parameters[parameter?.uuid]
+                    ? testOrder?.parameters[parameter?.uuid]
+                    : null
+                "
                 (mappingReference)="getMappingReference($event)"
               ></app-mapping-item>
             </td>
@@ -100,7 +114,11 @@
                 [itemType]="'ANSWER'"
                 [label]="'Answer'"
                 [reference]="answer"
-                [data]="testOrder?.answers[answer?.uuid]"
+                [data]="
+                  testOrder?.answers && testOrder?.answers[answer?.uuid]
+                    ? testOrder?.answers[answer?.uuid]
+                    : null
+                "
                 (mappingReference)="getMappingReference($event)"
               ></app-mapping-item>
             </td>

@@ -40,6 +40,7 @@ export class MappingHomeComponent implements OnInit {
           this.getMappingToEdit(this.testOrders);
         } else {
           this.createLISTestOrderField(this.testOrders);
+          this.createMachineTestOrderField();
         }
       }
     });
@@ -76,10 +77,7 @@ export class MappingHomeComponent implements OnInit {
         }
       })
       .catch((error) => {
-        this.createMachineTestOrderField();
-        if (this.mappingId) {
-          this.openSnackBar({ success: false, message: error });
-        }
+        this.openSnackBar({ success: false, message: error });
       });
   }
 
