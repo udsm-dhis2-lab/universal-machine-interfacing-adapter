@@ -5,8 +5,8 @@
   "description": "Machine Interfacing by UDSM DHIS2",
   "homepage": "https://github.com/udsm-dhis2-lab/GeneXpert",
   "author": {
-    "name": "Bennett Benedict",
-    "email": "bennybenester@gmail.com"
+    "name": "UDSM DHIS2 Lab",
+    "email": "udsm.dhis.project@gmail.com"
   },
   "keywords": [
     "HIV",
