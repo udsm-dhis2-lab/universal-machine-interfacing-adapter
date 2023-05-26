@@ -53,7 +53,7 @@ export class MappingHomeComponent implements OnInit {
         if (response?.data?.length > 0) {
           this.selectedTestOrder = null;
           setTimeout(() => {
-            const testOrderUuid = response?.data[0]?.lis_order;
+            const testOrderUuid = response?.data[0]?.test_id;
             this.selectedTestOrder = (testOrders?.filter(
               (testOrder) => testOrder?.uuid === testOrderUuid
             ) || [])[0];
@@ -148,8 +148,9 @@ export class MappingHomeComponent implements OnInit {
 
   onSave = () => {
     const data = {
-      lis_order: this.selectedTestOrder.uuid,
+      lis_order: this.selectedTestOrder?.display,
       test_order: this.testOrderMachineCode,
+      test_id: this.selectedTestOrder?.uuid,
       parameters: JSON.stringify(this.mappings),
       answers: JSON.stringify(this.mappings),
     };
