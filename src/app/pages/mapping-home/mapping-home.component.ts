@@ -4,6 +4,8 @@ import { DatabaseService } from "../../services/database.service";
 import { Dropdown } from "../../shared/modules/forms/models/dropdown.model";
 import { FormValue } from "../../shared/modules/forms/models/form-value.model";
 import { Textbox } from "../../shared/modules/forms/models/text-box.model";
+import { FxResponse } from "../../shared/interfaces/fx.interface";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
   selector: "app-mapping-home",
@@ -17,7 +19,12 @@ export class MappingHomeComponent implements OnInit {
   selectedTestOrder: any;
   machineTestOrderField: any;
   testOrderMachineCode: string;
-  constructor(private router: Router, private service: DatabaseService) {}
+  mappings: any;
+  constructor(
+    private router: Router,
+    private service: DatabaseService,
+    private snackBar: MatSnackBar
+  ) {}
 
   async ngOnInit() {
     await this.service.run(null, null, "TEST_ORDERS").then((res) => {
@@ -70,6 +77,49 @@ export class MappingHomeComponent implements OnInit {
   }
 
   onGetTestParametersMapping(mappings: any): void {
-    console.log(mappings);
+    this.mappings = mappings;
+  }
+
+  onSave = () => {
+    const data = {
+      lis_order: this.selectedTestOrder.systemName,
+      test_order: this.testOrderMachineCode,
+      parameters: JSON.stringify(this.mappings),
+      answers: JSON.stringify(this.mappings),
+    };
+
+    this.service.genericAdd(
+      data,
+      "code_parameters",
+      () => {
+        this.openSnackBar({
+          success: true,
+          message: "Parameter created successfully",
+        });
+        this.router.navigate(["/coded"]);
+      },
+      (error) => {
+        this.openSnackBar({ success: false, message: error });
+      }
+    );
+  };
+
+  openSnackBar = (data: FxResponse) => {
+    this.snackBar.open(data.message, "", {
+      duration: 2500,
+      panelClass: data.success ? ["success"] : ["error"],
+      horizontalPosition: "center",
+      verticalPosition: "bottom",
+    });
+  };
+
+  get validResults() {
+    return (
+      this.testOrderMachineCode !== "" &&
+      this.mappings !== "" &&
+      this.mappings &&
+      this.selectedTestOrder &&
+      this.selectedTestOrder !== ""
+    );
   }
 }

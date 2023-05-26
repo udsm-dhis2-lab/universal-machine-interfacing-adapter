@@ -15,4 +15,16 @@
       (testParametersMapping)="onGetTestParametersMapping($event)"
     ></app-mapping-form>
   </div>
+  <div mat-dialog-actions [align]="'end'">
+    <button mat-flat-button cdkFocusInitial>Cancel</button>
+    <button
+      [disabled]="!validResults"
+      color="primary"
+      mat-flat-button
+      (click)="onSave()"
+    >
+      <mat-icon>save</mat-icon>
+      <span> Save </span>
+    </button>
+  </div>
 </div>

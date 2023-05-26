@@ -66,8 +66,6 @@ export class AddParamsComponent implements OnInit {
       ),
     };
 
-    console.log(data);
-
     this.db.genericAdd(
       data,
       "code_parameters",

@@ -11,6 +11,7 @@ export class MappingFormComponent implements OnInit {
   testOrderColumns: number = 0;
   mappings: any = {};
   @Output() testParametersMapping: EventEmitter<any> = new EventEmitter<any>();
+  answer: any;
   constructor() {}
 
   ngOnInit(): void {
