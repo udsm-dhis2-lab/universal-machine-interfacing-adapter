@@ -1,6 +1,6 @@
 <div class="container">
   <app-top-menu-bar></app-top-menu-bar>
-  <div class="h4">New Mapping</div>
+  <div class="h4">{{ mappingId ? "Edit" : "New" }} mapping</div>
   <div class="w-100" style="margin-top: 12px">
     <app-form
       *ngIf="testOrderField"
