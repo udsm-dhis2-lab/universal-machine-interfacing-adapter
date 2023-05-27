@@ -359,12 +359,30 @@ export class InterfaceService {
     ) {
       that.logger("info", "Processing ASTM Concatenated");
 
-      const d = data.toString("hex");
+      const hexadecimalRepresentationOfMessage = data.toString("hex");
 
-      if (d === "04") {
+      if (
+        hexadecimalRepresentationOfMessage === "04" ||
+        hexadecimalRepresentationOfMessage.substring(
+          hexadecimalRepresentationOfMessage.length - 2
+        ) === "04"
+      ) {
+        if (
+          hexadecimalRepresentationOfMessage.substring(
+            hexadecimalRepresentationOfMessage.length - 2
+          ) === "04"
+        ) {
+          that.strData = Buffer.from(
+            hexadecimalRepresentationOfMessage.substring(
+              0,
+              hexadecimalRepresentationOfMessage.length - 2
+            ),
+            "hex"
+          ).toString("utf-8");
+        }
         that.socketClient.write(that.ACK);
-
         that.logger("info", "Received EOT. Ready to Process");
+
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings?.analyzerMachineName;
@@ -380,14 +398,13 @@ export class InterfaceService {
             );
           }
         );
-
         that.processASTMConcatenatedData(that.strData);
         that.strData = "";
-      } else if (d === "21") {
+      } else if (hexadecimalRepresentationOfMessage === "21") {
         that.socketClient.write(that.ACK);
         that.logger("error", "NAK Received");
       } else {
-        let text = that.hex2ascii(d);
+        let text = that.hex2ascii(hexadecimalRepresentationOfMessage);
         if (text.match(/^\d*H/)) {
           text = "##START##" + text;
         }
@@ -572,7 +589,7 @@ export class InterfaceService {
   }
 
   processASTMConcatenatedData(astmData: string) {
-    //this.logger('info', astmData);
+    // this.logger("info", astmData);
 
     const that = this;
     astmData = astmData.replace(/[\x05]/g, "");
@@ -593,7 +610,7 @@ export class InterfaceService {
     const fullDataArray = astmData.split("##START##");
 
     // that.logger('info', "AFTER SPLITTING USING ##START##");
-    // that.logger('info', fullDataArray);
+    // that.logger("info", fullDataArray.toString());
 
     fullDataArray.forEach(function (partData) {
       if (partData !== "" && partData !== undefined && partData !== null) {
