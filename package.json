@@ -33,7 +33,7 @@
     "hl7-object-parser": "^2.5.0",
     "hl7parser": "^1.0.1",
     "node-cron": "^3.0.2",
-    "serialport": "^10.5.0",
+    "serialport": "^11.0.0",
     "sqlite3": "^5.1.2",
     "usb": "^2.8.3"
   },

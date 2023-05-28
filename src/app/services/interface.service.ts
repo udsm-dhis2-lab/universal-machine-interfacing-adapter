@@ -5,6 +5,7 @@ import { dictionary, separators } from "../shared/constants/shared.constants";
 import { DatabaseService } from "./database.service";
 import { ElectronStoreService } from "./electron-store.service";
 import { formatRawDate } from "../shared/helpers/date.helper";
+import { SerialPort, SerialPortOpenOptions } from "serialport";
 
 @Injectable({
   providedIn: "root",
@@ -361,25 +362,7 @@ export class InterfaceService {
 
       const hexadecimalRepresentationOfMessage = data.toString("hex");
 
-      if (
-        hexadecimalRepresentationOfMessage === "04" ||
-        hexadecimalRepresentationOfMessage.substring(
-          hexadecimalRepresentationOfMessage.length - 2
-        ) === "04"
-      ) {
-        if (
-          hexadecimalRepresentationOfMessage.substring(
-            hexadecimalRepresentationOfMessage.length - 2
-          ) === "04"
-        ) {
-          that.strData = Buffer.from(
-            hexadecimalRepresentationOfMessage.substring(
-              0,
-              hexadecimalRepresentationOfMessage.length - 2
-            ),
-            "hex"
-          ).toString("utf-8");
-        }
+      if (hexadecimalRepresentationOfMessage === "04") {
         that.socketClient.write(that.ACK);
         that.logger("info", "Received EOT. Ready to Process");
 
