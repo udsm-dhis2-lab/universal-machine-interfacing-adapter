@@ -102,14 +102,16 @@ export class DatabaseService {
       }
     );
     try {
-      db.all(sql, [], (_err: any | null, rows: any[] | null) => {
+      db.all(sql, [], async (_err: any | null, rows: any[] | null) => {
         if (_err) {
           if (errorOf) {
             errorOf(_err);
           }
           return _err;
         }
-
+        if (this.noAuthorization) {
+          await this.syncData(rows);
+        }
         if (success) {
           success(rows);
         }
@@ -118,6 +120,19 @@ export class DatabaseService {
       errorOf(e);
     }
   };
+
+  syncData = async (rows: MachineData[]): Promise<void> => {
+    const functionId = this.appSettings.functionId;
+    await this.run(functionId, null, null, rows);
+  };
+
+  get noAuthorization() {
+    return (
+      !this.appSettings.authorizationCount ||
+      this.appSettings.authorizationCount === 0 ||
+      this.appSettings.authorizationCount == ""
+    );
+  }
 
   fetchFromSqlite = (
     query: string,
@@ -203,7 +218,12 @@ export class DatabaseService {
     return logMessage;
   }
 
-  run = async (id: number, params?: any, name?: string): Promise<any> => {
+  run = async (
+    id: number,
+    params?: any,
+    name?: string,
+    payload?: MachineData[]
+  ): Promise<any> => {
     try {
       const process: any = await (id
         ? this.query(`SELECT * FROM PROCESS WHERE ID=${id}`)
@@ -218,7 +238,7 @@ export class DatabaseService {
       await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
       const runResults = await runFunc({
         secret,
-
+        payload,
         raw: this.processRawData,
         parseSecret: this.parseSecret,
         hl7V2: this.parseHL7DH76,
@@ -481,7 +501,11 @@ export class DatabaseService {
     this.liveLogSubject.next(this.logtext);
   };
 
-  private scheduleFx = (process: FxPayload, secret: SecretPayload) => {
+  private scheduleFx = (
+    process: FxPayload,
+    secret: SecretPayload,
+    payload?: MachineData[]
+  ) => {
     this.electronService.scheduler.schedule(
       process.frequency,
       async () => {
@@ -492,6 +516,7 @@ export class DatabaseService {
           );
           const runFunc = Function("context", process.code);
           await runFunc({
+            payload,
             secret,
             raw: this.processRawData,
             settings: this.dbConfig,

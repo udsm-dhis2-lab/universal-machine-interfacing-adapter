@@ -246,6 +246,10 @@ const syncData = async (rows) => {
 const run = async () => {
   try {
 
+    if (context.payload) {
+      return await syncData(context.payload)
+    }
+
     if (!context.secret || !context?.secret?.id) {
       db.all(`SELECT * FROM SECRET WHERE ID=${context.secret_id}`, [], (_err, rows) => {
         if (rows?.length > 0) {
