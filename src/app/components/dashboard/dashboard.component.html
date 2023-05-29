@@ -33,7 +33,12 @@
           class="btn-primary p-1 d-inline-flex justify-content-center align-items-center"
           [disabled]="connectionInProcess"
         >
-          <ng-container *ngIf="reconnectButtonText === 'Connect'">
+          <ng-container
+            *ngIf="
+              reconnectButtonText === 'Connect' ||
+              reconnectButtonText === 'Reconnect'
+            "
+          >
             <mat-icon>link</mat-icon>
           </ng-container>
           <span>{{ reconnectButtonText }}</span>
@@ -53,8 +58,24 @@
           <mat-icon>cancel</mat-icon>
           <span> Cancel </span>
         </button>
+
+        <button
+          *ngIf="!connectionInProcess && !isConnected"
+          (click)="newConnection()"
+          class="btn btn-info"
+        >
+          <span>Connect</span>
+        </button>
       </ng-template>
+      <br />
+      <div class="text-muted mt-2">
+        <span *ngIf="appSettings && appSettings.analyzerMachineHost">
+          Host: {{ appSettings.analyzerMachineHost }} | Port:
+          {{ appSettings.analyzerMachinePort }}
+        </span>
+      </div>
     </div>
+
     <div class="livelog">
       <app-logs [liveLogText]="liveLogText"></app-logs>
     </div>

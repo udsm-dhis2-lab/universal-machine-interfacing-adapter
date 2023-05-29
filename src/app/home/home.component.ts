@@ -31,14 +31,8 @@ export class HomeComponent implements OnInit {
   ) {
     this.databaseService.setDefaultDatabaseData();
     this.settings = this.store.get("appSettings");
-    if (
-      undefined !== this.settings &&
-      null !== this.settings &&
-      undefined !== this.settings.interfaceAutoConnect &&
-      null !== this.settings.interfaceAutoConnect &&
-      "yes" === this.settings.interfaceAutoConnect &&
-      this.store.get("loggedin") === true
-    ) {
+    console.log(this.settings);
+    if (this.settings && this.store.get("loggedin") === true) {
       this.store.set("loggedin", true);
       this.router.navigate(["/dashboard"]);
     } else {
@@ -114,7 +108,7 @@ export class HomeComponent implements OnInit {
                 keyBy(privilegeRes, "name")
               );
 
-              if (undefined === this.settings) {
+              if (!this.settings) {
                 this.router.navigate(["/settings"]);
               } else {
                 this.router.navigate(["/dashboard"]);

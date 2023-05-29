@@ -2,7 +2,6 @@ import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { first } from "rxjs/operators";
-import { ElectronService } from "../../core/services";
 import { DatabaseService } from "../../services/database.service";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import { FxPayload } from "../../shared/interfaces/fx.interface";
@@ -14,9 +13,16 @@ import { FxPayload } from "../../shared/interfaces/fx.interface";
 })
 export class SettingsComponent implements OnInit {
   public settings: any = {};
+  multiSettings: any = [];
+  editing: boolean = false;
+  currentId: number;
   public appPath: string = "";
   methods: string[] = ["POST", "GET", "PUT"];
   authTypes: string[] = ["Basic", "Bearer"];
+  currentPage = 0;
+  pageSize = 5;
+  pageSizeOptions = [5, 10, 20, 50];
+  columns = ["name", "host", "mode", "port", "actions"];
   functions: any[];
   protocols: { id: string; name: string }[] = [
     { id: "astm-elecsys", name: "ASTM/Elecsys (Single Record)" },
@@ -35,7 +41,6 @@ export class SettingsComponent implements OnInit {
   ];
 
   constructor(
-    private router: Router,
     private store: ElectronStoreService,
     private service: DatabaseService,
     private _http: HttpClient
@@ -46,15 +51,6 @@ export class SettingsComponent implements OnInit {
     if (appSettings) {
       this.settings.labID = appSettings.labID;
       this.settings.labName = appSettings.labName;
-
-      this.settings.analyzerMachineName = appSettings.analyzerMachineName;
-      this.settings.analyzerMachinePort = appSettings.analyzerMachinePort;
-      this.settings.analyzerMachineHost = appSettings.analyzerMachineHost;
-      this.settings.interfaceConnectionMode =
-        appSettings.interfaceConnectionMode;
-      this.settings.interfaceAutoConnect = appSettings.interfaceAutoConnect;
-      this.settings.interfaceCommunicationProtocol =
-        appSettings.interfaceCommunicationProtocol;
       this.settings.functionId = appSettings.functionId;
       this.settings.hasExternalLogin = appSettings.hasExternalLogin;
       this.settings.externalLoginUrl = appSettings.externalLoginUrl;
@@ -69,6 +65,10 @@ export class SettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const multiSettings = this.store.get("multiSettings");
+    if (multiSettings && Array.isArray(multiSettings)) {
+      this.multiSettings = multiSettings;
+    }
     this.loadFunctions();
   }
 
@@ -78,10 +78,30 @@ export class SettingsComponent implements OnInit {
     return true;
   }
 
+  getConnectionType = (id: string) =>
+    this.toolType.find((tool) => tool.id === id)?.name;
+
+  onEdit = (machine: any) => {
+    const that = this;
+    that.currentId = machine.id;
+    Object.keys(machine).forEach((key) => {
+      this.settings[key] = machine[key];
+    });
+    that.editing = true;
+  };
+
+  onDelete = (deleteMachine: any) => {
+    this.multiSettings = this.multiSettings.filter(
+      (machine) => machine.id !== deleteMachine.id
+    );
+    this.store.set("multiSettings", this.multiSettings);
+  };
+
   updateSettings = async () => {
     const that = this;
 
     const appSettings = {
+      id: new Date().valueOf(),
       labID: that.settings.labID,
       labName: that.settings.labName,
       analyzerMachinePort: that.settings.analyzerMachinePort,
@@ -91,11 +111,6 @@ export class SettingsComponent implements OnInit {
       interfaceAutoConnect: that.settings.interfaceAutoConnect,
       interfaceCommunicationProtocol:
         that.settings.interfaceCommunicationProtocol,
-      dbHost: that.settings.dbHost,
-      dbPort: that.settings.dbPort,
-      dbName: that.settings.dbName,
-      dbUser: that.settings.dbUser,
-      dbPassword: that.settings.dbPassword,
       hasExternalDB: that.settings?.hasExternalDB,
       authorizationCount: that.settings.authorizationCount,
       hasExternalLogin: that.settings.hasExternalLogin,
@@ -108,8 +123,13 @@ export class SettingsComponent implements OnInit {
       identifier: that.settings.identifier,
       instrumentCode: that.settings.instrumentCode,
     };
+    if (this.currentId) {
+      this.multiSettings = this.multiSettings.filter(
+        (setting: { id: number }) => setting.id !== this.currentId
+      );
+    }
     try {
-      that.store.set("appSettings", appSettings);
+      that.store.set("multiSettings", [...this.multiSettings, appSettings]);
     } catch (e) {}
     const notificationOptions = {
       body: "Updated Successfully",
@@ -119,7 +139,8 @@ export class SettingsComponent implements OnInit {
       name: "",
     };
     new Notification("", notificationOptions);
-    this.router.navigate(["/dashboard"]);
+    this.multiSettings = this.store.get("multiSettings");
+    this.editing = !this.settings;
   };
 
   addDatabase = (checked: boolean) => {

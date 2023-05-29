@@ -25,6 +25,14 @@ export class TopMenuBarComponent implements OnInit {
     this.store.set("userid", null);
     this.store.set("roleids", null);
     localStorage.removeItem("token");
+    const settings = this.store.get("appSettings");
+    delete settings.analyzerMachineName;
+    delete settings.analyzerMachinePort;
+    delete settings.analyzerMachineHost;
+    delete settings.interfaceConnectionMode;
+    delete settings.interfaceAutoConnect;
+    delete settings.interfaceCommunicationProtocol;
+    this.store.set("appSettings", settings);
     this.router.navigate(["/home"]);
   }
 

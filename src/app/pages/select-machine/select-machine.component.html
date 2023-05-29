@@ -1,0 +1,51 @@
+<mat-dialog-content>
+  <table mat-table [dataSource]="machines" class="mat-elevation-z0 table w-100">
+    <ng-container class="text-center" matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Machine Name</th>
+      <td mat-cell *matCellDef="let machine">
+        {{ machine.analyzerMachineName }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="host">
+      <th mat-header-cell *matHeaderCellDef>Machine IP</th>
+      <td mat-cell *matCellDef="let machine">
+        {{ machine.analyzerMachineHost }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="mode">
+      <th mat-header-cell *matHeaderCellDef>Connection Mode</th>
+      <td mat-cell *matCellDef="let machine">
+        {{ getConnectionType(machine.interfaceConnectionMode) }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="port">
+      <th mat-header-cell *matHeaderCellDef>Machine Port</th>
+      <td mat-cell *matCellDef="let machine">
+        {{ machine.analyzerMachinePort }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr
+      mat-row
+      *matRowDef="let row; columns: columns; let index = index"
+      (click)="selected = row"
+      (click)="selectedRow = index"
+      [class.blue]="index == selectedRow"
+    ></tr>
+  </table>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="false">Cancel</button>
+  <button
+    [disabled]="!selected"
+    mat-button
+    (click)="save()"
+    [color]="'primary'"
+  >
+    Save
+  </button>
+</mat-dialog-actions>

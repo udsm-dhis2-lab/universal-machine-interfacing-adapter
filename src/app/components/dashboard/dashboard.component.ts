@@ -12,6 +12,7 @@ import { InterfaceService } from "../../services/interface.service";
 import { DatabaseResponse } from "../../shared/interfaces/db.interface";
 import { FxResponse } from "../../shared/interfaces/fx.interface";
 import { InfoComponent } from "../info/info.component";
+import { SelectMachineComponent } from "../../pages/select-machine/select-machine.component";
 
 @Component({
   selector: "app-dashboard",
@@ -94,6 +95,9 @@ export class DashboardComponent implements OnInit {
     that.keyedCurrentPrivileges = that.store.get("keyedUserPrivileges");
     that.currentUserId = this.store.get("userid");
     that.appSettings = that.store.get("appSettings");
+    if (that.appSettings) {
+      that.reconnectButtonText = "Reconnect";
+    }
     if (
       !that.appSettings?.authorizationCount ||
       that.appSettings?.authorizationCount === ""
@@ -102,13 +106,7 @@ export class DashboardComponent implements OnInit {
         (column) => column !== "can_sync"
       );
     }
-    if (
-      null === that.appSettings ||
-      undefined === that.appSettings ||
-      !that.appSettings.analyzerMachinePort ||
-      !that.appSettings.interfaceCommunicationProtocol ||
-      !that.appSettings.analyzerMachineHost
-    ) {
+    if (!that.appSettings) {
       that.router.navigate(["/settings"]);
     } else {
       that.machineName = that.appSettings.analyzerMachineName;
@@ -134,7 +132,11 @@ export class DashboardComponent implements OnInit {
       that._ngZone.run(() => {
         if (status === false) {
           that.connectionInProcess = false;
-          that.reconnectButtonText = "Connect";
+          if (that.appSettings) {
+            that.reconnectButtonText = "Reconnect";
+          } else {
+            that.reconnectButtonText = "Connect";
+          }
         } else {
           that.connectionInProcess = true;
           that.reconnectButtonText = "Please wait ...";
@@ -209,8 +211,27 @@ export class DashboardComponent implements OnInit {
   }
 
   reconnect() {
-    this.interfaceService.reconnect();
+    const appSettings = this.store.get("appSettings");
+    if (appSettings.analyzerMachineHost) {
+      this.interfaceService.reconnect();
+    } else {
+      this.newConnection();
+    }
   }
+
+  newConnection = () => {
+    const selectionDialog = this.dialog.open(SelectMachineComponent, {
+      width: "50%",
+      height: "auto",
+    });
+    selectionDialog.afterClosed().subscribe((res) => {
+      if (res) {
+        this.interfaceService.reconnect();
+      } else {
+        this.openSnackBar({ message: "No machine selected", success: false });
+      }
+    });
+  };
 
   close() {
     this.interfaceService.closeConnection();
