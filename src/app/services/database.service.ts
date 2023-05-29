@@ -233,6 +233,7 @@ export class DatabaseService {
         http: axios,
         sqlite: this.electronService.sqlite,
         dbPath: this.store.get("appPath"),
+        store: this.store,
         log: this.electronService.log,
         logger: this.logger,
         id,

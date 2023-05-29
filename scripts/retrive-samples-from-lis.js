@@ -1,9 +1,7 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const run = async () => {
-  console.log("TEST");
+const syncData = async (dataRow) => {
   try {
-    const basicAuthToken = "YWRtaW46QWRtaW4xMjM=";
     // 1. Get samples
     // 2. Save samples to the database
     const headersList = {
@@ -22,7 +20,6 @@ const run = async () => {
       "Access-Control-Allow-Headers": "*",
       "Access-Control-Allow-Credentials": "true",
       Accept: "*",
-      Authorization: "Basic " + basicAuthToken,
       crossDomain: true,
       crossOrigin: true,
     };
@@ -30,13 +27,13 @@ const run = async () => {
     // Get sample by sample (filter API)
     const sampleId = "NPHL/23/0000369";
     const url = BASE_URL + `lab/samples?q=${sampleId}&excludeAllocations=false`;
-    let filteredSamplesDetails = await context.http.get(url, {
-      auth: {
-        username: "admin",
-        password: "Admin123",
-      },
-      headers: headersList,
-    });
+    // let filteredSamplesDetails = await context.http.get(url, {
+    //   auth: {
+    //     username: context.store.identifier,
+    //     password: context.store.password,
+    //   },
+    //   headers: headersList,
+    // });
     filteredSamplesDetails = {
       pager: {
         pageCount: 1,
@@ -275,303 +272,6 @@ const run = async () => {
                 uuid: "111034a2-cd10-43b9-85da-9a509d842e7f",
               },
             },
-            {
-              testAllocations: [
-                {
-                  container: {
-                    display: "Other container",
-                    uuid: "eb21ff23-a627-4a62-8bd0-efdc1db2ebb5",
-                  },
-                  testAllocationAssociatedFields: [],
-                  concept: {
-                    mappings: null,
-                    datatype: {
-                      display: "Coded",
-                      name: "Coded",
-                      description:
-                        "Value determined by term dictionary lookup (i.e., term identifier)",
-                      uuid: "8d4a48b6-c2cc-11de-8d13-0010c6dffd0f",
-                    },
-                    display: "COVID-19",
-                    uuid: "9c657ac6-deed-4167-b7ea-a2d794c3c66e",
-                  },
-                  parameter: {
-                    mappings: null,
-                    datatype: {
-                      display: "Coded",
-                      name: "Coded",
-                      description:
-                        "Value determined by term dictionary lookup (i.e., term identifier)",
-                      uuid: "8d4a48b6-c2cc-11de-8d13-0010c6dffd0f",
-                    },
-                    display: "COVID-19",
-                    uuid: "9c657ac6-deed-4167-b7ea-a2d794c3c66e",
-                  },
-                  statuses: [],
-                  label: "ORD-89899",
-                  uuid: "4c3e4103-6c1c-4121-a377-177a1d023657",
-                  results: [],
-                  sample: {
-                    label: "NPHL/23/0000369",
-                    uuid: "fc7e74a0-2aba-4fbd-aeee-084b7ed0ff21",
-                  },
-                  isSetMember: true,
-                  order: {
-                    orderNumber: "ORD-89899",
-                    careSetting: "Outpatient",
-                    dateCreated: 1683795254000,
-                    orderer: {
-                      display: "LIS Admin",
-                      name: "LIS Admin",
-                      uuid: "f9badd80-ab76-11e2-9e96-0800200c9a66",
-                    },
-                    concept: {
-                      display: "TEST_ORDERS:Corona Virus PCR Test",
-                      setMembers: [
-                        {
-                          display: "COVID-19",
-                          uuid: "9c657ac6-deed-4167-b7ea-a2d794c3c66e",
-                        },
-                      ],
-                      uuid: "818caf3e-13b5-47f2-9a9a-7d823495fb5e",
-                    },
-                    dateActivated: 1683795254000,
-                    uuid: "c243d080-5b12-4c63-a9e1-1f51c6acece9",
-                    orderDate: 1683795254000,
-                  },
-                },
-              ],
-              sample: {
-                label: "NPHL/23/0000369",
-                uuid: "fc7e74a0-2aba-4fbd-aeee-084b7ed0ff21",
-              },
-              order: {
-                orderNumber: "ORD-89899",
-                voidReason: null,
-                concept: {
-                  relatedMetadataAttribute: {
-                    testMethod: {
-                      testMethodMap: {
-                        code: "CORONA19",
-                        source: "Unified LIS Standard Coding Reference",
-                        relationship: "SAME-AS",
-                      },
-                      display: "TEST_METHODS:Corona Virus PCR",
-                      uuid: "6ee878a7-e2d9-4939-a129-23c59e9c54e7",
-                    },
-                    uuid: "fdb69dfd-cf50-4d80-b8c0-ca2935d2a162",
-                    value: "6ee878a7-e2d9-4939-a129-23c59e9c54e7",
-                  },
-                  display: "TEST_ORDERS:Corona Virus PCR Test",
-                  uuid: "818caf3e-13b5-47f2-9a9a-7d823495fb5e",
-                },
-                orderer: {
-                  name: "LIS Admin",
-                  uuid: "f9badd80-ab76-11e2-9e96-0800200c9a66",
-                },
-                voided: false,
-                shortName: "TEST_ORDERS:PCRCV",
-                uuid: "c243d080-5b12-4c63-a9e1-1f51c6acece9",
-              },
-            },
-            {
-              testAllocations: [
-                {
-                  container: {
-                    display: "Other container",
-                    uuid: "eb21ff23-a627-4a62-8bd0-efdc1db2ebb5",
-                  },
-                  testAllocationAssociatedFields: [],
-                  concept: {
-                    mappings: null,
-                    datatype: {
-                      display: "Coded",
-                      name: "Coded",
-                      description:
-                        "Value determined by term dictionary lookup (i.e., term identifier)",
-                      uuid: "8d4a48b6-c2cc-11de-8d13-0010c6dffd0f",
-                    },
-                    display: "COVID-19",
-                    uuid: "9c657ac6-deed-4167-b7ea-a2d794c3c66e",
-                  },
-                  parameter: {
-                    mappings: null,
-                    datatype: {
-                      display: "Coded",
-                      name: "Coded",
-                      description:
-                        "Value determined by term dictionary lookup (i.e., term identifier)",
-                      uuid: "8d4a48b6-c2cc-11de-8d13-0010c6dffd0f",
-                    },
-                    display: "COVID-19",
-                    uuid: "9c657ac6-deed-4167-b7ea-a2d794c3c66e",
-                  },
-                  statuses: [],
-                  label: "ORD-89900",
-                  uuid: "e2d4a488-35fe-44b8-9112-e6f5d664718a",
-                  results: [],
-                  sample: {
-                    label: "NPHL/23/0000369",
-                    uuid: "fc7e74a0-2aba-4fbd-aeee-084b7ed0ff21",
-                  },
-                  isSetMember: true,
-                  order: {
-                    orderNumber: "ORD-89900",
-                    careSetting: "Outpatient",
-                    dateCreated: 1683795254000,
-                    orderer: {
-                      display: "LIS Admin",
-                      name: "LIS Admin",
-                      uuid: "f9badd80-ab76-11e2-9e96-0800200c9a66",
-                    },
-                    concept: {
-                      display: "TEST_ORDERS:Corona Virus PCR Test",
-                      setMembers: [
-                        {
-                          display: "COVID-19",
-                          uuid: "9c657ac6-deed-4167-b7ea-a2d794c3c66e",
-                        },
-                      ],
-                      uuid: "818caf3e-13b5-47f2-9a9a-7d823495fb5e",
-                    },
-                    dateActivated: 1683795254000,
-                    uuid: "3aae8059-31ed-4926-8aee-5c310446ae52",
-                    orderDate: 1683795254000,
-                  },
-                },
-              ],
-              sample: {
-                label: "NPHL/23/0000369",
-                uuid: "fc7e74a0-2aba-4fbd-aeee-084b7ed0ff21",
-              },
-              order: {
-                orderNumber: "ORD-89900",
-                voidReason: null,
-                concept: {
-                  relatedMetadataAttribute: {
-                    testMethod: {
-                      testMethodMap: {
-                        code: "CORONA19",
-                        source: "Unified LIS Standard Coding Reference",
-                        relationship: "SAME-AS",
-                      },
-                      display: "TEST_METHODS:Corona Virus PCR",
-                      uuid: "6ee878a7-e2d9-4939-a129-23c59e9c54e7",
-                    },
-                    uuid: "fdb69dfd-cf50-4d80-b8c0-ca2935d2a162",
-                    value: "6ee878a7-e2d9-4939-a129-23c59e9c54e7",
-                  },
-                  display: "TEST_ORDERS:Corona Virus PCR Test",
-                  uuid: "818caf3e-13b5-47f2-9a9a-7d823495fb5e",
-                },
-                orderer: {
-                  name: "LIS Admin",
-                  uuid: "f9badd80-ab76-11e2-9e96-0800200c9a66",
-                },
-                voided: false,
-                shortName: "TEST_ORDERS:PCRCV",
-                uuid: "3aae8059-31ed-4926-8aee-5c310446ae52",
-              },
-            },
-            {
-              testAllocations: [
-                {
-                  container: {
-                    display: "Other container",
-                    uuid: "eb21ff23-a627-4a62-8bd0-efdc1db2ebb5",
-                  },
-                  testAllocationAssociatedFields: [],
-                  concept: {
-                    mappings: null,
-                    datatype: {
-                      display: "Coded",
-                      name: "Coded",
-                      description:
-                        "Value determined by term dictionary lookup (i.e., term identifier)",
-                      uuid: "8d4a48b6-c2cc-11de-8d13-0010c6dffd0f",
-                    },
-                    display: "COVID-19",
-                    uuid: "9c657ac6-deed-4167-b7ea-a2d794c3c66e",
-                  },
-                  parameter: {
-                    mappings: null,
-                    datatype: {
-                      display: "Coded",
-                      name: "Coded",
-                      description:
-                        "Value determined by term dictionary lookup (i.e., term identifier)",
-                      uuid: "8d4a48b6-c2cc-11de-8d13-0010c6dffd0f",
-                    },
-                    display: "COVID-19",
-                    uuid: "9c657ac6-deed-4167-b7ea-a2d794c3c66e",
-                  },
-                  statuses: [],
-                  label: "ORD-89901",
-                  uuid: "c531c02f-caa4-4d0e-aada-2a414a1af2ac",
-                  results: [],
-                  sample: {
-                    label: "NPHL/23/0000369",
-                    uuid: "fc7e74a0-2aba-4fbd-aeee-084b7ed0ff21",
-                  },
-                  isSetMember: true,
-                  order: {
-                    orderNumber: "ORD-89901",
-                    careSetting: "Outpatient",
-                    dateCreated: 1683795254000,
-                    orderer: {
-                      display: "LIS Admin",
-                      name: "LIS Admin",
-                      uuid: "f9badd80-ab76-11e2-9e96-0800200c9a66",
-                    },
-                    concept: {
-                      display: "TEST_ORDERS:Corona Virus PCR Test",
-                      setMembers: [
-                        {
-                          display: "COVID-19",
-                          uuid: "9c657ac6-deed-4167-b7ea-a2d794c3c66e",
-                        },
-                      ],
-                      uuid: "818caf3e-13b5-47f2-9a9a-7d823495fb5e",
-                    },
-                    dateActivated: 1683795254000,
-                    uuid: "f43ea406-d2dd-4da0-8078-a0c9e129eebe",
-                    orderDate: 1683795254000,
-                  },
-                },
-              ],
-              sample: {
-                label: "NPHL/23/0000369",
-                uuid: "fc7e74a0-2aba-4fbd-aeee-084b7ed0ff21",
-              },
-              order: {
-                orderNumber: "ORD-89901",
-                voidReason: null,
-                concept: {
-                  relatedMetadataAttribute: {
-                    testMethod: {
-                      testMethodMap: {
-                        code: "CORONA19",
-                        source: "Unified LIS Standard Coding Reference",
-                        relationship: "SAME-AS",
-                      },
-                      display: "TEST_METHODS:Corona Virus PCR",
-                      uuid: "6ee878a7-e2d9-4939-a129-23c59e9c54e7",
-                    },
-                    uuid: "fdb69dfd-cf50-4d80-b8c0-ca2935d2a162",
-                    value: "6ee878a7-e2d9-4939-a129-23c59e9c54e7",
-                  },
-                  display: "TEST_ORDERS:Corona Virus PCR Test",
-                  uuid: "818caf3e-13b5-47f2-9a9a-7d823495fb5e",
-                },
-                orderer: {
-                  name: "LIS Admin",
-                  uuid: "f9badd80-ab76-11e2-9e96-0800200c9a66",
-                },
-                voided: false,
-                shortName: "TEST_ORDERS:PCRCV",
-                uuid: "f43ea406-d2dd-4da0-8078-a0c9e129eebe",
-              },
-            },
           ],
           visit: {
             stopDateTime: 1683882714000,
@@ -623,20 +323,72 @@ const run = async () => {
      * 1. Order is the test order
      * 2. Allocations map to test parameter as one to one
      */
-    const orders = filteredSamplesDetails?.results[0]?.orders;
-    const testOrders =
-      orders?.map((sampleOrder) => sampleOrder?.order?.concept) || [];
+    const testOrders = filteredSamplesDetails?.results[0]?.orders;
     // The UUID of the test orders is the one on on the mapping
     // Each order has test allocations who concept is a parameter
-    orders?.forEach((order) => {
-      const allocations = order?.testAllocations;
-      // Create result payload, if allocation has results the one of allocation status has to be of AMENDMENT category
-      // Follow up the APIs on results entry
+    // TODO: Add support to handle multiple orders
+    const testOrder = testOrders[0];
+    const allocations = testOrder?.testAllocations;
+    // console.log(allocations);
+    // Create result payload, if allocation has results the one of allocation status has to be of AMENDMENT category
+    // Follow up the APIs on results entry
+    const messageHeader = dataRow?.raw_data?.split("AOBX")[0];
+    const requestSegOccurances = dataRow?.raw_data?.split("OBR").length - 1;
+    const OULSegment = dataRow?.raw_data?.split("OBR").length - 1;
+    let instrumentCode = dataRow?.raw_data?.split("|")[2];
+    const splittedItems = dataRow?.raw_data?.split("|");
+    machine_order_code = splittedItems[113];
+    const results = allocations?.map((allocation) => {
+      // const parameter
+      return {
+        concept: {
+          uuid: allocation?.concept?.uuid,
+        },
+        testAllocation: {
+          uuid: allocation?.uuid,
+        },
+        valueNumeric: null,
+        valueText: null,
+        valueCoded: {
+          uuid: "5c96e8a8-3676-494e-bbea-5ec7eeff8d83",
+        },
+        abnormal: false,
+        instrument: {
+          code: instrumentCode,
+        },
+        status: {
+          category: "RESULT_REMARKS",
+          status: "REMARKS",
+          remarks: "Remarks for testing",
+        },
+      };
     });
+    console.log(results);
+
+    const resultsUrl = BASE_URL + `lab/multipleresults`;
+    // const response = await context.http.get(url, {
+    //   auth: {
+    //     username: context.store.identifier,
+    //     password: context.store.password,
+    //   },
+    //   headers: headersList,
+    // });
 
     console.log("filteredSamplesDetails", filteredSamplesDetails);
   } catch (e) {
     console.log(e);
+  }
+};
+
+const run = async () => {
+  const orderToPush = {
+    raw_data: `MSH|^~&|COBAS6800/8800||LIS||20230517161532||OUL^R22|e7618717-5c98-4a9d-a8ac-cb8a6f93a1db|P|2.5||||||ASCII|||LAB-23^ROCHESPM||TBY 7367||CPM^cobas PCR Media^99ROC|||||||P||||||||||||||||SAC|||||||||||||||||||||400|||uL^^UCUMOBR|1|||SARS-COV-2^SARS-COV-2^99ROC|||||||AOBX|1|ST|TGT1^TGT1^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171444|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|2|ST|TGT2^TGT2^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171444|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|3|ST|SARS-COV-2^SARS-COV-2^99ROC|1/1|ValueNotSet|||NA|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171444|||||||||4170_neg^^99ROC~4169_pos^^99ROCOBX|4|ST|SARS-COV-2^SARS-COV-2^99ROC|1/2|NA|||"|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171444|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0MSH|^~&|COBAS6800/8800||LIS||20230517161532||OUL^R22|004db723-f8ce-4956-a0f6-5b35b58a3a49|P|2.5||||||ASCII|||LAB-23^ROCHESPM||TBY 7363||CPM^cobas PCR Media^99ROC|||||||P||||||||||||||||SAC|||||||||||||||||||||400|||uL^^UCUMOBR|1|||SARS-COV-2^SARS-COV-2^99ROC|||||||AOBX|1|ST|TGT1^TGT1^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171442|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|2|ST|TGT2^TGT2^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171442|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|3|ST|SARS-COV-2^SARS-COV-2^99ROC|1/1|ValueNotSet|||NA|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171442|||||||||4170_neg^^99ROC~4169_pos^^99ROCOBX|4|ST|SARS-COV-2^SARS-COV-2^99ROC|1/2|NA|||"|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171442|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0MSH|^~&|COBAS6800/8800||LIS||20230517161532||OUL^R22|5dc47eb9-37a8-4760-834d-a47c547f0d7c|P|2.5||||||ASCII|||LAB-23^ROCHESPM||TBY 7364||CPM^cobas PCR Media^99ROC|||||||P||||||||||||||||SAC|||||||||||||||||||||400|||uL^^UCUMOBR|1|||SARS-COV-2^SARS-COV-2^99ROC|||||||AOBX|1|ST|TGT1^TGT1^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|2|ST|TGT2^TGT2^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|3|ST|SARS-COV-2^SARS-COV-2^99ROC|1/1|ValueNotSet|||NA|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCOBX|4|ST|SARS-COV-2^SARS-COV-2^99ROC|1/2|NA|||"|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0MSH|^~&|COBAS6800/8800||LIS||20230517161532||OUL^R22|4b6204ec-94a6-4d9a-b5ed-c832268b4cb0|P|2.5||||||ASCII|||LAB-23^ROCHESPM||TBY 7365||CPM^cobas PCR Media^99ROC|||||||P||||||||||||||||SAC|||||||||||||||||||||400|||uL^^UCUMOBR|1|||SARS-COV-2^SARS-COV-2^99ROC|||||||AOBX|1|ST|TGT1^TGT1^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|2|ST|TGT2^TGT2^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|3|ST|SARS-COV-2^SARS-COV-2^99ROC|1/1|ValueNotSet|||NA|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCOBX|4|ST|SARS-COV-2^SARS-COV-2^99ROC|1/2|NA|||"|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0`,
+  };
+  // context.payload;
+  console.log(orderToPush);
+  if (orderToPush) {
+    // get order mapping
+    await syncData(orderToPush);
   }
 };
 
