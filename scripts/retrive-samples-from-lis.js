@@ -14,6 +14,10 @@ const username = context?.store?.get("identifier")
 const password = context?.store?.get("password")
   ? context.store.get("password")
   : "Admin123";
+const userUuid = "84ee6acb-1e75-11eb-8bc7-0242c0a85003";
+//  context?.store?.get("userUuid")
+//   ? context.store.get("userUuid")
+//   : "84ee6acb-1e75-11eb-8bc7-0242c0a85003";
 
 const syncData = async (
   sampleId,
@@ -94,7 +98,7 @@ const syncData = async (
         finalResult = "NEG";
       }
 
-      console.log("mappedItems", mappedItems);
+      // console.log("mappedItems", mappedItems);
       const results = allocations?.map((allocation) => {
         // const parameter
         return {
@@ -131,8 +135,11 @@ const syncData = async (
           sample: {
             uuid: data?.results[0]?.uuid,
           },
+          user: {
+            uuid: userUuid
+          },
           remarks: "Has results",
-          status: "HAS_RESULTS",
+          status: "HAS  RESULTS",
           category: "HAS_RESULTS",
         };
         const statusUrl = BASE_URL + `lab/samplestatus`;

@@ -525,6 +525,7 @@ export class DatabaseService {
             log: this.electronService.log,
             sqlite: this.electronService.sqlite,
             dbPath: this.store.get("appPath"),
+            store: this.store,
             logtext: this.logtext,
             liveLogSubject: this.liveLogSubject,
             id: process.id,
