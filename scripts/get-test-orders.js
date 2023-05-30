@@ -5,14 +5,14 @@ const run = async () => {
     const basicAuthToken = "YWRtaW46QWRtaW4xMjM=";
     const headersList = {
       Accept: "*/*",
-      Origin: "https://lis.dhis2.udsm.ac.tz/openmrs",
-      Referer: "https://lis.dhis2.udsm.ac.tz/openmrs",
+      Origin: "http://192.168.2.132/openmrs",
+      Referer: "http://192.168.2.132/openmrs",
       "Access-Control-Allow-Origin": "*",
       "Content-Type": "application/json",
       "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "*",
     };
-    const BASE_URL = "https://lis.dhis2.udsm.ac.tz/openmrs/ws/rest/v1/";
+    const BASE_URL = "http://192.168.2.132/openmrs/";
     const url =
       BASE_URL +
       "icare/concept?limit=100&conceptClass=Test&searchTerm=TEST_ORDERS&detailed=true";
@@ -51903,7 +51903,6 @@ const run = async () => {
       },
       headers: headersList,
     });
-    console.log(data.results)
     return data?.results;
   } catch (e) {
     console.log(e);
