@@ -12,7 +12,7 @@ const run = async () => {
       "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "*",
     };
-    const BASE_URL = "http://192.168.2.132/openmrs/";
+    const BASE_URL = "http://192.168.2.132/openmrs/ws/rest/v1/";
     const url =
       BASE_URL +
       "icare/concept?limit=100&conceptClass=Test&searchTerm=TEST_ORDERS&detailed=true";
