@@ -55,7 +55,7 @@ export class HomeComponent implements OnInit {
 
   private loginExternal = () => {
     this.databaseService
-      .run(this.settings.functionId, {
+      .run(this.settings.externalLoginFunction, {
         identifier: this.user.login,
         password: this.user.password,
         url: this.settings.externalLoginUrl,

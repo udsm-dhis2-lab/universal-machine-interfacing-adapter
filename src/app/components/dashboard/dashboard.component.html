@@ -134,11 +134,11 @@
             </span>
           </span>
           <button
+            mat-flat-button
             (click)="fetchLastOrders()"
-            class="btn btn-sm btn-primary"
             style="float: right"
           >
-            <span>Fetch Recent Records</span>
+            <mat-icon color="primary">refresh</mat-icon>
           </button>
         </div>
       </div>
@@ -301,9 +301,9 @@
                 "
                 (click)="onApproval($event, element)"
               >
+                <!-- <mat-icon>☑️</mat-icon> -->
                 <!-- TODO: Improve to support preve -->
-                <!-- <mat-icon></mat-icon> -->
-                <span>{{
+                <span class="p-2">{{
                   !appSettings.authorizationCount ||
                   (appSettings.authorizationCount &&
                     (appSettings.authorizationCount == 0 ||
@@ -323,6 +323,16 @@
                 mat-flat-button
               >
                 <mat-icon>delete</mat-icon>
+                <span class="p-2">Delete</span>
+              </button>
+              <br />
+              <button
+                class="menu-more-option mat-typography text-center text-success"
+                (click)="sync(element)"
+                mat-flat-button
+              >
+                <mat-icon>sync</mat-icon>
+                <span class="p-2">Sync</span>
               </button>
             </mat-menu>
           </td>

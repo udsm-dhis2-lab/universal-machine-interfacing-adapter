@@ -10,7 +10,7 @@ import { DatabaseService } from "../../services/database.service";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import { InterfaceService } from "../../services/interface.service";
 import { DatabaseResponse } from "../../shared/interfaces/db.interface";
-import { FxResponse } from "../../shared/interfaces/fx.interface";
+import { FxPayload, FxResponse } from "../../shared/interfaces/fx.interface";
 import { InfoComponent } from "../info/info.component";
 import { SelectMachineComponent } from "../../pages/select-machine/select-machine.component";
 
@@ -297,10 +297,10 @@ export class DashboardComponent implements OnInit {
     );
   }
 
-  sync = () => {
+  sync = (data?: FxPayload) => {
     if (this.appSettings.functionId && this.appSettings.functionId !== "") {
       this.database
-        .run(this.appSettings.functionId)
+        .run(this.appSettings.functionId, data)
         .then((res) => {})
         .catch((e) => {});
     }
