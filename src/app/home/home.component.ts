@@ -66,6 +66,8 @@ export class HomeComponent implements OnInit {
       })
       .then((res: LoginResponse) => {
         if (res.success) {
+          this.store.set("loggedin", true);
+          this.store.set("userUuid", res?.user?.uuid);
           this.openSnackBar({
             success: true,
             message: `Successfully logged in with ${this.settings.systemName}`,
