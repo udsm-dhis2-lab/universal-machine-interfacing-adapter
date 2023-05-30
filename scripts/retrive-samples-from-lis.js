@@ -50,7 +50,7 @@ const syncData = async (
 
     // Get mappings by machine test order code
     const url = BASE_URL + `lab/samples?q=${sampleId}&excludeAllocations=false`;
-    const {data} = await context.http.get(url, {
+    const { data } = await context.http.get(url, {
       auth: {
         username: username,
         password: password,
@@ -126,6 +126,25 @@ const syncData = async (
         headers: headersList,
       });
       console.log(response);
+      if (response) {
+        const status = {
+          sample: {
+            uuid: data?.results[0]?.uuid,
+          },
+          remarks: "Has results",
+          status: "HAS_RESULTS",
+          category: "HAS_RESULTS",
+        };
+        const statusUrl = BASE_URL + `lab/samplestatus`;
+        const response = await context.http.post(statusUrl, status, {
+          auth: {
+            username: username,
+            password: password,
+          },
+          headers: headersList,
+        });
+        console.log(response);
+      }
     }
   } catch (e) {
     console.log(e);
