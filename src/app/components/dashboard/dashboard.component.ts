@@ -226,6 +226,7 @@ export class DashboardComponent implements OnInit {
     });
     selectionDialog.afterClosed().subscribe((res) => {
       if (res) {
+        this.appSettings = this.store.get("appSettings");
         this.interfaceService.reconnect();
       } else {
         this.openSnackBar({ message: "No machine selected", success: false });

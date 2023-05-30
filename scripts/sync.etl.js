@@ -13,18 +13,27 @@ const mappings = {
   mtb: 'ywRl88yte5b',
   inh: 'nPGTzMkULFh',
   linh: 'nPGTzMkULFh',
-  'GLqRo7AuhJM': 'GLqRo7AuhJM', //DST Result Ethionamide
+  ethr: 'GLqRo7AuhJM', //DST Result Ethionamide
   flq: 'o2zbpZDZele', //DST Result Fluoroquinolone
   lflq: 'o2zbpZDZele' //DST Result Fluoroquinolone
 }
 
-const assays = ['mtb', 'inh', 'linh', 'flq', 'lflq', 'eth']
+const assays = ['mtb', 'inh', 'linh', 'flq', 'lflq', 'ethr']
+
+const assayMappings = {
+  mtb: 'MTB',
+  inh: 'INH Resistance',
+  linh: 'LINH Resistance',
+  flq: 'FLQ Resistance',
+  lflq: 'INH Resistance',
+  ethr: 'ETH Resistance'
+}
 
 const mapping = {
   ywRl88yte5b: ['mtb'],
   nPGTzMkULFh: ['inh', 'linh'],
   o2zbpZDZele: ['flq', 'lflq'],
-  GLqRo7AuhJM: ['eth', 'ethr']
+  GLqRo7AuhJM: ['ethr']
 }
 
 const stageMappings = {
@@ -34,13 +43,35 @@ const stageMappings = {
   GLqRo7AuhJM: { ethr: 'ETH Resistance ', }
 }
 
+getMissingResult = (assayData, d, results, assay) => {
+  let result = {}
+  let detected = ''
+  assayData?.forEach(key => {
+    assayValue = key?.split('|')[0];
+    if (assayValue?.toLowerCase()?.includes('detected')) {
+      detected = assayValue?.split('^')?.join('')
+    }
+  })
+
+  if (detected === '') {
+    d = d[1]?.split('|')
+    d?.forEach(key => {
+      assayValue = key?.split('|')[0];
+      if (assayValue?.toLowerCase()?.includes('detected')) {
+        detected = assayValue?.split('^')?.join('')
+      }
+    })
+  }
+  result = { ...results[0], assayNumber: assay, result: detected }
+  return result
+}
+
 const saveStatus = ({ id, reason }) => {
   try {
     const query = `UPDATE orders SET reason="${reason}",sync_status="ERROR",lims_sync_status=${3} WHERE id=${id}`;
     db.all(query, [], async (err, _rows) => {
       if (err) {
         console.error('🚫 ERROR WHILE UPDATING SYNC STATUS ', err, ' 🚫')
-        console.log(query)
       }
     });
   } catch (e) {
@@ -114,23 +145,18 @@ const cleanData = (data) => {
     const testedResults = dataArray.resultData.filter(d => d.testedBy && d.testedBy !== '')
     results = [...results, ...testedResults]
   }
+  assays?.forEach(assay => {
+    let assayData = results.find(({ assayNumber, result }) => assayNumber === assay && isNaN(result))
+    if (!assayData) {
+      assayData = data?.split('5')?.join('').split(`${assayMappings[assay]}^|`)
+      const d = data?.toLowerCase()?.split(`${assay} `)
+      const result = getMissingResult(assayData, d, results, assay)
+      if (result.result && result.result !== '') {
+        results = [...results, result]
+      }
+    }
+  })
 
-  const ethr = results.find(({ assayNumber }) => assayNumber === 'ethr')
-  if (!ethr) {
-    let ethr = data.split('ETH Resistance^|')
-    let d = data.toLowerCase().split('eth ')
-    let ethrData = {}
-    if (ethr.length <= 1 && d.length > 1) {
-      d = d[1]?.split('|')
-      d = d.length > 0 ? d[1] : null
-      ethrData = { ...results[0], assayNumber: 'ethr', result: d ? d?.split('^')?.join('')?.toUpperCase() : null }
-    } else {
-      ethrData = { ...results[0], assayNumber: 'ethr', result: ethr.length > 0 ? ethr[1]?.split('|')[0] : null }
-    }
-    if (ethrData.result) {
-      results = [...results, ethrData]
-    }
-  }
   return sanitizeResults(results)
 }
 
@@ -239,7 +265,6 @@ const syncData = async (rows) => {
       }
     } catch (e) {
       saveStatus({ id: row.id, reason: e.message })
-
     }
   }
 };
