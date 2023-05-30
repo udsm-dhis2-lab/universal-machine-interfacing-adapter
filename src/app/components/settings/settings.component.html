@@ -335,10 +335,10 @@
             <div class="w-50">
               <mat-form-field appearance="outline" class="w-100">
                 <mat-label>Function</mat-label>
-                <mat-select [(value)]="settings.functionId">
+                <mat-select [(value)]="settings.externalLoginFunction">
                   <mat-option>None</mat-option>
                   <mat-option
-                    (click)="settings.functionId = function.id"
+                    (click)="settings.externalLoginFunction = function.id"
                     *ngFor="let function of functions"
                     [value]="function.id"
                     >{{ function.display }}</mat-option

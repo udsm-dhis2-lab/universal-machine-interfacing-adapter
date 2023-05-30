@@ -5,6 +5,7 @@ import { first } from "rxjs/operators";
 import { DatabaseService } from "../../services/database.service";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import { FxPayload } from "../../shared/interfaces/fx.interface";
+import { Settings } from "../../shared/interfaces/settings.interface";
 
 @Component({
   selector: "app-settings",
@@ -13,7 +14,7 @@ import { FxPayload } from "../../shared/interfaces/fx.interface";
 })
 export class SettingsComponent implements OnInit {
   public settings: any = {};
-  multiSettings: any = [];
+  multiSettings: Settings[] = [];
   editing: boolean = false;
   currentId: number;
   public appPath: string = "";
@@ -61,6 +62,7 @@ export class SettingsComponent implements OnInit {
       this.settings.moduleName = appSettings.moduleName;
       this.settings.identifier = appSettings.identifier;
       this.settings.instrumentCode = appSettings.instrumentCode;
+      this.settings.externalLoginFunction = appSettings.externalLoginFunction;
     }
   }
 
@@ -81,7 +83,7 @@ export class SettingsComponent implements OnInit {
   getConnectionType = (id: string) =>
     this.toolType.find((tool) => tool.id === id)?.name;
 
-  onEdit = (machine: any) => {
+  onEdit = (machine: Settings) => {
     const that = this;
     that.currentId = machine.id;
     Object.keys(machine).forEach((key) => {
@@ -90,16 +92,15 @@ export class SettingsComponent implements OnInit {
     that.editing = true;
   };
 
-  onDelete = (deleteMachine: any) => {
+  onDelete = (deleteMachine: Settings) => {
     this.multiSettings = this.multiSettings.filter(
-      (machine) => machine.id !== deleteMachine.id
+      (machine: Settings) => machine.id !== deleteMachine.id
     );
     this.store.set("multiSettings", this.multiSettings);
   };
 
   updateSettings = async () => {
     const that = this;
-
     const appSettings = {
       id: new Date().valueOf(),
       labID: that.settings.labID,
@@ -122,14 +123,16 @@ export class SettingsComponent implements OnInit {
       moduleName: that.settings.moduleName,
       identifier: that.settings.identifier,
       instrumentCode: that.settings.instrumentCode,
+      externalLoginFunction: that.settings.externalLoginFunction,
     };
     if (this.currentId) {
       this.multiSettings = this.multiSettings.filter(
-        (setting: { id: number }) => setting.id !== this.currentId
+        (setting: Settings) => setting.id !== this.currentId
       );
     }
     try {
       that.store.set("multiSettings", [...this.multiSettings, appSettings]);
+      that.store.set("appSettings", appSettings);
     } catch (e) {}
     const notificationOptions = {
       body: "Updated Successfully",
