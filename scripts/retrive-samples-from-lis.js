@@ -9,6 +9,9 @@ const db = new context.sqlite.Database(
   }
 );
 
+const username = context.store.identifier ? context.store.identifier : "admin";
+const password = context.store.password ? context.store.password : "Admin123";
+
 const syncData = async (
   sampleId,
   instrumentCode,
@@ -48,8 +51,8 @@ const syncData = async (
     const url = BASE_URL + `lab/samples?q=${sampleId}&excludeAllocations=false`;
     let filteredSamplesDetails = await context.http.get(url, {
       auth: {
-        username: context.store.identifier,
-        password: context.store.password,
+        username: username,
+        password: password,
       },
       headers: headersList,
     });
@@ -391,13 +394,12 @@ const syncData = async (
           },
         };
       });
-      console.log(results);
 
       const resultsUrl = BASE_URL + `lab/multipleresults`;
       const response = await context.http.get(resultsUrl, {
         auth: {
-          username: context.store.identifier,
-          password: context.store.password,
+          username: username,
+          password: password,
         },
         headers: headersList,
       });
