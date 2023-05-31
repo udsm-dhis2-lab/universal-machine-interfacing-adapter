@@ -102,11 +102,18 @@
       </div>
       <div *ngIf="isDev">
         <a
-          (click)="testData()"
+          (click)="testData('astm')"
+          class="btn btn-outline-primary btn-sm mr-5"
+          style="float: right"
+        >
+          <span>ASTM</span>
+        </a>
+        <a
+          (click)="testData('hl7')"
           class="btn btn-outline-primary btn-sm"
           style="float: right"
         >
-          <span>Test</span>
+          <span>HL7</span>
         </a>
       </div>
     </div>
@@ -146,54 +153,35 @@
       <table mat-table [dataSource]="lastOrders" class="mat-elevation-z2 table">
         <!-- Name Column -->
         <ng-container class="text-center" matColumnDef="order_id">
-          <th style="width: 25% !important" mat-header-cell *matHeaderCellDef>
-            Patient ID
-          </th>
+          <th mat-header-cell *matHeaderCellDef>Patient ID</th>
           <td mat-cell *matCellDef="let element">{{ element?.patient_id }}</td>
         </ng-container>
 
         <ng-container class="text-center" matColumnDef="test_id">
-          <th style="width: 15% !important" mat-header-cell *matHeaderCellDef>
-            Sample ID
-          </th>
+          <th mat-header-cell *matHeaderCellDef>Sample ID</th>
           <td mat-cell *matCellDef="let element">{{ element?.order_id }}</td>
         </ng-container>
 
-        <!-- Description Column -->
-        <!-- <ng-container matColumnDef="results">
-          <th style="width: 15%" mat-header-cell *matHeaderCellDef>
-            Test Result
-          </th>
-          <td mat-cell *matCellDef="let element">{{ element?.results }}</td>
-        </ng-container> -->
-
-        <!-- Frequency Column -->
         <ng-container matColumnDef="test_unit">
-          <th style="width: 10%" mat-header-cell *matHeaderCellDef>
-            Result Unit
-          </th>
+          <th mat-header-cell *matHeaderCellDef>Result Unit</th>
           <td mat-cell *matCellDef="let element">{{ element?.test_unit }}</td>
         </ng-container>
 
         <!-- Frequency Column -->
         <ng-container matColumnDef="test_type">
-          <th style="width: 15%" mat-header-cell *matHeaderCellDef>
-            Test Type
-          </th>
+          <th mat-header-cell *matHeaderCellDef>Test Type</th>
           <td mat-cell *matCellDef="let element">{{ element?.test_type }}</td>
         </ng-container>
 
         <!-- Frequency Column -->
         <ng-container matColumnDef="tested_by">
-          <th style="width: 15%" mat-header-cell *matHeaderCellDef>
-            Tested By
-          </th>
+          <th mat-header-cell *matHeaderCellDef>Tested By</th>
           <td mat-cell *matCellDef="let element">{{ element?.tested_by }}</td>
         </ng-container>
 
         <!-- Frequency Column -->
         <ng-container matColumnDef="tested_on">
-          <th style="width: 8%" mat-header-cell *matHeaderCellDef>Tested On</th>
+          <th mat-header-cell *matHeaderCellDef>Tested On</th>
           <td mat-cell *matCellDef="let element">
             {{ element?.analysed_date_time }}
           </td>
@@ -201,12 +189,7 @@
 
         <!-- Frequency Column -->
         <ng-container matColumnDef="can_sync">
-          <th
-            class="text-center"
-            style="width: 5%"
-            mat-header-cell
-            *matHeaderCellDef
-          >
+          <th class="text-center" mat-header-cell *matHeaderCellDef>
             Can Sync
           </th>
           <td class="text-center" mat-cell *matCellDef="let element">
@@ -223,12 +206,7 @@
 
         <!-- Frequency Column -->
         <ng-container matColumnDef="lims_sync_status">
-          <th
-            class="text-center"
-            style="width: 5%"
-            mat-header-cell
-            *matHeaderCellDef
-          >
+          <th class="text-center" mat-header-cell *matHeaderCellDef>
             Sync Status
           </th>
           <td
@@ -259,9 +237,7 @@
 
         <!-- Frequency Column -->
         <ng-container matColumnDef="lims_sync_date_time">
-          <th style="width: 8%" mat-header-cell *matHeaderCellDef>
-            Sync Datetime
-          </th>
+          <th mat-header-cell *matHeaderCellDef>Sync Datetime</th>
           <td mat-cell *matCellDef="let element">
             {{ element?.lims_sync_date_time }}
           </td>
@@ -290,6 +266,10 @@
             </button>
             <mat-menu #menu="matMenu">
               <button
+                *ngIf="
+                  appSettings?.authorizationCount &&
+                  appSettings?.authorizationCount === ''
+                "
                 mat-menu-item
                 [disabled]="
                   currentOrderApprovalStatuses?.length >=
