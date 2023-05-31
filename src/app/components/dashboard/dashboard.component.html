@@ -254,11 +254,7 @@
             <button
               mat-icon-button
               [matMenuTriggerFor]="menu"
-              [disabled]="
-                !keyedCurrentPrivileges['DO_FINAL_AUTHORIZATION'] &&
-                !keyedCurrentPrivileges['DO_AUTHORIZE'] &&
-                !keyedCurrentPrivileges['ALL']
-              "
+              [disabled]="disableAction"
               aria-label="More actions"
               (click)="getApprovalInfos($event, element)"
             >
@@ -266,10 +262,7 @@
             </button>
             <mat-menu #menu="matMenu">
               <button
-                *ngIf="
-                  appSettings?.authorizationCount &&
-                  appSettings?.authorizationCount === ''
-                "
+                *ngIf="shouldAuthorize"
                 mat-menu-item
                 [disabled]="
                   currentOrderApprovalStatuses?.length >=
