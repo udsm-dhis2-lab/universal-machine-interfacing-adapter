@@ -129,7 +129,6 @@ const syncData = async (
         },
         headers: headersList,
       });
-      console.log(response);
       if (response) {
         const status = {
           sample: {
@@ -150,7 +149,29 @@ const syncData = async (
           },
           headers: headersList,
         });
-        console.log(response);
+
+        const statusMachineStatus = {
+          sample: {
+            uuid: data?.results[0]?.uuid,
+          },
+          user: {
+            uuid: userUuid,
+          },
+          remarks: "Synced by analyzer",
+          status: "Synced by analyzer",
+          category: "SYNCED_BY_ANALYSER",
+        };
+        const response2 = await context.http.post(
+          statusUrl,
+          statusMachineStatus,
+          {
+            auth: {
+              username: username,
+              password: password,
+            },
+            headers: headersList,
+          }
+        );
       }
     }
   } catch (e) {
@@ -159,7 +180,7 @@ const syncData = async (
 };
 
 const run = async () => {
-  const orderToPush = {
+  const orderToPush = context?.payload ? context?.payload: {
     raw_data: `MSH|^~&|COBAS6800/8800||LIS||20230517161532||OUL^R22|e7618717-5c98-4a9d-a8ac-cb8a6f93a1db|P|2.5||||||ASCII|||LAB-23^ROCHESPM||TBY 7367||CPM^cobas PCR Media^99ROC|||||||P||||||||||||||||SAC|||||||||||||||||||||400|||uL^^UCUMOBR|1|||SARS-COV-2^SARS-COV-2^99ROC|||||||AOBX|1|ST|TGT1^TGT1^99ROC||NEG|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171444|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|2|ST|TGT2^TGT2^99ROC||NEG|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171444|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|3|ST|SARS-COV-2^SARS-COV-2^99ROC|1/1|NEG|||NA|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171444|||||||||4170_neg^^99ROC~4169_pos^^99ROCOBX|4|ST|SARS-COV-2^SARS-COV-2^99ROC|1/2|NA|||"|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171444|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0MSH|^~&|COBAS6800/8800||LIS||20230517161532||OUL^R22|004db723-f8ce-4956-a0f6-5b35b58a3a49|P|2.5||||||ASCII|||LAB-23^ROCHESPM||TBY 7363||CPM^cobas PCR Media^99ROC|||||||P||||||||||||||||SAC|||||||||||||||||||||400|||uL^^UCUMOBR|1|||SARS-COV-2^SARS-COV-2^99ROC|||||||AOBX|1|ST|TGT1^TGT1^99ROC||NEG|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171442|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|2|ST|TGT2^TGT2^99ROC||NEG|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171442|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|3|ST|SARS-COV-2^SARS-COV-2^99ROC|1/1|NEG|||NA|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171442|||||||||4170_neg^^99ROC~4169_pos^^99ROCOBX|4|ST|SARS-COV-2^SARS-COV-2^99ROC|1/2|NA|||"|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171442|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0MSH|^~&|COBAS6800/8800||LIS||20230517161532||OUL^R22|5dc47eb9-37a8-4760-834d-a47c547f0d7c|P|2.5||||||ASCII|||LAB-23^ROCHESPM||TBY 7364||CPM^cobas PCR Media^99ROC|||||||P||||||||||||||||SAC|||||||||||||||||||||400|||uL^^UCUMOBR|1|||SARS-COV-2^SARS-COV-2^99ROC|||||||AOBX|1|ST|TGT1^TGT1^99ROC||NEG|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|2|ST|TGT2^TGT2^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|3|ST|SARS-COV-2^SARS-COV-2^99ROC|1/1|ValueNotSet|||NA|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCOBX|4|ST|SARS-COV-2^SARS-COV-2^99ROC|1/2|NA|||"|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0MSH|^~&|COBAS6800/8800||LIS||20230517161532||OUL^R22|4b6204ec-94a6-4d9a-b5ed-c832268b4cb0|P|2.5||||||ASCII|||LAB-23^ROCHESPM||TBY 7365||CPM^cobas PCR Media^99ROC|||||||P||||||||||||||||SAC|||||||||||||||||||||400|||uL^^UCUMOBR|1|||SARS-COV-2^SARS-COV-2^99ROC|||||||AOBX|1|ST|TGT1^TGT1^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|2|ST|TGT2^TGT2^99ROC||ValueNotSet|||NEG|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0INV|SARS-COV-2|OK|MR|||||||||20230731030000||||J16959INV|Tip rack|OK|SC|||||||||20231231030000||||322INV|Processing plate|OK|SC|||||||||20240531030000||||436INV|Amplification plate|OK|SC|||||||||20240630030000||||554INV|Diluent|OK|DI|||||||||20240229030000||||J01946INV|Lysis reagent|OK|LI|||||||||20231231030000||||H34541INV|Wash reagent|OK|LI|||||||||20231031030000||||H29693INV|MGP cassette|OK|SC|||||||||20231130030000||||J00845OBX|3|ST|SARS-COV-2^SARS-COV-2^99ROC|1/1|ValueNotSet|||NA|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCOBX|4|ST|SARS-COV-2^SARS-COV-2^99ROC|1/2|NA|||"|||F|||||FBN||C6800/8800^Roche^^~Unknown^Roche^^~ID_000000000012076380^IM300-001794^^|20230516171443|||||||||4170_neg^^99ROC~4169_pos^^99ROCTCD|SARS-COV-2^SARS-COV-2^99ROC|^1^:^0`,
   };
   // context.payload;
