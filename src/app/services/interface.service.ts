@@ -770,7 +770,8 @@ export class InterfaceService {
     return finalData;
   }
 
-  parseHL7DH76 = (hl7: string) => {
+  parseHL7DH76 = (hl7: string, noAck?: boolean) => {
+    hl7 = hl7.split("|/").join("|");
     const data: any = {};
     let master = [];
 
@@ -790,10 +791,8 @@ export class InterfaceService {
     // Remove empty values
     master = master.filter(Boolean);
     // Now that master is populated, we can iterate over it and form the table
-    let inHTML = "";
-    master.forEach((value, index) => {
+    master.forEach((value) => {
       const fields = value.split("|");
-      let subdetail = "";
       const segmentName = fields[0];
       fields.shift();
       const segmentValue = {};
@@ -833,12 +832,20 @@ export class InterfaceService {
         data[segmentName] = [data[segmentName], segmentValue];
       }
     });
-    this.socketClient.write(this.hl7ACK(data.MSH["Message Control ID"]));
-    const order: any = {
-      order_id: data.OBR["Filler Order Number"],
+    if (!noAck) {
+      this.socketClient.write(this.hl7ACK(data.MSH["Message Control ID"]));
+    }
+    let order: any = {
+      order_id:
+        data.OBR["Filler Order Number"] ??
+        (Array.isArray(data?.MSH) && data?.MSH[0])
+          ? data.MSH[0]["Receiving Responsible Organization"]
+          : data?.MSH
+          ? data?.MSH["Receiving Responsible Organization"]
+          : null,
       test_type: data.OBR["Principal Result Interpreter +"],
-      test_unit: data.OBX.find((obx) => obx.Units !== "").Units,
-      patient_id: data.PID["Patient ID"],
+      test_unit: data.OBX.find((obx) => obx?.Units !== "")?.Units,
+      patient_id: data?.PID ? data?.PID["Patient ID"] : null,
       results: data.OBX.find((obx) => obx["Observation Result Status"] !== "")[
         "Observation Result Status"
       ],
@@ -846,11 +853,16 @@ export class InterfaceService {
       analysed_date_time: data.OBR["Requested Date/Time"],
       authorised_date_time: data.OBR["Requested Date/Time"],
       result_accepted_date_time: data.OBR["Observation End Date/Time #"],
-      raw_text: hl7,
+      raw_text: `${hl7}`,
     };
-
-    console.log(JSON.stringify(order));
-
+    order = {
+      ...order,
+      raw_text: order?.raw_text?.replace(/(\r\n|\n|\r)/gm, ""),
+    };
+    // console.log(order);
+    Object.keys(order).forEach((key) => {
+      if (order[key] === undefined) order[key] = "";
+    });
     this.dbService
       .addOrderTest(
         order,

@@ -91,39 +91,39 @@ export class DatabaseService {
       });
   }
 
-  private querySqlite = (sql: string, success?: Success, errorOf?: ErrorOf) => {
-    const db = new this.electronService.sqlite.Database(
-      this.store.get("appPath"),
-      this.electronService.sqlite.OPEN_READWRITE,
-      (err: { message: any }) => {
-        if (err) {
-          console.error(err.message);
-        }
-      }
-    );
+  private querySqlite = (
+    sql: string,
+    data: MachineData,
+    success?: Success,
+    errorOf?: ErrorOf
+  ) => {
     try {
-      db.all(sql, [], async (_err: any | null, rows: any[] | null) => {
-        if (_err) {
-          if (errorOf) {
-            errorOf(_err);
+      this.electronService
+        .execSqliteQuery(sql, [])
+        .then(async (res) => {
+          await this.syncData(data);
+          if (success) {
+            return success(res);
           }
-          return _err;
-        }
-        if (this.noAuthorization) {
-          await this.syncData(rows);
-        }
-        if (success) {
-          success(rows);
-        }
-      });
+          return res;
+        })
+        .catch((e) => {
+          if (errorOf) {
+            return errorOf(e);
+          }
+          return e;
+        });
     } catch (e) {
-      errorOf(e);
+      if (errorOf) {
+        return errorOf(e);
+      }
+      return e;
     }
   };
 
-  syncData = async (rows: MachineData[]): Promise<void> => {
+  syncData = async (rows: MachineData): Promise<void> => {
     const functionId = this.appSettings.functionId;
-    await this.run(functionId, null, null, rows);
+    await this.run(functionId, null, null, [rows]);
   };
 
   get noAuthorization() {
@@ -233,8 +233,9 @@ export class DatabaseService {
         "context",
         this.appSettings?.hasExternalDB
           ? process?.rows[0]?.code
-          : process[0].code
+          : process[0]?.code
       );
+      console.log("PAYLOAD", process);
       await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
       const runResults = await runFunc({
         secret,
@@ -256,10 +257,11 @@ export class DatabaseService {
         store: this.store,
         log: this.electronService.log,
         logger: this.logger,
+        query: this.electronService.execSqliteQuery,
         id,
         secret_id: this.appSettings?.hasExternalDB
           ? process?.rows[0]?.secret_id
-          : process[0].secret_id,
+          : process[0]?.secret_id,
         fs,
         externalParams: params,
       });
@@ -268,6 +270,7 @@ export class DatabaseService {
         : this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE NAME=${name}`));
       return runResults;
     } catch (e) {
+      console.log(e);
       await (id
         ? this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE ID=${id}`)
         : this.query(`UPDATE PROCESS SET RUNNING=${false} WHERE NAME=${name}`));
@@ -537,6 +540,7 @@ export class DatabaseService {
             basicAuth: BASICAUTH,
             basicHeaders: BASICHEADERS,
             hl7Parser: hl7parser.create,
+            query: this.electronService.execSqliteQuery,
             fs,
             externalParams: {},
           });
@@ -576,7 +580,7 @@ export class DatabaseService {
     )}) VALUES(${Object.values(data)
       .map((d) => '"' + d + '"')
       .join(",")}) RETURNING *`;
-    this.querySqlite(sql, success, errorOf);
+    this.querySqlite(sql, data, success, errorOf);
   };
 
   fetchLastOrders(success: Success, errorOf: ErrorOf, summary: boolean) {

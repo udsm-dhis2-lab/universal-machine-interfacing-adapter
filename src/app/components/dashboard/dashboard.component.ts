@@ -103,7 +103,7 @@ export class DashboardComponent implements OnInit {
       that.appSettings?.authorizationCount === ""
     ) {
       that.displayedColumns = that.displayedColumns.filter(
-        (column) => column !== "can_sync"
+        (column) => column !== "can_sync" && column !== "order_id"
       );
     }
     if (!that.appSettings) {
@@ -161,6 +161,13 @@ export class DashboardComponent implements OnInit {
     that.interval = setInterval(() => {
       that.fetchLastOrders();
     }, 1000 * 60 * 1);
+  }
+
+  get shouldAuthorize() {
+    return (
+      this.appSettings.authorizationCount &&
+      this.appSettings.authorizationCount !== ""
+    );
   }
 
   fetchLastOrders() {
@@ -325,9 +332,15 @@ export class DashboardComponent implements OnInit {
     );
   }
 
-  testData = () => {
-    const data = readFileSync("./data.txt", "utf-8");
-    this.interfaceService.processASTMConcatenatedData(data);
+  testData = (type: "astm" | "hl7") => {
+    if (type === "astm") {
+      const data = readFileSync("./data.txt", "utf-8");
+      this.interfaceService.processASTMConcatenatedData(data);
+      this.fetchLastOrders();
+      return;
+    }
+    const data = readFileSync("./hl7.txt", "utf-8");
+    this.interfaceService.parseHL7DH76(data, true);
     this.fetchLastOrders();
   };
 
