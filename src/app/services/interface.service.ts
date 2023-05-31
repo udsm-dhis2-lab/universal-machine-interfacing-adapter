@@ -270,7 +270,7 @@ export class InterfaceService {
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings?.analyzerMachineName;
-
+        rData.added_on = new Date();
         that.dbService.addRawData(
           rData,
           (res) => {
@@ -298,6 +298,7 @@ export class InterfaceService {
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings?.analyzerMachineName;
+        rData.added_on = new Date();
         that.processHL7Data(that.strData);
 
         that.dbService.addRawData(
@@ -328,6 +329,7 @@ export class InterfaceService {
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings?.analyzerMachineName;
+        rData.added_on = new Date();
         that.dbService.addRawData(
           rData,
           (res) => {
@@ -369,6 +371,7 @@ export class InterfaceService {
         const rData: any = {};
         rData.data = that.strData;
         rData.machine = that.appSettings?.analyzerMachineName;
+        rData.added_on = new Date();
         that.dbService.addRawData(
           rData,
           (res) => {
@@ -507,7 +510,7 @@ export class InterfaceService {
             order.lims_sync_status = 0;
             order.test_location = that.appSettings?.labName;
             order.machine_used = that.appSettings?.analyzerMachineName;
-
+            order.added_on = new Date();
             if (order.order_id) {
               that.logger(
                 "info",
@@ -680,6 +683,7 @@ export class InterfaceService {
             order.lims_sync_status = 0;
             order.test_location = that.appSettings?.labName;
             order.machine_used = that.appSettings?.analyzerMachineName;
+            order.added_on = new Date();
 
             if (order.order_id) {
               that.logger(
@@ -771,7 +775,6 @@ export class InterfaceService {
   }
 
   parseHL7DH76 = (hl7: string, noAck?: boolean) => {
-    hl7 = hl7.split("|/").join("|");
     const data: any = {};
     let master = [];
 
@@ -836,6 +839,7 @@ export class InterfaceService {
       this.socketClient.write(this.hl7ACK(data.MSH["Message Control ID"]));
     }
     let order: any = {
+      added_on: new Date(),
       order_id:
         data.OBR["Filler Order Number"] ??
         (Array.isArray(data?.MSH) && data?.MSH[0])
@@ -843,23 +847,28 @@ export class InterfaceService {
           : data?.MSH
           ? data?.MSH["Receiving Responsible Organization"]
           : null,
-      test_type: data.OBR["Principal Result Interpreter +"],
+      test_type: data.OBR["Universal Service Identifier"],
       test_unit: data.OBX.find((obx) => obx?.Units !== "")?.Units,
       patient_id: data?.PID ? data?.PID["Patient ID"] : null,
       results: data.OBX.find((obx) => obx["Observation Result Status"] !== "")[
         "Observation Result Status"
       ],
-      tested_by: data.OBR["Principal Result Interpreter +"],
-      analysed_date_time: data.OBR["Requested Date/Time"],
+      tested_by: this.getValue(data, "Responsible Observer"),
+      analysed_date_time: this.getValue(data, "Date/Time of the Analysis"),
       authorised_date_time: data.OBR["Requested Date/Time"],
-      result_accepted_date_time: data.OBR["Observation End Date/Time #"],
+      result_accepted_date_time: this.getValue(
+        data,
+        "Date/Time of the Analysis"
+      ),
       raw_text: `${hl7}`,
     };
+    // console.log(JSON.stringify(data));
     order = {
       ...order,
-      raw_text: order?.raw_text?.replace(/(\r\n|\n|\r)/gm, ""),
+      // raw_text: order?.raw_text?.replace(/(\r\n|\n|\r)/gm, ""),
     };
-    // console.log(order);
+    delete order.raw_text;
+    console.log(JSON.stringify(order));
     Object.keys(order).forEach((key) => {
       if (order[key] === undefined) order[key] = "";
     });
@@ -883,6 +892,16 @@ export class InterfaceService {
         );
         this.logger("success", "Result Successfully Added : " + order.order_id);
       });
+  };
+
+  private getValue = (data: any, value: string) => {
+    if (data && typeof data === "object") {
+      const obrValue = Array.isArray(data.OBX)
+        ? data?.OBX?.find((obx) => obx[value] !== "")
+        : null;
+      return obrValue ? obrValue[value] : data?.OBR ? data?.OBR[value] : null;
+    }
+    return null;
   };
 
   fetchLastOrders(summary: boolean) {
@@ -983,14 +1002,13 @@ export class InterfaceService {
     );
   }
 
-  processHl7V1 = (rawText: string) => {
+  processHl7V1 = (rawText: string, noAck?: boolean) => {
     const that = this;
     const message = that.hl7parser.create(rawText);
     const msgID = message.get("MSH.10").toString();
-    that.socketClient.write(that.hl7ACK(msgID));
+    if (!noAck) that.socketClient.write(that.hl7ACK(msgID));
     // let result = null;
     const obx = message.get("OBX").toArray();
-    console.log(obx);
 
     const spm = message.get("SPM");
     spm.forEach(function (singleSpm) {
@@ -1051,6 +1069,7 @@ export class InterfaceService {
       );
       order.test_location = that.appSettings?.labName;
       order.machine_used = that.appSettings?.analyzerMachineName;
+      order.added_on = new Date();
       console.log(order);
       if (order.results) {
         that.dbService

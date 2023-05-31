@@ -39,10 +39,10 @@ export class DashboardComponent implements OnInit {
   displayedColumns: string[] = [
     "order_id",
     "test_id",
-    "test_unit",
     "tested_by",
     "tested_on",
     "can_sync",
+    "test_type",
     "lims_sync_status",
     "lims_sync_date_time",
     "actions",
@@ -164,10 +164,20 @@ export class DashboardComponent implements OnInit {
   }
 
   get shouldAuthorize() {
-    return (
-      this.appSettings.authorizationCount &&
-      this.appSettings.authorizationCount !== ""
-    );
+    return this.appSettings.authorizationCount &&
+      this.appSettings.authorizationCount !== "" &&
+      this.appSettings.authorizationCount > 0
+      ? true
+      : false;
+  }
+
+  get disableAction() {
+    const disable =
+      !this.keyedCurrentPrivileges["DO_FINAL_AUTHORIZATION"] &&
+      !this.keyedCurrentPrivileges["DO_AUTHORIZE"] &&
+      !this.keyedCurrentPrivileges["ALL"] &&
+      this.shouldAuthorize;
+    return disable;
   }
 
   fetchLastOrders() {
@@ -175,12 +185,18 @@ export class DashboardComponent implements OnInit {
     that.interfaceService.fetchLastOrders(true);
 
     that.interfaceService.fetchLastSyncTimes((data: any) => {
-      that.lastLimsSync = this.getTimes(
-        (data?.lims_sync_date_time ?? "").split(".")[0]
-      );
-      that.lastResultReceived = this.getTimes(
-        (data?.added_on ?? "")?.split(".")[0]
-      );
+      const lastSyncTime = (data?.lims_sync_date_time ?? "")?.split(".")[0];
+      const lastResultReceived = (data?.added_on ?? "")?.split(".")[0];
+      that.lastResultReceived = `${this.getTimes(lastResultReceived)} ${
+        lastResultReceived && lastResultReceived != ""
+          ? "(" + new Date(lastResultReceived).toLocaleString() + ")"
+          : ""
+      }`;
+      that.lastLimsSync = `${this.getTimes(lastSyncTime)} ${
+        lastSyncTime && lastSyncTime !== ""
+          ? "(" + new Date(lastSyncTime).toLocaleString() + ")"
+          : ""
+      }`;
     });
 
     that.interfaceService.lastOrders.subscribe(
