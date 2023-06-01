@@ -1,30 +1,16 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(':memory:');
+// console.log(sqlite3)
+const db = new sqlite3.Database(context.dbPath);
 
 db.serialize(() => {
-  db.run("CREATE TABLE lorem (info TEXT)");
-
-  const stmt = db.prepare("INSERT INTO lorem VALUES (?)");
-  for (let i = 0; i < 10; i++) {
-    stmt.run("Ipsum " + i);
-  }
-  stmt.finalize();
-
-  db.each("SELECT rowid AS id, info FROM lorem", (err, row) => {
-    console.log(row.id + ": " + row.info);
+  db.each("SELECT * from orders", (err, row) => {
+    console.log(row + ": " + JSON.stringify(row));
   });
 });
 
 db.close();
 
 const run = async () => {
-  try {
-    console.log(context.payload)
-    db.all('DELETE FROM orders;', (err, rows) => {
-      console.log(rows)
-    })
-  } catch (e) {
-    console.log(e)
-  }
+
 }
 run()
