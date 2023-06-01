@@ -856,13 +856,7 @@ export class InterfaceService {
       ),
       raw_text: `${hl7}`,
     };
-    // console.log(JSON.stringify(data));
-    order = {
-      ...order,
-      // raw_text: order?.raw_text?.replace(/(\r\n|\n|\r)/gm, ""),
-    };
-    delete order.raw_text;
-    console.log(JSON.stringify(order));
+
     Object.keys(order).forEach((key) => {
       if (order[key] === undefined) order[key] = "";
     });
