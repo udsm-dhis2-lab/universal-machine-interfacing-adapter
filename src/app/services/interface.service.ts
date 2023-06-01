@@ -2,10 +2,9 @@ import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 import { ElectronService } from "../core/services";
 import { dictionary, separators } from "../shared/constants/shared.constants";
+import { formatRawDate } from "../shared/helpers/date.helper";
 import { DatabaseService } from "./database.service";
 import { ElectronStoreService } from "./electron-store.service";
-import { formatRawDate } from "../shared/helpers/date.helper";
-import { SerialPort, SerialPortOpenOptions } from "serialport";
 
 @Injectable({
   providedIn: "root",
@@ -245,6 +244,8 @@ export class InterfaceService {
 
   processHL7Data(rawText: string) {
     const that = this;
+    return that.parseHL7DH76(rawText);
+
     if (rawText.includes("DH7x") && rawText.includes("Dymind")) {
       that.parseHL7DH76(rawText);
     } else {
@@ -732,13 +733,6 @@ export class InterfaceService {
           console.error(error);
           return;
         }
-
-        //if (dataArray == undefined || dataArray['0'] == undefined ||
-        //      dataArray['O'][3] == undefined || dataArray['O'][3] == null ||
-        //        dataArray['O'][3] == '') return;
-        //if (dataArray == undefined || dataArray['R'] == undefined
-        //        || dataArray['R'][2] == undefined || dataArray['R'][2] == null
-        //        || dataArray['R'][2] == '') return;
       }
     });
   }
