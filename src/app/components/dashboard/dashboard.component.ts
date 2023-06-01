@@ -13,6 +13,7 @@ import { DatabaseResponse } from "../../shared/interfaces/db.interface";
 import { FxPayload, FxResponse } from "../../shared/interfaces/fx.interface";
 import { InfoComponent } from "../info/info.component";
 import { SelectMachineComponent } from "../../pages/select-machine/select-machine.component";
+import { MachineData } from "../../shared/interfaces/data.interface";
 
 @Component({
   selector: "app-dashboard",
@@ -320,7 +321,7 @@ export class DashboardComponent implements OnInit {
     );
   }
 
-  sync = (data?: any) => {
+  sync = (data?: MachineData) => {
     if (this.appSettings.functionId && this.appSettings.functionId !== "") {
       this.database
         .run(this.appSettings.functionId, null, null, [data])
