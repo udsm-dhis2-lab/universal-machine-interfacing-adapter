@@ -235,7 +235,6 @@ export class DatabaseService {
           ? process?.rows[0]?.code
           : process[0]?.code
       );
-      console.log("PAYLOAD", process);
       await this.query(`UPDATE PROCESS SET RUNNING=${true} WHERE ID=${id}`);
       const runResults = await runFunc({
         secret,

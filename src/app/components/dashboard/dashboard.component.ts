@@ -320,10 +320,10 @@ export class DashboardComponent implements OnInit {
     );
   }
 
-  sync = (data?: FxPayload) => {
+  sync = (data?: any) => {
     if (this.appSettings.functionId && this.appSettings.functionId !== "") {
       this.database
-        .run(this.appSettings.functionId, data)
+        .run(this.appSettings.functionId, null, null, [data])
         .then((res) => {})
         .catch((e) => {});
     }
