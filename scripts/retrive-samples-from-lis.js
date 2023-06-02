@@ -68,8 +68,8 @@ const syncData = async (
 
       const answers = JSON.parse(mapping?.answers);
 
-      const targetOneValue = obxBlock[0]["Observation Value"];
-      const targetTwoValue = obxBlock[1]["Observation Value"];
+      const targetOneValue = obxBlock[0]["Abnormal Flags"];
+      const targetTwoValue = obxBlock[1]["Abnormal Flags"];
       const mappedItems = Object.keys(answers).map((key) => {
         return {
           id: key,
@@ -78,6 +78,7 @@ const syncData = async (
       });
 
       let finalResult = "";
+      console.log("TGT2",targetTwoValue);
       if (targetOneValue === "POS" || targetTwoValue === "POS") {
         finalResult = targetOneValue;
       } else if (targetOneValue != "POS" && targetTwoValue != "POS") {
@@ -139,6 +140,9 @@ const syncData = async (
           sample: {
             uuid: data?.results[0]?.uuid,
           },
+          user: {
+            uuid: userUuid,
+          },
           remarks: "Synched from analyser",
           status: "SYNCED_FROM_ANALYSER",
           category: "SYNCED_FROM_ANALYSER",
@@ -175,7 +179,7 @@ const run = async () => {
     try {
       if (orderToPush?.raw_text) {
         const formattedJSON = context.hl7V2(orderToPush?.raw_text);
-        console.log(JSON.stringify(formattedJSON));
+        console.log("formattedJSON: ",JSON.stringify(formattedJSON));
         const mshBlock = formattedJSON["MSH"];
         const obrBlock = formattedJSON["OBR"];
         const obxBlock = formattedJSON["OBX"];
