@@ -272,6 +272,9 @@ const run = async () => {
   try {
 
     if (context.payload) {
+      db.all(`UPDATE orders set STATUS=${2} WHERE ID=${context.payload[0].id}`, [], async (_err, rows) => {
+
+      })
       return await syncData(context.payload)
     }
 
