@@ -18,7 +18,7 @@ const mappings = {
   lflq: 'o2zbpZDZele' //DST Result Fluoroquinolone
 }
 
-const assays = ['mtb', 'inh', 'linh', 'flq', 'lflq', 'ethr']
+const assays = ['mtb', 'inh', 'linh', 'flq', 'lflq', 'ethr', 'eth']
 
 const assayMappings = {
   mtb: 'MTB',
@@ -33,18 +33,17 @@ const mapping = {
   ywRl88yte5b: ['mtb'],
   nPGTzMkULFh: ['inh', 'linh'],
   o2zbpZDZele: ['flq', 'lflq'],
-  GLqRo7AuhJM: ['ethr']
+  GLqRo7AuhJM: ['ethr', 'eth']
 }
 
 const stageMappings = {
-  nPGTzMkULFh: { inh: 'INH Resistance ', linh: 'INH Resistance ' },
+  nPGTzMkULFh: { inh: 'INH Resistance ', linh: 'Low INH Resistance ' },
   ywRl88yte5b: { mtb: 'MTB ' },
-  o2zbpZDZele: { flq: 'FLQ Resistance ', lflq: 'FLQ Resistance ' },
-  GLqRo7AuhJM: { ethr: 'ETH Resistance ', }
+  o2zbpZDZele: { flq: 'FLQ Resistance ', lflq: 'Low FLQ Resistance ' },
+  GLqRo7AuhJM: { ethr: 'ETH Resistance ', eth: 'ETH Resistance ' }
 }
 
 getMissingResult = (assayData, d, results, assay) => {
-  let result = {}
   let detected = ''
   assayData?.forEach(key => {
     assayValue = key?.split('|')[0];
@@ -62,8 +61,7 @@ getMissingResult = (assayData, d, results, assay) => {
       }
     })
   }
-  result = { ...results[0], assayNumber: assay, result: detected }
-  return result
+  return { ...results[0], assayNumber: assay, result: detected?.toUpperCase() }
 }
 
 const saveStatus = ({ id, reason }) => {
@@ -135,7 +133,6 @@ const sanitizeResults = (results) => {
     })
     return cleanResult
   }).filter(result => Boolean(result))
-
   return patientResults(results)
 }
 const cleanData = (data) => {
@@ -228,7 +225,7 @@ const syncData = async (rows) => {
           trackedEntityInstance: trackedEntityInstanceData?.trackedEntityInstance,
           dataValues: stages.stage1.length > 0 ? stage1DataValues : stage2DataValues
         };
-
+        console.log(JSON.stringify(eventPayload))
         const eventUrl = `${context.secret.url}/api/events${row?.reference_uuid ? "/" + row?.reference_uuid : ""
           }.json`;
         const { data } = !row?.reference_uuid
