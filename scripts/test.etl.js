@@ -37,9 +37,9 @@ const mapping = {
 }
 
 const stageMappings = {
-  nPGTzMkULFh: { inh: 'INH Resistance ', linh: 'INH Resistance ' },
+  nPGTzMkULFh: { inh: 'INH Resistance ', linh: 'Low INH Resistance ' },
   ywRl88yte5b: { mtb: 'MTB ' },
-  o2zbpZDZele: { flq: 'FLQ Resistance ', lflq: 'FLQ Resistance ' },
+  o2zbpZDZele: { flq: 'FLQ Resistance ', lflq: 'Low FLQ Resistance ' },
   GLqRo7AuhJM: { ethr: 'ETH Resistance ', }
 }
 
@@ -148,6 +148,7 @@ const cleanData = (data) => {
   assays?.forEach(assay => {
     let assayData = results.find(({ assayNumber, result }) => assayNumber === assay && isNaN(result))
     if (!assayData) {
+      console.log('ASSAY', assay)
       assayData = data?.split('5')?.join('').split(`${assayMappings[assay]}^|`)
       const d = data?.toLowerCase()?.split(`${assay} `)
       const result = getMissingResult(assayData, d, results, assay)
