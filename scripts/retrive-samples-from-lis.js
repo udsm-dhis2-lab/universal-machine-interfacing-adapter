@@ -8,6 +8,7 @@ const db = new context.sqlite.Database(
     }
   }
 );
+
 const username = context?.store?.get("identifier")
   ? context.store.get("identifier")
   : "admin";
@@ -18,6 +19,8 @@ const userUuid = "84ee6acb-1e75-11eb-8bc7-0242c0a85003";
 //  context?.store?.get("userUuid")
 //   ? context.store.get("userUuid")
 //   : "84ee6acb-1e75-11eb-8bc7-0242c0a85003";
+
+const Authorization = `Basic ` + localStorage.getItem('token') ?? (new Buffer.from(`${username}:${password}`)).toString('base64')
 
 const syncData = async (
   sampleId,
@@ -31,18 +34,15 @@ const syncData = async (
     // 2. Save samples to the database
     const headersList = {
       Accept: "*/*",
+      Authorization
     };
-    const BASE_URL = "http://192.168.2.132/openmrs/ws/rest/v1/";
+    const BASE_URL = "http://192.168.2.95/openmrs/ws/rest/v1/";
     // Get sample by sample (filter API)
     // sampleId = "NPHL/23/0000369";
 
     // Get mappings by machine test order code
     const url = BASE_URL + `lab/samples?q=${sampleId}&excludeAllocations=false`;
     const { data } = await context.http.get(url, {
-      auth: {
-        username: username,
-        password: password,
-      },
       headers: headersList,
     });
 
@@ -109,10 +109,6 @@ const syncData = async (
       });
       const resultsUrl = BASE_URL + `lab/multipleresults`;
       const response = await context.http.post(resultsUrl, results, {
-        auth: {
-          username: username,
-          password: password,
-        },
         headers: headersList,
       });
       if (response) {
@@ -129,10 +125,6 @@ const syncData = async (
         };
         const statusUrl = BASE_URL + `lab/samplestatus`;
         const response = await context.http.post(statusUrl, status, {
-          auth: {
-            username: username,
-            password: password,
-          },
           headers: headersList,
         });
 
@@ -151,10 +143,6 @@ const syncData = async (
           statusUrl,
           syncStatus,
           {
-            auth: {
-              username: username,
-              password: password,
-            },
             headers: headersList,
           }
         );

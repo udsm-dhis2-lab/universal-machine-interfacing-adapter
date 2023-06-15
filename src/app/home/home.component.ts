@@ -65,7 +65,7 @@ export class HomeComponent implements OnInit {
         moduleName: this.settings.moduleName,
       })
       .then((res: LoginResponse) => {
-        if (res.success) {
+        if (res?.success) {
           this.store.set("loggedin", true);
           this.store.set("userUuid", res?.user?.uuid);
           this.openSnackBar({
@@ -82,8 +82,8 @@ export class HomeComponent implements OnInit {
         this.openSnackBar({
           success: false,
           message:
-            error.response.data.error ||
-            error.response.data.message ||
+            error.response?.data?.error ||
+            error.response?.data?.message ||
             error.message,
         });
       });
@@ -149,9 +149,9 @@ export class HomeComponent implements OnInit {
   };
 
   openSnackBar = (data: FxResponse) => {
-    this.snackBar.open(data.message, "", {
+    this.snackBar.open(data?.message, "", {
       duration: 2500,
-      panelClass: data.success ? ["success"] : ["error"],
+      panelClass: data?.success ? ["success"] : ["error"],
       horizontalPosition: "center",
       verticalPosition: "bottom",
     });

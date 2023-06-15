@@ -1,36 +1,42 @@
-//https://lis.dhis2.udsm.ac.tz/openmrs/ws/rest/v1/session?v=custom:(authenticated,user:(privileges:(uuid,name,roles),roles:(uuid,name)))
-console.log("CHm");
 const run = async () => {
+  const headers = {
+    Accept: "*",
+  };
   const auth = {
     username: context.externalParams.identifier,
     password: context.externalParams.password,
-  };
-  console.log(auth);
-  const Authorization = "Basic " + btoa(auth.username + ":" + auth.password);
-  const headers = {
-    Accept: "*",
-    Authorization,
-  };
+  }
 
-  const url = context.externalParams.url;
-
+  const url = context.externalParams.url
+  const Authorization = (new Buffer.from(`${auth.username}:${auth.password}`)).toString('base64')
   try {
-    const data = await context.http.get(url, { headers });
-    if (data.data.authenticated) {
+    const loggin = await context.http.get(`${url}/session?v=custom:(authenticated,user:(privileges:(uuid,name,roles),roles:(uuid,name))`,
+      { auth },
+      headers,
+    )
+    if (loggin.status === 200 || loggin.status === 201 || loggin.status === 304) {
+      const { data } = await context.http.get(`${url}/user/${loggin?.data?.user?.uuid}`, { auth }, headers)
       return {
         success: true,
         message: `Successfully logged in with ${context.externalParams.systemName}`,
         token: Authorization,
-        user: data.user,
-      };
+        code: loggin.status,
+        user: data
+      }
     }
     return {
       success: false,
-      message: "User not authenticated",
+      message: loggin?.response?.data?.message || loggin?.response?.data?.error || loggin?.message,
       token: Authorization,
-    };
+      code: loggin.status,
+    }
   } catch (e) {
-    console.log(e);
+    return {
+      success: false,
+      message: e?.response?.data?.message || e?.response?.data?.error?.message || e?.message,
+      token: Authorization,
+      code: e.response.status,
+    }
   }
-};
-return run();
+}
+return run()

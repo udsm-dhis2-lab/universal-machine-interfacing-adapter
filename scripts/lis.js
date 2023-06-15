@@ -1,5 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
-// console.log(sqlite3)
+/*const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(context.dbPath);
 
 db.serialize(() => {
@@ -8,9 +7,13 @@ db.serialize(() => {
   });
 });
 
-db.close();
+*/
 
 const run = async () => {
-
+  const loggedIn = localStorage.getItem('token')
+  const { data } = await context.http.get(`https://lis.dhis2.udsm.ac.tz/openmrs/ws/rest/v1/session?v=custom:(authenticated,user:(privileges:(uuid,name,roles),roles:(uuid,name))`,
+    { headers: { Authorization: `Bearer ${loggedIn}` } },
+  )
+  console.log(data)
 }
 run()
