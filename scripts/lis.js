@@ -10,8 +10,9 @@ db.serialize(() => {
 */
 
 const run = async () => {
+  const uuid = localStorage.getItem('userUuid')
   const loggedIn = localStorage.getItem('token')
-  const { data } = await context.http.get(`https://lis.dhis2.udsm.ac.tz/openmrs/ws/rest/v1/session?v=custom:(authenticated,user:(privileges:(uuid,name,roles),roles:(uuid,name))`,
+  const { data } = await context.http.get(`https://lis.dhis2.udsm.ac.tz/openmrs/ws/rest/v1/user/${uuid}`,
     { headers: { Authorization: `Bearer ${loggedIn}` } },
   )
   console.log(data)

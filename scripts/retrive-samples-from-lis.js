@@ -15,10 +15,7 @@ const username = context?.store?.get("identifier")
 const password = context?.store?.get("password")
   ? context.store.get("password")
   : "Admin123";
-const userUuid = "84ee6acb-1e75-11eb-8bc7-0242c0a85003";
-//  context?.store?.get("userUuid")
-//   ? context.store.get("userUuid")
-//   : "84ee6acb-1e75-11eb-8bc7-0242c0a85003";
+const userUuid = localStorage.getItem('userUuid') ?? "84ee6acb-1e75-11eb-8bc7-0242c0a85003";
 
 const Authorization = `Basic ` + localStorage.getItem('token') ?? (new Buffer.from(`${username}:${password}`)).toString('base64')
 
@@ -78,7 +75,7 @@ const syncData = async (
       });
 
       let finalResult = "";
-      console.log("TGT2",targetTwoValue);
+      console.log("TGT2", targetTwoValue);
       if (targetOneValue === "POS" || targetTwoValue === "POS") {
         finalResult = targetOneValue;
       } else if (targetOneValue != "POS" && targetTwoValue != "POS") {
@@ -167,7 +164,7 @@ const run = async () => {
     try {
       if (orderToPush?.raw_text) {
         const formattedJSON = context.hl7V2(orderToPush?.raw_text);
-        console.log("formattedJSON: ",JSON.stringify(formattedJSON));
+        console.log("formattedJSON: ", JSON.stringify(formattedJSON));
         const mshBlock = formattedJSON["MSH"];
         const obrBlock = formattedJSON["OBR"];
         const obxBlock = formattedJSON["OBX"];

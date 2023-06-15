@@ -16,6 +16,7 @@ const run = async () => {
     )
     if (loggin.status === 200 || loggin.status === 201 || loggin.status === 304) {
       const { data } = await context.http.get(`${url}/user/${loggin?.data?.user?.uuid}`, { auth }, headers)
+      localStorage.setItem('userUuid', data.uuid)
       return {
         success: true,
         message: `Successfully logged in with ${context.externalParams.systemName}`,
