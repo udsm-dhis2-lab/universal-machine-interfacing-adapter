@@ -79,10 +79,14 @@
   </div>
 
   <div style="padding: 10px; font-size: 0.8em">
-    <span style="padding-right: 10px" *ngIf="lastLimsSync"
+    <span
+      style="padding-right: 10px"
+      *ngIf="lastLimsSync && lastLimsSync != '' && statsData"
       ><strong>Last LIS Sync on :</strong> {{ lastLimsSync }}</span
     >
-    <span style="padding-right: 10px" *ngIf="lastResultReceived"
+    <span
+      style="padding-right: 10px"
+      *ngIf="lastResultReceived && lastResultReceived != '' && statsData"
       ><strong>Last Instrument Result Received on :</strong>
       {{ lastResultReceived }}</span
     >
@@ -97,7 +101,7 @@
           <span>Clear Log</span>
         </a>
       </div>
-      <div *ngIf="isDev">
+      <div *ngIf="isDev && !statsData">
         <a
           (click)="testData('astm')"
           class="btn btn-outline-primary btn-sm mr-5"

@@ -6,14 +6,14 @@ import { Router } from "@angular/router";
 import { readFileSync } from "fs";
 import { uniqBy } from "lodash";
 import { ElectronService } from "../../core/services";
+import { SelectMachineComponent } from "../../pages/select-machine/select-machine.component";
 import { DatabaseService } from "../../services/database.service";
 import { ElectronStoreService } from "../../services/electron-store.service";
 import { InterfaceService } from "../../services/interface.service";
-import { DatabaseResponse } from "../../shared/interfaces/db.interface";
-import { FxPayload, FxResponse } from "../../shared/interfaces/fx.interface";
-import { InfoComponent } from "../info/info.component";
-import { SelectMachineComponent } from "../../pages/select-machine/select-machine.component";
 import { MachineData } from "../../shared/interfaces/data.interface";
+import { DatabaseResponse } from "../../shared/interfaces/db.interface";
+import { FxResponse } from "../../shared/interfaces/fx.interface";
+import { InfoComponent } from "../info/info.component";
 
 @Component({
   selector: "app-dashboard",
@@ -25,14 +25,15 @@ export class DashboardComponent implements OnInit {
   public appSettings = null;
   public connectionInProcess = false;
   public reconnectButtonText = "Connect";
-  public lastLimsSync = "";
-  public lastResultReceived = "";
+  lastLimsSync: string;
+  lastResultReceived: string;
   public machineName = "";
   public interval: any;
   public lastOrders: any = [];
   public liveLogText = [];
   isDev: boolean;
   token: string;
+  statsData: boolean;
   pageSize: number = 10;
   currentPage: number = 0;
   pageSizeOptions: any[] = [5, 10, 50, 100];
@@ -186,6 +187,7 @@ export class DashboardComponent implements OnInit {
     that.interfaceService.fetchLastOrders(true);
 
     that.interfaceService.fetchLastSyncTimes((data: any) => {
+      data ? (this.statsData = true) : (this.statsData = false);
       const lastSyncTime = (data?.lims_sync_date_time ?? "")?.split(".")[0];
       const lastResultReceived = (data?.added_on ?? "")?.split(".")[0];
       that.lastResultReceived = `${this.getTimes(lastResultReceived)} ${
