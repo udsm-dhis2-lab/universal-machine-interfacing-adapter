@@ -1,3 +1,7 @@
+// Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // This file is required by karma.conf.js and loads recursively all the .spec and framework files
 
 import 'zone.js/testing';

@@ -1,3 +1,7 @@
+// Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 const formParams =
   'uuid,name,names:(uuid,name,display,conceptNameType),datatype,conceptClass,answers:(uuid,name,display,names:(uuid,name,display,conceptNameType)),mappings,units';
 export function getFormQueryFields(queryLevel: number): string {

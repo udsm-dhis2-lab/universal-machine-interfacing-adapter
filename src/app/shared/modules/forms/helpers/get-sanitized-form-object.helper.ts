@@ -1,3 +1,7 @@
+// Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 import { ConceptGet } from "src/app/shared/resources/openmrs";
 import { FormFieldType } from "../constants/form-field-type.constant";
 import { Boolean } from "../models/boolean.model";

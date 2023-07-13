@@ -1,3 +1,7 @@
+// Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { Observable, of } from "rxjs";

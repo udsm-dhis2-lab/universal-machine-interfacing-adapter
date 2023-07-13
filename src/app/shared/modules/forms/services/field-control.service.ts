@@ -1,3 +1,7 @@
+// Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 import { Injectable } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Field } from "../models/field.model";

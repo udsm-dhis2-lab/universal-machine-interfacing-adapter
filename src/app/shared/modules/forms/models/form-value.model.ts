@@ -1,3 +1,7 @@
+// Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 import { FormGroup } from "@angular/forms";
 import { find } from "lodash";
 import { Field } from "./field.model";

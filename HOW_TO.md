@@ -1,3 +1,9 @@
+<!--
+ Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+ Use of this source code is governed by a BSD-style
+ license that can be found in the LICENSE file.
+-->
+
 ###*First check it exists a version of your library compatible with the version of Angular defined in package.json.*
 
 ### How to install ng-bootstrap

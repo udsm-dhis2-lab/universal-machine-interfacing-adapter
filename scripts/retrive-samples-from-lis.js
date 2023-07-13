@@ -1,3 +1,7 @@
+// Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 const db = new context.sqlite.Database(
   context.dbPath,

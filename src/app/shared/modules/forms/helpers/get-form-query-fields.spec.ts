@@ -1,3 +1,7 @@
+// Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 import { getFormQueryFields } from './get-form-query-field.helper';
 
 describe('Given I want to get level one form query field', () => {

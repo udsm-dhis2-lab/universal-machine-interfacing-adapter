@@ -1,3 +1,7 @@
+// Copyright 2023 UDSM DHIS2 Lab All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 import { app, BrowserWindow, dialog, ipcMain, screen, shell } from "electron";
 import * as Store from "electron-store";
 import * as fs from "fs";
