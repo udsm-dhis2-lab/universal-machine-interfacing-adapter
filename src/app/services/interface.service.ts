@@ -522,6 +522,7 @@ export class InterfaceService {
                 "Trying to add order :" +
                   JSON.stringify({ ...order, raw_tex: "" })
               );
+
               that.dbService
                 .addOrderTest(
                   order,
@@ -867,8 +868,11 @@ export class InterfaceService {
     this.dbService
       .addOrderTest(
         order,
-        (res: any) => {},
+        (res: any) => {
+          console.log(res);
+        },
         (err: any) => {
+          console.log(err);
           this.logger("error", "Failed to add : " + JSON.stringify(err));
         }
       )

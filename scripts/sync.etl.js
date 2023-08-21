@@ -14,7 +14,7 @@ const db = new context.sqlite.Database(
 
 
 const mappings = {
-  mtb: 'ywRl88yte5b',
+  mtb: 'KjXtV9QnaRE',
   inh: 'nPGTzMkULFh',
   linh: 'nPGTzMkULFh',
   ethr: 'GLqRo7AuhJM', //DST Result Ethionamide
@@ -34,7 +34,7 @@ const assayMappings = {
 }
 
 const mapping = {
-  ywRl88yte5b: ['mtb'],
+  KjXtV9QnaRE: ['mtb'],
   nPGTzMkULFh: ['inh', 'linh'],
   o2zbpZDZele: ['flq', 'lflq'],
   GLqRo7AuhJM: ['ethr', 'eth']
@@ -42,7 +42,7 @@ const mapping = {
 
 const stageMappings = {
   nPGTzMkULFh: { inh: 'INH Resistance ', linh: 'Low INH Resistance ' },
-  ywRl88yte5b: { mtb: 'MTB ' },
+  KjXtV9QnaRE: { mtb: 'MTB ' },
   o2zbpZDZele: { flq: 'FLQ Resistance ', lflq: 'Low FLQ Resistance ' },
   GLqRo7AuhJM: { ethr: 'ETH Resistance ', eth: 'ETH Resistance ' }
 }
@@ -67,6 +67,28 @@ getMissingResult = (assayData, d, results, assay) => {
   }
   return { ...results[0], assayNumber: assay, result: detected?.toUpperCase() }
 }
+
+flatten = (data) => {
+  let res = [];
+  for (let i = 0; i < data.length; i++) {
+    if (Array.isArray(data[i])) {
+      res = res.concat(flatten(data[i]))
+    } else {
+      res.push(data[i]);
+    }
+  }
+  return res;
+}
+
+const eventDate = (row) => {
+  try {
+    const date = new Date(row?.authorised_date_time).toISOString() || new Date(row?.result_accepted_date_time).toISOString() || new Date().toISOString()
+    return date.toLowerCase().includes('invalid date') ? new Date().toISOString() : date;
+  } catch (e) {
+    return new Date().toISOString()
+  }
+}
+
 
 const saveStatus = ({ id, reason }) => {
   try {
@@ -208,7 +230,7 @@ const syncData = async (rows) => {
             providedElsewhere: false,
           },
           {
-            dataElement: "levlyYdnhws",
+            dataElement: "cl6xSSOJ4ko",
             value: "10 Color Module GeneXpert",
           },
         ]
@@ -225,11 +247,10 @@ const syncData = async (rows) => {
           program: "tj4u1ip0tTF",
           programStage: "yzu183PkJCH",
           status: "VISITED",
-          eventDate: new Date(row?.analysed_date_time),
+          eventDate: eventDate(row),
           trackedEntityInstance: trackedEntityInstanceData?.trackedEntityInstance,
           dataValues: stages.stage1.length > 0 ? stage1DataValues : stage2DataValues
         };
-        console.log(JSON.stringify(eventPayload))
         const eventUrl = `${context.secret.url}/api/events${row?.reference_uuid ? "/" + row?.reference_uuid : ""
           }.json`;
         const { data } = !row?.reference_uuid
@@ -248,7 +269,7 @@ const syncData = async (rows) => {
           const sync_status = response?.importSummaries ? response?.importSummaries[0]?.status : response.status;
           //   Update the orders table for sync reference references
           try {
-            const query = `UPDATE orders SET reference_uuid="${reference_uuid}",sync_status="${sync_status}", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${row?.id}`;
+            const query = `UPDATE orders SET reference_uuid="${reference_uuid}",reason=NULL, sync_status="${sync_status}", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${row?.id}`;
             db.all(query, [], async (err, _rows) => {
               if (err) {
                 console.log('🚫 ERROR WHILE UPDATING SYNC STATUS ', err?.toUpperCase(), ' 🚫')
@@ -265,7 +286,13 @@ const syncData = async (rows) => {
         saveStatus({ id: row.id, reason: 'Data not available on ETL' })
       }
     } catch (e) {
-      saveStatus({ id: row.id, reason: e.message })
+      let importSummaries = e?.response?.data?.response?.importSummaries?.map(summary => summary.conflicts || { value: summary.description }) || e?.response?.data?.response?.description || e?.response?.data?.response?.conflicts
+      if (importSummaries) {
+        importSummaries = flatten(Array.isArray(importSummaries) ? importSummaries : [{ value: importSummaries }])
+      }
+
+      const reason = importSummaries?.map(conflict => conflict?.value)?.join(',') || e?.response?.data?.response?.message || e.message
+      saveStatus({ id: row.id, reason })
     }
   }
 };
