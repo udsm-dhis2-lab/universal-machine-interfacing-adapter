@@ -60,7 +60,7 @@
     "@angular/platform-browser": "14.2.10",
     "@angular/platform-browser-dynamic": "14.2.10",
     "@angular/router": "14.2.10",
-    "@electron/rebuild": "^3.2.10",
+    "@electron/rebuild": "^3.3.0",
     "@mapbox/node-pre-gyp": "^1.0.10",
     "@ngx-translate/core": "14.0.0",
     "@ngx-translate/http-loader": "7.0.0",
