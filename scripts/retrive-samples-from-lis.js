@@ -51,8 +51,6 @@ const syncData = async (
       headers: headersList,
     });
 
-    console.log(data);
-
     if (data) {
       /**
        * TIPS
@@ -83,7 +81,6 @@ const syncData = async (
       });
 
       let finalResult = "";
-      console.log("TGT2", targetTwoValue);
       if (targetOneValue === "POS" || targetTwoValue === "POS") {
         finalResult = targetOneValue;
       } else if (targetOneValue != "POS" && targetTwoValue != "POS") {
@@ -151,7 +148,27 @@ const syncData = async (
             headers: headersList,
           }
         );
-        console.log(responseForSyncStatus);
+        try {
+          const query = `UPDATE orders SET reference_uuid="${
+            data?.results[0]?.uuid
+          }",reason=NULL, sync_status="1", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${order_id}`;
+          db.all(query, [], async (err, _rows) => {
+            if (err) {
+              console.log(
+                "🚫 ERROR WHILE UPDATING SYNC STATUS ",
+                err?.toUpperCase(),
+                " 🚫"
+              );
+            } else {
+            }
+          });
+        } catch (e) {
+          console.log(
+            "🚫 ERROR WHILE UPDATING SYNC STATUS ",
+            e.message.toUpperCase(),
+            " 🚫"
+          );
+        }
       }
     }
   } catch (e) {
@@ -190,7 +207,7 @@ const pushData = async (payload) => {
               obrBlock,
               obxBlock,
               rows[0],
-              orderToPush?.order_id
+              orderToPush?.id
             );
           }
         });
@@ -205,11 +222,12 @@ const run = async () => {
   if (context.payload) {
     return await pushData(context.payload);
   }
-  const sql = `SELECT * FROM orders;`;
+  const sql = `SELECT * FROM orders WHERE sync_status='0';`;
   db.all(sql, [], async (err, rows) => {
     if (err || rows.length === 0) {
       console.error(err ? err : "No data to sync");
     } else {
+      console.log(`🚀 DATA TO PUSH TO LIS:: ${rows?.length} 🚀`);
       await pushData(rows);
     }
   });
