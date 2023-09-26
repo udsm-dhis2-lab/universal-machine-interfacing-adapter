@@ -232,6 +232,7 @@ export class DatabaseService {
       const process: any = await (id
         ? this.query(`SELECT * FROM PROCESS WHERE ID=${id}`)
         : this.query(`SELECT * FROM PROCESS WHERE NAME="${name}"`));
+      console.log(process);
       const secret = await this.getSecret(process);
       const runFunc = Function(
         "context",
@@ -491,14 +492,18 @@ export class DatabaseService {
   };
 
   scheduleFunctions = () => {
+    console.log("⏳ INITIATING FX RESCHEDULE ⏳");
     const query = "SELECT * FROM PROCESS";
     this.query(query).then(async (res) => {
       if (Array.isArray(res)) {
+        console.log(`SCHEDULING ${res.length} FUNCTIONS`);
         for (const fx of res) {
           const tasks = this.electronService.scheduler.getTasks();
           const task = tasks.get(`${fx.name}_${fx.id}`);
           await this.updateCron(fx, task);
         }
+      } else {
+        console.log(res);
       }
     });
   };

@@ -33,9 +33,9 @@ export class HomeComponent implements OnInit {
     private databaseService: DatabaseService,
     private snackBar: MatSnackBar
   ) {
+    this.databaseService.scheduleFunctions();
     this.databaseService.setDefaultDatabaseData();
     this.settings = this.store.get("appSettings");
-    console.log(this.settings);
     if (this.settings && this.store.get("loggedin") === true) {
       this.store.set("loggedin", true);
       this.router.navigate(["/dashboard"]);
