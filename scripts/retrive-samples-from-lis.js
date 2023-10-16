@@ -81,10 +81,18 @@ const syncData = async (
       });
 
       let finalResult = "";
+      let valueNumericResult = false;
       if (targetOneValue === "POS" || targetTwoValue === "POS") {
         finalResult = targetOneValue;
-      } else if (targetOneValue != "POS" && targetTwoValue != "POS") {
+      } else if ((targetOneValue != "POS" && targetTwoValue != "POS") && (targetOneValue != "NEG" || targetTwoValue != "NEG")) {
         finalResult = "NEG";
+      } else if (!targetOneValue != "<Titer min" && !targetOneValue != ">Titer min" ){
+        valueNumericResult = true;
+        finalResult = parseFloat(targetOneValue);
+      }
+      else {
+        valueNumericResult = false;
+        finalResult = targetOneValue;
       }
 
       // console.log("mappedItems", mappedItems);
@@ -97,10 +105,10 @@ const syncData = async (
           testAllocation: {
             uuid: allocation?.uuid,
           },
-          valueNumeric: null,
+          valueNumeric: valueNumericResult ? finalResult : null,
           valueText: null,
           valueCoded: {
-            uuid: (mappedItems?.filter((item) => item?.value === finalResult) ||
+            uuid: valueNumericResult ? null : (mappedItems?.filter((item) => item?.value === finalResult) ||
               [])[0]?.id,
           },
           abnormal: false,
@@ -109,6 +117,9 @@ const syncData = async (
           },
         };
       });
+      const logValueResult = {
+
+      }
       const resultsUrl = BASE_URL + `lab/multipleresults`;
       const response = await context.http.post(resultsUrl, results, {
         headers: headersList,
