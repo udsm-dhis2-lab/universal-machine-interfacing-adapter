@@ -34,6 +34,9 @@ const syncData = async (
   mapping,
   order_id
 ) => {
+
+console.log("NANAAN: ",obrBlock["Universal Service Identifier"].split(" ")[0]);
+
   try {
     // 1. Get samples
     // 2. Save samples to the database
@@ -57,7 +60,6 @@ const syncData = async (
        * 1. Order is the test order
        * 2. Allocations map to test parameter as one to one
        */
-      console.log("data", data?.results);
       const testOrders = data?.results[0]?.orders;
       // The UUID of the test orders is the one on on the mapping
       // Each order has test allocations who concept is a parameter
@@ -71,8 +73,13 @@ const syncData = async (
 
       const answers = JSON.parse(mapping?.answers);
 
+
+      if(obrBlock["Universal Service Identifier"].split(" ")[0] === "SARS-COV-2"){
+
+
       const targetOneValue = obxBlock[0]["Abnormal Flags"];
       const targetTwoValue = obxBlock[1]["Abnormal Flags"];
+
       const mappedItems = Object.keys(answers).map((key) => {
         return {
           id: key,
@@ -81,18 +88,10 @@ const syncData = async (
       });
 
       let finalResult = "";
-      let valueNumericResult = false;
       if (targetOneValue === "POS" || targetTwoValue === "POS") {
         finalResult = targetOneValue;
-      } else if ((targetOneValue != "POS" && targetTwoValue != "POS") && (targetOneValue != "NEG" || targetTwoValue != "NEG")) {
+      } else if (targetOneValue != "POS" && targetTwoValue != "POS") {
         finalResult = "NEG";
-      } else if (!targetOneValue != "<Titer min" && !targetOneValue != ">Titer min" ){
-        valueNumericResult = true;
-        finalResult = parseFloat(targetOneValue);
-      }
-      else {
-        valueNumericResult = false;
-        finalResult = targetOneValue;
       }
 
       // console.log("mappedItems", mappedItems);
@@ -117,70 +116,188 @@ const syncData = async (
           },
         };
       });
-      const logValueResult = {
 
-      }
-      const resultsUrl = BASE_URL + `lab/multipleresults`;
-      const response = await context.http.post(resultsUrl, results, {
-        headers: headersList,
-      });
-      if (response) {
-        const status = {
-          sample: {
-            uuid: data?.results[0]?.uuid,
-          },
-          user: {
-            uuid: userUuid,
-          },
-          remarks: "Has results",
-          status: "HAS  RESULTS",
-          category: "HAS_RESULTS",
-        };
-        const statusUrl = BASE_URL + `lab/samplestatus`;
-        const response = await context.http.post(statusUrl, status, {
+        const resultsUrl = BASE_URL + `lab/multipleresults`;
+        const response = await context.http.post(resultsUrl, results, {
           headers: headersList,
         });
-
-        const syncStatus = {
-          sample: {
-            uuid: data?.results[0]?.uuid,
-          },
-          user: {
-            uuid: userUuid,
-          },
-          remarks: "Synched from analyser",
-          status: "SYNCED_FROM_ANALYSER",
-          category: "SYNCED_FROM_ANALYSER",
-        };
-        const responseForSyncStatus = await context.http.post(
-          statusUrl,
-          syncStatus,
-          {
+        if (response) {
+          const status = {
+            sample: {
+              uuid: data?.results[0]?.uuid,
+            },
+            user: {
+              uuid: userUuid,
+            },
+            remarks: "Has results",
+            status: "HAS  RESULTS",
+            category: "HAS_RESULTS",
+          };
+          const statusUrl = BASE_URL + `lab/samplestatus`;
+          const response = await context.http.post(statusUrl, status, {
             headers: headersList,
-          }
-        );
-        try {
-          const query = `UPDATE orders SET reference_uuid="${
-            data?.results[0]?.uuid
-          }",reason=NULL, sync_status="1", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${order_id}`;
-          db.all(query, [], async (err, _rows) => {
-            if (err) {
-              console.log(
-                "🚫 ERROR WHILE UPDATING SYNC STATUS ",
-                err?.toUpperCase(),
-                " 🚫"
-              );
-            } else {
-            }
           });
-        } catch (e) {
-          console.log(
-            "🚫 ERROR WHILE UPDATING SYNC STATUS ",
-            e.message.toUpperCase(),
-            " 🚫"
+
+          const syncStatus = {
+            sample: {
+              uuid: data?.results[0]?.uuid,
+            },
+            user: {
+              uuid: userUuid,
+            },
+            remarks: "Synched from analyser",
+            status: "SYNCED_FROM_ANALYSER",
+            category: "SYNCED_FROM_ANALYSER",
+          };
+
+          const responseForSyncStatus = await context.http.post(
+            statusUrl,
+            syncStatus,
+            {
+              headers: headersList,
+            }
           );
+          try {
+            const query = `UPDATE orders SET reference_uuid="${
+              data?.results[0]?.uuid
+            }",reason=NULL, sync_status="1", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${order_id}`;
+            db.all(query, [], async (err, _rows) => {
+              if (err) {
+                console.log(
+                  "🚫 ERROR WHILE UPDATING SYNC STATUS ",
+                  err?.toUpperCase(),
+                  " 🚫"
+                );
+              } else {
+              }
+            });
+          } catch (e) {
+            console.log(
+              "🚫 ERROR WHILE UPDATING SYNC STATUS ",
+              e.message.toUpperCase(),
+              " 🚫"
+            );
+          }
         }
+    } else if(obrBlock["Universal Service Identifier"].split(" ")[0] === "70241-5"){
+
+      let valueNumericResult = false;
+
+      if(obxBlock[0]["Observation Value"] === "ValueNotSet"){
+
+        var targetOneValue = obxBlock[2]["Observation Value"];
+      } else{
+
+        valueNumericResult = true;
+        var valueOne = +obxBlock[0]["Observation Value"];
+
+        // Assume obxBlock[0] ["Units"] = 10*-1.{Copies}/mL
+        var valueTwo = obxBlock[0] ["Units"].toString().split(".")[0];
+        var baseNumber = +valueTwo.split("*")[0];
+        var exponentNumber = +valueTwo.split("*")[1];
+        var finalValue = baseNumber ** exponentNumber;
+        var targetOneValue = valueOne * finalValue;
+
       }
+
+      console.log("tgt1 HIV: ", targetOneValue);
+
+
+      const mappedItems = Object.keys(answers).map((key) => {
+        return {
+          id: key,
+          ...answers[key],
+        };
+      });
+
+      const results = allocations?.map((allocation) => {
+        // const parameter
+        return {
+          concept: {
+            uuid: allocation?.concept?.uuid,
+          },
+          testAllocation: {
+            uuid: allocation?.uuid,
+          },
+          valueNumeric: valueNumericResult ? targetOneValue : null,
+          valueText: null,
+          valueCoded: {
+            uuid: valueNumericResult ? null : (mappedItems?.filter((item) => item?.value === targetOneValue ) ||
+              [])[0]?.id,
+          },
+          abnormal: false,
+          instrument: {
+            uuid: "d1217680-41ab-4e5e-bf50-10d780006cf4",
+          },
+        };
+      });
+
+        const resultsUrl = BASE_URL + `lab/multipleresults`;
+        const response = await context.http.post(resultsUrl, results, {
+          headers: headersList,
+        });
+        if (response) {
+          const status = {
+            sample: {
+              uuid: data?.results[0]?.uuid,
+            },
+            user: {
+              uuid: userUuid,
+            },
+            remarks: "Has results",
+            status: "HAS  RESULTS",
+            category: "HAS_RESULTS",
+          };
+          const statusUrl = BASE_URL + `lab/samplestatus`;
+          const response = await context.http.post(statusUrl, status, {
+            headers: headersList,
+          });
+
+          const syncStatus = {
+            sample: {
+              uuid: data?.results[0]?.uuid,
+            },
+            user: {
+              uuid: userUuid,
+            },
+            remarks: "Synched from analyser",
+            status: "SYNCED_FROM_ANALYSER",
+            category: "SYNCED_FROM_ANALYSER",
+          };
+          
+          const responseForSyncStatus = await context.http.post(
+            statusUrl,
+            syncStatus,
+            {
+              headers: headersList,
+            }
+          );
+          try {
+            const query = `UPDATE orders SET reference_uuid="${
+              data?.results[0]?.uuid
+            }",reason=NULL, sync_status="1", lims_sync_date_time="${new Date().toISOString()}" WHERE id=${order_id}`;
+            db.all(query, [], async (err, _rows) => {
+              if (err) {
+                console.log(
+                  "🚫 ERROR WHILE UPDATING SYNC STATUS ",
+                  err?.toUpperCase(),
+                  " 🚫"
+                );
+              } else {
+              }
+            });
+          } catch (e) {
+            console.log(
+              "🚫 ERROR WHILE UPDATING SYNC STATUS ",
+              e.message.toUpperCase(),
+              " 🚫"
+            );
+          }
+        }
+
+    }
+
+
     }
   } catch (e) {
     console.log(e);
@@ -207,7 +324,7 @@ const pushData = async (payload) => {
           ? obrBlock[0]["Universal Service Identifier"].split(" ")[0]
           : obrBlock["Universal Service Identifier"].split(" ")[0];
 
-        const sql = `SELECT * FROM code_parameters WHERE test_order='${machineTestOrderCode}';`;
+        const sql = `SELECT * FROM code_parameters WHERE test_order="${machineTestOrderCode}";`;
         db.all(sql, [], async (err, rows) => {
           if (err || rows.length === 0) {
             console.error(err ? err : "No data to sync");
@@ -233,7 +350,7 @@ const run = async () => {
   if (context.payload) {
     return await pushData(context.payload);
   }
-  const sql = `SELECT * FROM orders WHERE sync_status='0';`;
+  const sql = `SELECT * FROM orders WHERE test_type != ""  order by id desc limit 10;`;
   db.all(sql, [], async (err, rows) => {
     if (err || rows.length === 0) {
       console.error(err ? err : "No data to sync");
