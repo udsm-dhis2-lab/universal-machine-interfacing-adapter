@@ -35,8 +35,6 @@ const syncData = async (
   order_id
 ) => {
 
-console.log("NANAAN: ",obrBlock["Universal Service Identifier"].split(" ")[0]);
-
   try {
     // 1. Get samples
     // 2. Save samples to the database
@@ -73,12 +71,14 @@ console.log("NANAAN: ",obrBlock["Universal Service Identifier"].split(" ")[0]);
 
       const answers = JSON.parse(mapping?.answers);
 
-
       if(obrBlock["Universal Service Identifier"].split(" ")[0] === "SARS-COV-2"){
 
 
       const targetOneValue = obxBlock[0]["Abnormal Flags"];
       const targetTwoValue = obxBlock[1]["Abnormal Flags"];
+
+      const analysedDateString = obxBlock[0]["Date/Time of the Analysis"];
+      const testedDate = analysedDateString.split(" ")[0];
 
       const mappedItems = Object.keys(answers).map((key) => {
         return {
@@ -94,7 +94,6 @@ console.log("NANAAN: ",obrBlock["Universal Service Identifier"].split(" ")[0]);
         finalResult = "NEG";
       }
 
-      // console.log("mappedItems", mappedItems);
       const results = allocations?.map((allocation) => {
         // const parameter
         return {
@@ -114,6 +113,8 @@ console.log("NANAAN: ",obrBlock["Universal Service Identifier"].split(" ")[0]);
           instrument: {
             uuid: "d1217680-41ab-4e5e-bf50-10d780006cf4",
           },
+          testedBy:userUuid,
+          testedDate:testedDate
         };
       });
 
@@ -182,26 +183,13 @@ console.log("NANAAN: ",obrBlock["Universal Service Identifier"].split(" ")[0]);
     } else if(obrBlock["Universal Service Identifier"].split(" ")[0] === "70241-5"){
 
       let valueNumericResult = false;
+      // TODO: Find a way to softcode the allocation uuids
+      viralLoadCodedAllocationUuid = "04e0b707-af58-4271-a8bf-0c6051932743";
+      viralLoadNumericAllocationUuid = "dc5010d4-c02d-4c54-b593-118966c7e773";
+      viraLoadLogAllocationUuid = "7a20878d-78b0-47b3-adc8-bc2f2db63ee5";
 
-      if(obxBlock[0]["Observation Value"] === "ValueNotSet"){
-
-        var targetOneValue = obxBlock[2]["Observation Value"];
-      } else{
-
-        valueNumericResult = true;
-        var valueOne = +obxBlock[0]["Observation Value"];
-
-        // Assume obxBlock[0] ["Units"] = 10*-1.{Copies}/mL
-        var valueTwo = obxBlock[0] ["Units"].toString().split(".")[0];
-        var baseNumber = +valueTwo.split("*")[0];
-        var exponentNumber = +valueTwo.split("*")[1];
-        var finalValue = baseNumber ** exponentNumber;
-        var targetOneValue = valueOne * finalValue;
-
-      }
-
-      console.log("tgt1 HIV: ", targetOneValue);
-
+      const analysedDateString = obxBlock[0]["Date/Time of the Analysis"];
+      const testedDate = analysedDateString.split(" ")[0];
 
       const mappedItems = Object.keys(answers).map((key) => {
         return {
@@ -210,14 +198,17 @@ console.log("NANAAN: ",obrBlock["Universal Service Identifier"].split(" ")[0]);
         };
       });
 
-      const results = allocations?.map((allocation) => {
-        // const parameter
-        return {
+      const results = [];
+
+      if(obxBlock[0]["Observation Value"] === "ValueNotSet"){
+
+        var targetOneValue = obxBlock[2]["Observation Value"];
+        const viralLoadCodedResult = {
           concept: {
-            uuid: allocation?.concept?.uuid,
+            uuid: viralLoadCodedAllocationUuid,
           },
           testAllocation: {
-            uuid: allocation?.uuid,
+            uuid: allocations[0]?.uuid,
           },
           valueNumeric: valueNumericResult ? targetOneValue : null,
           valueText: null,
@@ -229,8 +220,111 @@ console.log("NANAAN: ",obrBlock["Universal Service Identifier"].split(" ")[0]);
           instrument: {
             uuid: "d1217680-41ab-4e5e-bf50-10d780006cf4",
           },
-        };
-      });
+          testedBy:userUuid,
+          testedDate:testedDate
+         }
+
+         results.push(viralLoadCodedResult);
+
+      } else{
+
+        valueNumericResult = true;
+        var valueOne = +obxBlock[0]["Observation Value"];
+
+        // Assume obxBlock[0] ["Units"] = 10*-1.{Copies}/mL
+        var valueTwo = obxBlock[0] ["Units"].toString().split(".")[0];
+        var baseNumber = +valueTwo.split("*")[0];
+        var exponentNumber = +valueTwo.split("*")[1];
+        var finalValue = baseNumber ** exponentNumber;
+        var targetOneValue = valueOne * finalValue;
+        const logBase10Value = Math.log10(targetOneValue);
+
+        const viralLoadNumericResult = {
+          concept: {
+            uuid: viralLoadNumericAllocationUuid,
+          },
+          testAllocation: {
+            uuid: allocations[1]?.uuid,
+          },
+          valueNumeric: valueNumericResult ? targetOneValue : null,
+          valueText: null,
+          valueCoded: {
+            uuid: valueNumericResult ? null : (mappedItems?.filter((item) => item?.value === targetOneValue ) ||
+              [])[0]?.id,
+          },
+          abnormal: false,
+          instrument: {
+            uuid: "d1217680-41ab-4e5e-bf50-10d780006cf4",
+          },
+          testedBy:userUuid,
+          testedDate:testedDate
+         }
+
+         const viralLoadLogResult = {
+          concept: {
+            uuid: viraLoadLogAllocationUuid,
+          },
+          testAllocation: {
+            uuid: allocations[2]?.uuid,
+          },
+          valueNumeric: valueNumericResult ? logBase10Value : null,
+          valueText: null,
+          valueCoded: {
+            uuid: valueNumericResult ? null : (mappedItems?.filter((item) => item?.value === targetOneValue ) ||
+              [])[0]?.id,
+          },
+          abnormal: false,
+          instrument: {
+            uuid: "d1217680-41ab-4e5e-bf50-10d780006cf4",
+          },
+          testedBy:userUuid,
+          testedDate:testedDate
+         }
+
+         results.push(viralLoadNumericResult,viralLoadLogResult);
+
+
+      }
+
+      console.log("tgt1 HIV: ", targetOneValue);
+
+
+      // const analysedDateString = obxBlock[0]["Date/Time of the Analysis"];
+      // const testedDate = analysedDateString.split(" ")[0];
+
+      // const mappedItems = Object.keys(answers).map((key) => {
+      //   return {
+      //     id: key,
+      //     ...answers[key],
+      //   };
+      // });
+
+
+      // const results = allocations?.map((allocation) => {
+      //   // const parameter
+      //   return {
+      //     concept: {
+      //       uuid: allocation?.concept?.uuid,
+      //     },
+      //     testAllocation: {
+      //       uuid: allocation?.uuid,
+      //     },
+      //     valueNumeric: valueNumericResult ? targetOneValue : null,
+      //     valueText: null,
+      //     valueCoded: {
+      //       uuid: valueNumericResult ? null : (mappedItems?.filter((item) => item?.value === targetOneValue ) ||
+      //         [])[0]?.id,
+      //     },
+      //     abnormal: false,
+      //     instrument: {
+      //       uuid: "d1217680-41ab-4e5e-bf50-10d780006cf4",
+      //     },
+      //     testedBy:userUuid,
+      //     testedDate:testedDate
+      //   };
+      // });
+
+      console.log("resultss:: ",results);
 
         const resultsUrl = BASE_URL + `lab/multipleresults`;
         const response = await context.http.post(resultsUrl, results, {
@@ -264,7 +358,7 @@ console.log("NANAAN: ",obrBlock["Universal Service Identifier"].split(" ")[0]);
             status: "SYNCED_FROM_ANALYSER",
             category: "SYNCED_FROM_ANALYSER",
           };
-          
+
           const responseForSyncStatus = await context.http.post(
             statusUrl,
             syncStatus,
