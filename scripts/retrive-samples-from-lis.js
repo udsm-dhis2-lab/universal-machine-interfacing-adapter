@@ -103,10 +103,10 @@ const syncData = async (
           testAllocation: {
             uuid: allocation?.uuid,
           },
-          valueNumeric: valueNumericResult ? finalResult : null,
+          valueNumeric: null,
           valueText: null,
           valueCoded: {
-            uuid: valueNumericResult ? null : (mappedItems?.filter((item) => item?.value === finalResult) ||
+            uuid: (mappedItems?.filter((item) => item?.value === finalResult) ||
               [])[0]?.id,
           },
           abnormal: false,
@@ -184,9 +184,9 @@ const syncData = async (
 
       let valueNumericResult = false;
       // TODO: Find a way to softcode the allocation uuids
-      viralLoadCodedAllocationUuid = "04e0b707-af58-4271-a8bf-0c6051932743";
-      viralLoadNumericAllocationUuid = "dc5010d4-c02d-4c54-b593-118966c7e773";
-      viraLoadLogAllocationUuid = "7a20878d-78b0-47b3-adc8-bc2f2db63ee5";
+      viralLoadCodedConceptUuid = "04e0b707-af58-4271-a8bf-0c6051932743";
+      viralLoadNumericConceptUuid = "dc5010d4-c02d-4c54-b593-118966c7e773";
+      viraLoadLogConceptUuid = "7a20878d-78b0-47b3-adc8-bc2f2db63ee5";
 
       const analysedDateString = obxBlock[0]["Date/Time of the Analysis"];
       const testedDate = analysedDateString.split(" ")[0];
@@ -200,15 +200,31 @@ const syncData = async (
 
       const results = [];
 
+      allocations?.map((allocation) => {
+
+        if(allocation?.concept?.uuid === viralLoadCodedConceptUuid){
+          codedAllocationUuid = allocation?.uuid;
+        }
+
+        if(allocation?.concept?.uuid === viralLoadNumericConceptUuid){
+          numericAllocationUuid = allocation?.uuid;
+        }
+
+        if(allocation?.concept?.uuid === viraLoadLogConceptUuid){
+          logAllocationUuid = allocation?.uuid;
+        }
+
+      })
+
       if(obxBlock[0]["Observation Value"] === "ValueNotSet"){
 
         var targetOneValue = obxBlock[2]["Observation Value"];
         const viralLoadCodedResult = {
           concept: {
-            uuid: viralLoadCodedAllocationUuid,
+            uuid: viralLoadCodedConceptUuid,
           },
           testAllocation: {
-            uuid: allocations[0]?.uuid,
+            uuid: codedAllocationUuid,
           },
           valueNumeric: valueNumericResult ? targetOneValue : null,
           valueText: null,
@@ -241,10 +257,10 @@ const syncData = async (
 
         const viralLoadNumericResult = {
           concept: {
-            uuid: viralLoadNumericAllocationUuid,
+            uuid: viralLoadNumericConceptUuid,
           },
           testAllocation: {
-            uuid: allocations[1]?.uuid,
+            uuid: numericAllocationUuid,
           },
           valueNumeric: valueNumericResult ? targetOneValue : null,
           valueText: null,
@@ -262,10 +278,10 @@ const syncData = async (
 
          const viralLoadLogResult = {
           concept: {
-            uuid: viraLoadLogAllocationUuid,
+            uuid: viraLoadLogConceptUuid,
           },
           testAllocation: {
-            uuid: allocations[2]?.uuid,
+            uuid: logAllocationUuid,
           },
           valueNumeric: valueNumericResult ? logBase10Value : null,
           valueText: null,
@@ -444,7 +460,7 @@ const run = async () => {
   if (context.payload) {
     return await pushData(context.payload);
   }
-  const sql = `SELECT * FROM orders WHERE test_type != ""  order by id desc limit 10;`;
+  const sql = `SELECT * FROM orders WHERE test_type != "" AND reference_uuid IS NULL order by id asc limit 50;`;
   db.all(sql, [], async (err, rows) => {
     if (err || rows.length === 0) {
       console.error(err ? err : "No data to sync");
