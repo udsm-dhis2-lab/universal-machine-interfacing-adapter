@@ -1428,11 +1428,23 @@ export class DatabaseService {
   private parseHL7DH76 = (hl7: string) => {
     const data: any = {};
     let master = [];
+    let inventories = [];
 
     // This will turn the hl7 into an array seperated by our categories, however in order to keep the categories they stay in their own element
     const tokens = hl7.split(
       new RegExp("(" + separators.join("\\||") + "\\|)")
     );
+    const inventorySegments = hl7
+      .split(/[\r\n]+/)
+      ?.filter((segment) => segment.indexOf("INV|") > -1);
+    // console.log(inventorySegments);
+    data["INV"] = inventorySegments.map((segment, index) => {
+      return {
+        item: segment.split("|")[1],
+        status: segment.split("|")[2],
+        id: segment.split("|")[segment.split("|").length - 1],
+      };
+    });
 
     // Remove first element which is empty
     tokens.shift();
