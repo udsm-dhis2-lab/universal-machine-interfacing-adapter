@@ -1439,12 +1439,23 @@ export class DatabaseService {
       ?.filter((segment) => segment.indexOf("INV|") > -1);
     // console.log(inventorySegments);
     data["INV"] = inventorySegments.map((segment, index) => {
+      const splittedInvSections = segment.split("|");
+      const year = Number(splittedInvSections[12].substring(0, 4));
+      const month = Number(splittedInvSections[12].substring(4, 6));
+      const date = Number(splittedInvSections[12].substring(6, 8));
       return {
-        item: segment.split("|")[1],
-        status: segment.split("|")[2],
-        id: segment.split("|")[segment.split("|").length - 1],
+        item: splittedInvSections[1],
+        status: splittedInvSections[2],
+        locationName: splittedInvSections[3],
+        datetimeStr: splittedInvSections[12],
+        year: year,
+        month: month,
+        date: date,
+        dateFormatted: new Date(year + "-" + month + "-" + date),
+        locationId: splittedInvSections[splittedInvSections.length - 1],
       };
     });
+    // console.log("DATA", data);
 
     // Remove first element which is empty
     tokens.shift();
