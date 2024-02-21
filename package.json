@@ -28,7 +28,7 @@
   "dependencies": {
     "@angular-material-components/datetime-picker": "^6.0.3",
     "@angular/material-moment-adapter": "^13.3.9",
-    "axios": "^1.2.1",
+    "axios": "^1.6.0",
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
     "hl7-object-parser": "^2.5.0",
