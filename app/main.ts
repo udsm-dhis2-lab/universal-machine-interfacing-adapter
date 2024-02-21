@@ -11,26 +11,6 @@ if (process.platform === "win32") {
   app.setAppUserModelId("⚙️");
 }
 
-//import { Sqlite3Helper } from '../src/app/core/sqlite3helper.main';
-
-// const isMac = process.platform === "darwin";
-const items = [
-  {
-    label: "Help",
-    submenu: [
-      {
-        label: "Learn More",
-        click: async () => {
-          await shell.openExternal("https://electronjs.org");
-        },
-      },
-    ],
-  },
-];
-
-// const menu = Menu.buildFromTemplate(items);
-// Menu.setApplicationMenu(menu);
-
 let win: BrowserWindow = null;
 let store: Store = null;
 let sqlitePath: string = null;
@@ -59,7 +39,7 @@ function createWindow(): BrowserWindow {
   win = new BrowserWindow({
     disableAutoHideCursor: true,
     autoHideMenuBar: true,
-    title: "Machine Interfacing Module",
+    title: "Machine Interfacing",
     x: 0,
     y: 0,
     fullscreenable: true,

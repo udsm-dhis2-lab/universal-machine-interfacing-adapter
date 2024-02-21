@@ -81,17 +81,31 @@
       >
     </blockquote>
 
-    <br *ngIf="!externalLoginCheck" />
+    <br
+      *ngIf="
+        !externalLoginCheck && settings.systemName && settings.systemName != ''
+      "
+    />
 
     <p
-      *ngIf="settings?.hasExternalLogin && !externalLoginCheck"
+      *ngIf="
+        settings?.hasExternalLogin &&
+        !externalLoginCheck &&
+        settings.systemName &&
+        settings.systemName != ''
+      "
       class="mt-3 text-center"
     >
       OR
     </p>
 
     <button
-      *ngIf="settings?.hasExternalLogin && !externalLoginCheck"
+      *ngIf="
+        settings?.hasExternalLogin &&
+        !externalLoginCheck &&
+        settings.systemName &&
+        settings.systemName != ''
+      "
       mat-flat-button
       class="w-100"
       [style.height]="'50px'"
@@ -103,15 +117,17 @@
     </button>
     <div class="d-flex justify-content-between">
       <div>
-<p (click)="openUrl()" class="mt-5 mb-3 text-muted" style="cursor: pointer">
-      &copy; UDSM DHIS2 Lab
-    </p>
+        <p
+          (click)="openUrl()"
+          class="mt-5 mb-3 text-muted"
+          style="cursor: pointer"
+        >
+          &copy; UDSM DHIS2 Lab
+        </p>
       </div>
 
       <div>
-    <p class="mt-5 mb-3 text-muted ">
-      v0.0.1
-    </p>
+        <p class="mt-5 mb-3 text-muted">v0.0.1</p>
       </div>
     </div>
   </form>
